@@ -4,7 +4,7 @@ module.exports = class extends Monitor {
 
     constructor(...args) {
         super(...args, {
-            name: 'antiinvite',
+            name: 'invitedetection',
             enabled: true,
             ignoreSelf: true
         });
