@@ -50,5 +50,3 @@ We will automatically deny PRs that:
 - Any reason **WE** feel is valid.
 
 > WE RESERVE THE RIGHT TO REFUSE ANY CONTENTS FOR ANY REASON WHETHER YOU ACCEPT THEM OR NOT.
-
-This repository contains the various *Pieces* submitted by users and collaborators.
