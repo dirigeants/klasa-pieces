@@ -9,11 +9,6 @@ module.exports = class extends Command {
 			description: 'Execute commands in the terminal, use with EXTREME CAUTION.',
 			usage: '<expression:str>'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [input]) {

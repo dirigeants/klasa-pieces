@@ -9,11 +9,6 @@ module.exports = class extends Command {
 			description: 'Draws some random cards from a deck.',
 			usage: '<num:int{1,10}>'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [num]) {

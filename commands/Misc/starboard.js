@@ -16,11 +16,6 @@ module.exports = class extends Command {
 			usage: '<messageid:msg>'
 		});
 
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['moment', 'moment-duration-format']
-		};
-
 		this.providerEngine = 'json';
 		this.provider = null;
 	}

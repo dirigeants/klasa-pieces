@@ -10,11 +10,6 @@ module.exports = class extends Command {
 			usage: '<choices:str> [...]',
 			usageDelim: '|'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [...choices]) {

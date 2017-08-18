@@ -8,11 +8,6 @@ module.exports = class extends Command {
 			description: 'Creates an ASCII banner from the string you supply.',
 			usage: '<banner:str>'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['figlet']
-		};
 	}
 
 	async run(msg, [banner]) {

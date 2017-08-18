@@ -10,11 +10,6 @@ module.exports = class extends Command {
 
 			description: 'Checks the guild for any user accounts younger than the minimum account age.'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg) {

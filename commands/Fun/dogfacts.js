@@ -4,11 +4,6 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, { description: 'Gives you a random dog fact.' });
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg) {

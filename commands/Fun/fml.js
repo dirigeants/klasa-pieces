@@ -7,11 +7,6 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, { description: 'Grabs random \'Fuck My Life\' quote from the web.' });
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['snekfetch', 'fast-html-parser']
-		};
 	}
 
 	async run(msg) {

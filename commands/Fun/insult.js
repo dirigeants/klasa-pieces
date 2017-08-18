@@ -8,11 +8,6 @@ module.exports = class extends Command {
 			description: 'Insults who you mention.',
 			usage: '<user:mention>'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [user]) {

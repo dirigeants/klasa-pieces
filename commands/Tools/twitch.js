@@ -16,11 +16,6 @@ module.exports = class extends Command {
 			description: 'Returns information on a Twitch.tv Account',
 			usage: '<name:str>'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['snekfetch', 'moment', 'moment-duration-format']
-		};
 	}
 
 	async run(msg, [twitchName]) {

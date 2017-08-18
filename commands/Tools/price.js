@@ -9,11 +9,6 @@ module.exports = class extends Command {
 			usage: '<coin:str> <currency:str>',
 			usageDelim: ' '
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['snekfetch']
-		};
 	}
 
 	async run(msg, [coin, currency]) {

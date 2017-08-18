@@ -8,11 +8,6 @@ module.exports = class extends Command {
 
 			description: 'Flips a (pseudo) fair coin.'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg) {

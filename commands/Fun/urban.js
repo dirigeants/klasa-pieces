@@ -9,11 +9,6 @@ module.exports = class extends Command {
 			usage: '<search:str> [resultNum:int]',
 			usageDelim: ', '
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['snekfetch']
-		};
 	}
 
 	async run(msg, [search, index = 1]) {

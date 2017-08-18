@@ -12,11 +12,6 @@ module.exports = class extends Command {
 			usage: '<member:member> [reason:string]',
 			usageDelim: ' '
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [member, ...reason]) {

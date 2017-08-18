@@ -11,11 +11,6 @@ module.exports = class extends Command {
 			usage: '[channel:channel] <message:string> [...]',
 			usageDelim: ' '
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [channel = msg.channel, ...message]) {

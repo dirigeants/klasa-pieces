@@ -8,11 +8,6 @@ module.exports = class extends Command {
 			aliases: ['catfact', 'kittenfact'],
 			description: 'Let me tell you a misterious cat fact.'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['snekfetch']
-		};
 	}
 
 	async run(msg) {

@@ -12,11 +12,6 @@ module.exports = class extends Command {
 			usage: '<member:user> [days:int{1,7}] [reason:string]',
 			usageDelim: ' '
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [user, days = 1, ...reason]) {

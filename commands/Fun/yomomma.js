@@ -9,11 +9,6 @@ module.exports = class extends Command {
 
 			description: 'Yo momma is so fat, yo.'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: ['snekfetch']
-		};
 	}
 
 	async run(msg) {

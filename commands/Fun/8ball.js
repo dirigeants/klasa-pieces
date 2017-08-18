@@ -9,11 +9,6 @@ module.exports = class extends Command {
 			description: 'Magic 8-Ball, does exactly what the toy does.',
 			usage: '<query:str>'
 		});
-
-		this.pieces = {
-			type: 'commands',
-			requiredModules: []
-		};
 	}
 
 	async run(msg, [question]) {
