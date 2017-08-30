@@ -13,7 +13,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const accAge = msg.guildConf.minAccAge;
+		const accAge = msg.guild.settings.minAccAge;
 		const mtime = msg.createdTimestamp;
 
 		const users = [];
