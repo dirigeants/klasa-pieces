@@ -18,7 +18,7 @@ module.exports = class extends Command {
 		if (user.id === msg.author.id) throw 'Why would you ban yourself?';
 		if (user.id === this.client.user.id) throw 'Have I done something wrong?';
 
-		const member = await msg.guild.fetchMember(user).catch(() => null);
+		const member = await msg.guild.members.fetch(user).catch(() => null);
 		if (member) {
 			if (member.highestRole.position >= msg.member.highestRole.position) throw 'You cannot ban this user.';
 			if (member.bannable === false) throw 'I cannot ban this user.';
