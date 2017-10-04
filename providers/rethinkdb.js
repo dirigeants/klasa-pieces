@@ -224,7 +224,7 @@ module.exports = class extends Provider {
 	 * @returns {?Object}
 	 */
 	getFromArrayByID(table, id, uArray, index) {
-		return this.db.table(table).get(id)(uArray).filter(r.row('id').eq(index)).run().then(res => res.length ? res[0] : null);
+		return this.db.table(table).get(id)(uArray).filter(rethink.row('id').eq(index)).run().then(res => res.length ? res[0] : null);
 	}
 
 };
