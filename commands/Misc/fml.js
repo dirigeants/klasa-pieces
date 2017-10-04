@@ -6,17 +6,7 @@ module.exports = class extends Command {
 
   constructor(...args) {
     super(...args, {
-      name: 'fml',
-      enabled: true,
-      runIn: ['text'],
-      cooldown: 0,
-      aliases: [],
-      permLevel: 0,
-      botPerms: ['SEND_MESSAGES'],
-      requiredSettings: [],
       description: 'Gets a random FML story.',
-      usage: '',
-      extendedHelp: 'No Extended Help.',
     });
   }
 
@@ -36,9 +26,9 @@ module.exports = class extends Command {
       .addField('I agree, your life sucks', updoot.childNodes[0].text, true)
       .addField('You deserved it:', downdoot.childNodes[0].text, true);
     if (article.childNodes[0].text.length < 5) {
-      return msg.channel.send('Today, something went wrong, so you will have to try again in a few moments. FML again.');
+      return msg.send('Today, something went wrong, so you will have to try again in a few moments. FML again.');
     }
-    return msg.channel.send({ embed });
+    return msg.send({ embed });
   }
   
 };

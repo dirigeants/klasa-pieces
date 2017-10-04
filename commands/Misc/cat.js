@@ -5,17 +5,8 @@ module.exports = class extends Command {
 
   constructor(...args) {
     super(...args, {
-      name: 'cat',
-      enabled: true,
-      runIn: ['text'],
-      cooldown: 0,
       aliases: ['randomcat', 'meow'],
-      permLevel: 0,
-      botPerms: ['SEND_MESSAGES'],
-      requiredSettings: [],
       description: 'Grabs a random cat image from random.cat.',
-      usage: '',
-      usageDelim: undefined,
       extendedHelp: 'This command grabs a random cat from "http://random.cat/meow".',
     });
   }
