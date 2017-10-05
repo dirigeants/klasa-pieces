@@ -4,4 +4,4 @@ node_js:
 jobs:
   include:
     - stage: test
-      script: eslint .
+      script: npm test
