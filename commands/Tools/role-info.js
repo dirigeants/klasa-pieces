@@ -43,7 +43,6 @@ module.exports = class extends Command {
 
 	async run(msg, [role]) {
 		const allPermissions = Object.entries(role.permissions.serialize()).filter(([allowed]) => allowed).map(([perm]) => this.perms[perm]).join(', ');
-
 		const roleInfo = new this.client.methods.Embed()
 			.setColor(role.hexColor || '#FFF')
 			.addField('❯ Name', role.name, true)
@@ -53,7 +52,7 @@ module.exports = class extends Command {
 			.addField('❯ Hoisted', role.hoist ? 'Yes' : 'No', true)
 			.addField('❯ Mentionable', role.mentionable ? 'Yes' : 'No', true)
 			.addField('❯ Permissions', allPermissions);
-		return msg.channel.send('', { embed: roleInfo });
+		return msg.sendEmbed(roleInfo);
 	}
 
 };

@@ -29,7 +29,7 @@ module.exports = class extends Command {
 			.addField('❯ Playing', member.user.presence.activity ? member.user.presence.activity.name : 'N/A', true)
 			.addField('❯ Highest Role', member.highestRole.name !== '@everyone' ? member.highestRole.name : 'None', true)
 			.addField('❯ Hoist Role', member.hoistRole ? member.hoistRole.name : 'None', true);
-		return msg.send({ embed: userInfo });
+		return msg.sendEmbed(userInfo);
 	}
 
 };

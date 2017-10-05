@@ -36,7 +36,7 @@ module.exports = class extends Command {
 			.addField('❯ Verification Level', this.verificationLevels[msg.guild.verificationLevel], true)
 			.addField('❯ Owner', msg.guild.owner ? msg.guild.owner.user.tag : 'None', true)
 			.addField('❯ Members', msg.guild.memberCount, true);
-		return msg.channel.send({ embed: serverInfo });
+		return msg.sendEmbed(serverInfo);
 	}
 
 };
