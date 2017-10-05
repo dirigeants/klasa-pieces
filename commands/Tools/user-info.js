@@ -2,10 +2,10 @@ const { Command } = require('klasa');
 const moment = require('moment');
 
 const statuses = {
-	online: '<:online:313956277808005120> Online',
-	idle: '<:away:313956277220802560> Idle',
-	dnd: '<:dnd:313956276893646850> Do Not Disturb',
-	offline: '<:offline:313956277237710868> Offline'
+	online: '💚 Online',
+	idle: '💛 Idle',
+	dnd: '💔 Do Not Disturb',
+	offline: '❤ Offline'
 };
 
 module.exports = class extends Command {

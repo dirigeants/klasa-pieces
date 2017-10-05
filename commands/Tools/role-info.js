@@ -9,10 +9,7 @@ module.exports = class extends Command {
 			description: 'Get information on a role with an id or a mention.',
 			usage: '<Role:role>'
 		});
-	}
-
-	async run(msg, [role]) {
-		const perms = {
+		this.perms = {
 			ADMINISTRATOR: 'Administrator',
 			VIEW_AUDIT_LOG: 'View Audit Log',
 			MANAGE_GUILD: 'Manage Server',
@@ -42,8 +39,10 @@ module.exports = class extends Command {
 			MOVE_MEMBERS: 'Move Members',
 			USE_VAD: 'Use Voice Activity'
 		};
-		/* eslint-disable no-unused-vars */
-		const allPermissions = Object.entries(role.serialize()).filter(([perm, allowed]) => allowed).map(([perm]) => perms[perm]).join(', ');
+	}
+
+	async run(msg, [role]) {
+		const allPermissions = Object.entries(role.permissions.serialize()).filter(([allowed]) => allowed).map(([perm]) => this.perms[perm]).join(', ');
 
 		const roleInfo = new this.client.methods.Embed()
 			.setColor(role.hexColor || '#FFF')
