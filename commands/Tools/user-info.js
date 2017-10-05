@@ -1,13 +1,6 @@
 const { Command } = require('klasa');
 const moment = require('moment');
 
-const statuses = {
-	online: '💚 Online',
-	idle: '💛 Idle',
-	dnd: '💔 Do Not Disturb',
-	offline: '❤ Offline'
-};
-
 module.exports = class extends Command {
 
 	constructor(...args) {
@@ -15,6 +8,12 @@ module.exports = class extends Command {
 			description: 'Get information on a mentioned user.',
 			usage: '[Member:member]'
 		});
+		this.statuses = {
+			online: ':green_heart: Online',
+			idle: ':yellow_heart: Idle',
+			dnd: ':heart: Do Not Disturb',
+			offline: ':broken_heart: Offline'
+		};
 	}
 
 	async run(msg, [...args]) {
@@ -26,7 +25,7 @@ module.exports = class extends Command {
 			.addField('❯ ID', member.id, true)
 			.addField('❯ Discord Join Date', moment(member.user.createdAt).format('MMMM Do YYYY'), true)
 			.addField('❯ Server Join Date', moment(member.joinedTimestamp).format('MMMM Do YYYY'), true)
-			.addField('❯ Status', statuses[member.user.presence.status], true)
+			.addField('❯ Status', this.statuses[member.user.presence.status], true)
 			.addField('❯ Playing', member.user.presence.activity ? member.user.presence.activity.name : 'N/A', true)
 			.addField('❯ Highest Role', member.highestRole.name !== '@everyone' ? member.highestRole.name : 'None', true)
 			.addField('❯ Hoist Role', member.hoistRole ? member.hoistRole.name : 'None', true);
