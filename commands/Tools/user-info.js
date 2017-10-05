@@ -16,8 +16,8 @@ module.exports = class extends Command {
 		};
 	}
 
-	async run(msg, [...args]) {
-		const member = args[0] || msg.member;
+	async run(msg, [mentioned]) {
+		const member = mentioned || msg.member;
 		const userInfo = new this.client.methods.Embed()
 			.setColor(member.displayHexColor || 0)
 			.setThumbnail(member.user.displayAvatarURL())
