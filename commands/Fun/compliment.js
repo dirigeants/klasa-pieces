@@ -100,7 +100,6 @@ module.exports = class extends Command {
 			'I bet you do the crossword puzzle in ink.',
 			'Babies and small animals probably love you.',
 			"If you were a scented candle they'd call it Perfectly Imperfect (and it would smell like summer).",
-			"There's ordinary, and then there's you.",
 			"You're someone's reason to smile.",
 			"You're even better than a unicorn, because you're real.",
 			'How do you keep being so funny and making everyone laugh?',
@@ -109,7 +108,7 @@ module.exports = class extends Command {
 			'The way you treasure your loved ones is incredible.',
 			"You're really something special.",
 			"You're a gift to those around you.",
-			"You don't deserve it."
+			'You deserve better.'
 		];
 	}
 
