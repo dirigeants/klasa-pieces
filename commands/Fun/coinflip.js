@@ -18,13 +18,13 @@ module.exports = class extends Command {
 		switch (coins > 1) {
 			case true:
 				for (var i = 0; i < coins; i++) {
-					Math.random() > 0.5 ? heads++ : tails++;
+					if(Math.random() > 0.5) heads++
+					else tails++;
 				}
 				return msg.channel.send(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
-				break;
 			default:
 				return msg.channel.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 		}
 	}
-	
+
 };
