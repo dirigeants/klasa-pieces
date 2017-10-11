@@ -12,18 +12,17 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [coins = 0]) {
-		var heads = 0;
-		var tails = 0;
+		let heads = 0;
+		let tails = 0;
 
-		switch (coins > 1) {
-			case true:
-				for (var i = 0; i < coins; i++) {
-					if (Math.random() > 0.5) heads++;
-					else tails++;
-				}
-				return msg.channel.send(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
-			default:
-				return msg.channel.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
+		if (coins > 1) {
+			for (let i = 0; i < coins; i++) {
+				if (Math.random() > 0.5) heads++;
+				else tails++;
+			}
+			msg.send(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
+		} else {
+			msg.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 		}
 	}
 
