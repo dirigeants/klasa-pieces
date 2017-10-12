@@ -46,7 +46,8 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	createTable(table, rows) {
-		return this.run(`CREATE TABLE '${table}' (${rows.join(', ')});`);
+		const query = rows.map(row => `'${row[0]}' ${row[1]}`).join(', ');
+		return this.run(`CREATE TABLE '${table}' (${query});`);
 	}
 
 	/**
@@ -80,7 +81,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<?Object>}
 	 */
 	get(table, key, value = null) {
-		return this.runGet(!value ?
+		return this.runGet(value === null ?
 			`SELECT * FROM ${table} WHERE id = ${this.sanitize(key)}` :
 			`SELECT * FROM ${table} WHERE ${key} = ${this.sanitize(value)}`).catch(() => null);
 	}
@@ -110,12 +111,19 @@ module.exports = class extends Provider {
 	 * Insert a new document into a table.
 	 * @param {string} table The name of the table.
 	 * @param {string} row The row id.
-	 * @param {Object} data The object with all properties you want to insert into the document.
-	 * @returns {Promise<Object>}
+	 * @param {Array<string[]>} inserts The object with all properties you want to insert into the document.
+	 * @returns {Promise<any>}
 	 */
-	create(table, row, data) {
-		const { keys, values } = this.serialize(Object.assign(data, { id: row }));
-		return this.run(`INSERT INTO '${table}' (${keys.join(', ')}) VALUES(${values.map(this.sanitize).join(', ')})`);
+	create(table, row, inserts = []) {
+		if (Array.isArray(inserts) === false) throw new TypeError('SQLite#create only accepts string[][] as input for the inserts parameter.');
+
+		const keys = [];
+		const values = [];
+		for (let i = 0; i < inserts.length; i++) {
+			keys.push(inserts[i][0]);
+			values.push(inserts[i][1]);
+		}
+		return this.run(`INSERT INTO '${table}' ( ${keys.join(', ')} ) VALUES( ${values.join(', ')} )`);
 	}
 
 	set(...args) {
@@ -130,11 +138,10 @@ module.exports = class extends Provider {
 	 * Update a row from a table.
 	 * @param {string} table The name of the table.
 	 * @param {string} row The row id.
-	 * @param {Object} data The object with all the properties you want to update.
+	 * @param {Object} inserts The object with all the properties you want to update.
 	 * @returns {Promise<Object>}
 	 */
-	update(table, row, data) {
-		const inserts = Object.entries(data).map(value => `${value[0]} = ${this.sanitize(value[1])}`).join(', ');
+	update(table, row, inserts) {
 		return this.run(`UPDATE '${table}' SET ${inserts} WHERE id = '${row}'`);
 	}
 
@@ -149,22 +156,93 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	delete(table, row) {
-		return this.run(`DELETE FROM '${table}' WHERE id = ${this.sanitize(row)}`);
+		return this.run(`DELETE FROM '${table}' WHERE id = '${row}'`);
 	}
 
 	/**
-	 * Update the columns from a table.
-	 * @param {string} table The name of the table.
-	 * @param {string[]} columns Array of columns.
-	 * @param {array[]} schema Tuples of keys/values from the schema.
-	 * @returns {boolean}
+	 * Add a new column to a table's schema.
+	 * @param {string} table The name of the table to edit.
+	 * @param {string} key The key to add.
+	 * @param {string} datatype The datatype for the new key.
+	 * @returns {Promise<any>}
 	 */
-	async updateColumns(table, columns, schema) {
-		await this.run(`CREATE TABLE \`temp_table\` (\n${schema.map(sh => `\`${sh[0]}\` ${sh[1]}`).join(',\n')}\n);`);
-		await this.run(`INSERT INTO \`temp_table\` (\`${columns.join('`, `')}\`) SELECT \`${columns.join('`, `')}\` FROM \`${table}\`;`);
-		await this.run(`DROP TABLE \`${table}\`;`);
-		await this.run(`ALTER TABLE \`temp_table\` RENAME TO \`${table}\`;`);
+	addColumn(table, key, datatype) {
+		return this.exec(`ALTER TABLE \`${table}\` ADD \`${key}\` ${datatype}`);
+	}
+
+	/**
+	 * Remove a column from a table's schema.
+	 * @param {string} table The name of the table to edit.
+	 * @param {string} key The key to remove.
+	 * @returns {Promise<boolean>}
+	 */
+	async removeColumn(table, key) {
+		const columns = await this.getColumns(table);
+		const newSchema = [];
+		const newColumns = [];
+		for (let i = 0; i < columns.length; i++) {
+			if (columns[i][0] === key) continue;
+			newSchema.push(`\`${columns[i][0]}\` ${columns[i][1]}`);
+			newColumns.push(columns[i][0]);
+		}
+		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
+		await this.exec([
+			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')})\``,
+			`	SELECT \`${newColumns.join('`, `')})\``,
+			`	FROM \`${table}\``
+		].join('\n'));
+		await this.exec(`DROP TABLE \`${table}\``);
+		await this.exec(`ALTER TABLE \`${table}_temp\` RENAME TO \`${table}\``);
 		return true;
+	}
+
+	/**
+	 * Edit the key's datatype from the table's schema.
+	 * @param {string} table The name of the table to edit.
+	 * @param {string} key The name of the column to update.
+	 * @param {string} datatype The new datatype for the column.
+	 * @returns {Promise<boolean>}
+	 */
+	async updateColumn(table, key, datatype) {
+		const columns = await this.getColumns(table);
+		const newSchema = [];
+		const newColumns = [];
+		for (let i = 0; i < columns.length; i++) {
+			if (columns[i][0] === key) columns[i][1] = datatype;
+			newSchema.push(`\`${columns[i][0]}\` ${columns[i][1]}`);
+			newColumns.push(columns[i][0]);
+		}
+		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
+		await this.exec([
+			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')})\``,
+			`	SELECT \`${newColumns.join('`, `')})\``,
+			`	FROM \`${table}\``
+		].join('\n'));
+		await this.exec(`DROP TABLE \`${table}\``);
+		await this.exec(`ALTER TABLE \`${table}_temp\` RENAME TO \`${table}\``);
+		return true;
+	}
+
+	/**
+	 * Get an array of tuples containing all the keys and datatypes from a table.
+	 * @param {string} table The name of the table to edit.
+	 * @returns {Array<string[]>}
+	 */
+	async getColumns(table) {
+		const result = await this.runGet(`SELECT sql FROM sqlite_master WHERE tbl_name = '${table}' AND type = 'table'`);
+		const raw = /\(([^)]+)\)/.exec(result.sql);
+		if (raw === null) return [];
+		const columns = raw[1].split('\n');
+		const output = [];
+		for (let i = 0; i < columns.length; i++) {
+			const trimmed = columns[i].trim();
+			if (trimmed.length === 0) continue;
+			const prc = /`([^`]+)`\s*([^,]+)/.exec(trimmed);
+			if (prc === null) continue;
+			output.push([prc[1], prc[2]]);
+		}
+
+		return output;
 	}
 
 	/**
@@ -173,6 +251,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	runGet(sql) {
+		console.log(sql);
 		return db.get(sql).catch(throwError);
 	}
 
@@ -182,6 +261,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	runAll(sql) {
+		console.log(sql);
 		return db.all(sql).catch(throwError);
 	}
 
@@ -191,6 +271,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	run(sql) {
+		console.log(sql);
 		return db.run(sql).catch(throwError);
 	}
 
@@ -200,28 +281,19 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	exec(sql) {
+		console.log(sql);
 		return db.exec(sql).catch(throwError);
 	}
 
-	/**
-	 * Transform NoSQL queries into SQL.
-	 * @param {Object} data The object.
-	 * @returns {Object}
-	 */
-	serialize(data) {
-		const keys = [];
-		const values = [];
-		const entries = Object.entries(data);
-		for (let i = 0; i < entries.length; i++) {
-			[keys[i], values[i]] = entries[i];
+	sanitize(value) {
+		const type = typeof value;
+		switch (type) {
+			case 'boolean':
+			case 'number': return value;
+			case 'string': return `'${value}'`;
+			case 'object': return value === null ? value : JSON.stringify(value);
+			default: return value;
 		}
-
-		return { keys, values };
-	}
-
-	sanitize(string) {
-		if (typeof string === 'string') return `'${string.replace(/'/g, "''")}'`;
-		return `'${JSON.stringify(string).replace(/'/g, "''")}'`;
 	}
 
 };
