@@ -187,8 +187,8 @@ module.exports = class extends Provider {
 		}
 		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
 		await this.exec([
-			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')})\``,
-			`	SELECT \`${newColumns.join('`, `')})\``,
+			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')}\`)`,
+			`	SELECT \`${newColumns.join('`, `')}\``,
 			`	FROM \`${table}\``
 		].join('\n'));
 		await this.exec(`DROP TABLE \`${table}\``);
@@ -214,8 +214,8 @@ module.exports = class extends Provider {
 		}
 		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
 		await this.exec([
-			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')})\``,
-			`	SELECT \`${newColumns.join('`, `')})\``,
+			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')}\`)`,
+			`	SELECT \`${newColumns.join('`, `')}\``,
 			`	FROM \`${table}\``
 		].join('\n'));
 		await this.exec(`DROP TABLE \`${table}\``);
