@@ -1,6 +1,6 @@
 const now = require('performance-now');
 const { MessageAttachment } = require('discord.js');
-const { Command } = require('klasa');
+const { Command, util: { sleep } } = require('klasa');
 const { inspect } = require('util');
 
 module.exports = class extends Command {
@@ -23,6 +23,8 @@ module.exports = class extends Command {
 		this.inspectionDepth = 0;
 		// this.getTypeStr shouldn't recurse more than once, but just in case
 		this.typeRecursionLimit = 2;
+		// How long to wait for promises to resolve
+		this.timeout = 10000;
 		// The number of lines before the output is considered overly long
 		this.tooManyLines = 7;
 		// The approx. number of chars per line in a codeblock on Android, on a Google Pixel XL
@@ -32,7 +34,7 @@ module.exports = class extends Command {
 		this.outputTo = {
 			channel: (msg, topLine, evaled) => msg.send(`\`${topLine}\`\n${this.client.methods.util.codeBlock('js', this.client.methods.util.clean(evaled))}`),
 			log: (msg, topLine, evaled) => this.client.emit('log', `${topLine}\n${evaled}`),
-			upload: (msg, topLine, evaled) => msg.channel.send('', new MessageAttachment(Buffer.from(`// ${topLine}\n${evaled}`), 'eval.js'))
+			upload: (msg, topLine, evaled) => msg.channel.send(`\`${topLine}\``, new MessageAttachment(Buffer.from(`// ${topLine}\n${evaled}`), 'eval.js'))
 		};
 	}
 
@@ -48,37 +50,22 @@ module.exports = class extends Command {
 		if (flags.delete) msg.delete();
 
 		try {
-			const start = now();
-			const evaledP = eval(code); // eslint-disable-line no-eval
-			let evaled = typeof evaledP.then === 'function' ? await evaledP : evaledP;
-			const time = this.getNiceDuration(now() - start);
-
-			if (flags.silent) return null;
-
-			const topLine = `${await this.getTypeStr(evaledP)}, ${time}`;
-			if (typeof evaled !== 'string') evaled = inspect(evaled, { depth: this.inspectionDepth });
+			const [evaled, topLine] = await this.handleEval(flags, code, msg);
 
 			if (flags.log) return this.outputTo.log(msg, topLine, evaled);
 
-			// 1988 is 2000 - 12 (the chars that are added, "`...`\n```js\n...```")
-			if (evaled.length > 1988 - topLine.length) {
+			if (this.isTooLong(evaled, topLine)) {
 				return this.sendTooLongQuery(msg, topLine, evaled,
 					'Output is too long. Log it to console instead? Or `truncate` it or `upload` it as a file?',
 					{ yes: 'log' });
 			}
 
-			const lines = evaled.split('\n');
-			let lineCount = lines.length;
-			let calcWithScreenWrap = false;
-			if (lineCount < this.tooManyLines) {
-				lineCount = lines.reduce((count, line) => count + Math.ceil(line.length / this.mobileCharsPerLine), 0);
-				calcWithScreenWrap = true;
-			}
-			if (lineCount >= this.tooManyLines) {
+			const is = this.isKindaLong(evaled);
+			if (is.kindaLong) {
 				return this.sendTooLongQuery(msg, topLine, evaled,
-					calcWithScreenWrap ?
-						`The output is long (${lineCount} lines, plus wrapping on small screens). Send it anyway? Or \`truncate\` it and send it, or \`log\` it to console, or \`upload\` it as a file.` :
-						`The output is long (${lineCount} lines). Send it anyway? Or \`truncate\` it and send it, or \`log\` it to console, or \`upload\` it as a file.`,
+					is.becauseOfWrapping ?
+						`The output is long (${is.lineCount} lines, plus wrapping on small screens). Send it anyway? Or \`truncate\` it and send it, or \`log\` it to console, or \`upload\` it as a file.` :
+						`The output is long (${is.lineCount} lines). Send it anyway? Or \`truncate\` it and send it, or \`log\` it to console, or \`upload\` it as a file.`,
 					{ yes: 'channel' });
 			}
 
@@ -91,37 +78,106 @@ module.exports = class extends Command {
 		}
 	}
 
-	async getTypeStr(value, i = 0) {
-		let typeStr = '';
-		const basicType = typeof value;
-		if (basicType === 'object') {
-			if (value === null) {
-				typeStr = 'null primitive';
-			} else {
-				let objType = value.constructor.name;
-				// Check whether value is a promise, or more precisely, a thenable
-				if (typeof value.then === 'function') {
-					if (objType !== 'Promise') objType += ' promise';
-					typeStr = i <= this.typeRecursionLimit ?
-						`awaited ${objType} object ➡ ${await this.getTypeStr(await value, i + 1)}` :
-						`${objType} object`;
-				} else if (value instanceof Boolean || value instanceof Number || value instanceof String) {
-					typeStr = `${objType} object (not a primitive!)`;
-				} else {
-					if (objType === 'Object') objType = 'plain';
-					typeStr = `${objType} object`;
-				}
-			}
-		} else if (basicType === 'function') {
-			const objType = value.constructor.name;
-			typeStr = objType === 'Function' ?
-				`${basicType} object` :
-				`${objType} ${basicType} object`;
-		} else {
-			typeStr = `${basicType} primitive`;
+	/**
+	 * Eval the code and get info on the type of the result.
+	 * @param {Ojbect} flags The flags the command was called with.
+	 * @param {string} code The code obvs.
+	 * @param {DiscordMessage} msg The message, so it's available to the eval.
+	 * @returns {array}
+	 */
+	async handleEval(flags, code, msg) { // eslint-disable-line no-unused-vars
+		const start = now();
+		const evaledOriginal = eval(code); // eslint-disable-line no-eval
+		const syncEnd = now();
+		const evaledTimeout = this.timeoutPromise(evaledOriginal);
+		// Awaiting a non-promise returns the non-promise
+		let evaledValue = await evaledTimeout;
+		const asyncEnd = now();
+
+		const evaledIsThenable = this.isThenable(evaledOriginal);
+
+		// We're doing this checking here so it's not counted in the performance-now timeing
+		// And if the promise timed out, just show the promise
+		if (!evaledIsThenable || evaledValue instanceof TimeoutError) evaledValue = evaledOriginal;
+
+		const time = evaledIsThenable ?
+			`${this.getNiceDuration(syncEnd - start)} ➡ ${this.getNiceDuration(asyncEnd - syncEnd)}` :
+			`${this.getNiceDuration(syncEnd - start)}`;
+
+		if (flags.silent) return [evaledValue];
+
+		const topLine = `${await this.getTypeStr(
+			evaledOriginal,
+			evaledIsThenable ? evaledTimeout : null
+		)}, ${time}`;
+
+		if (typeof evaledValue !== 'string') evaledValue = inspect(evaledValue, { depth: this.inspectionDepth });
+
+		return [evaledValue, topLine];
+	}
+
+	isTooLong(evaled, topLine) {
+		// 1988 is 2000 - 12 (the chars that are added, "`...`\n```js\n...```")
+		return evaled.length > 1988 - topLine.length;
+	}
+
+	isKindaLong(evaled) {
+		const lines = String(evaled).split('\n');
+		const lineCount = lines.length;
+
+		if (lineCount < this.tooManyLines) {
+			// It's not long in line-length alone, but what if we take line wrapping into account on small screens?
+			const lineCountWithWrapping = lines.reduce(
+				// The line length is divided by this.mobileCharsPerLine, rounded up, to see about how many lines
+				// it will be on mobile screens.
+				(count, line) => count + Math.ceil(line.length / this.mobileCharsPerLine),
+				// We have to start with a `count` of 0 for the function to work.
+				0
+			);
+			return {
+				lineCount: lineCountWithWrapping,
+				kindaLong: lineCountWithWrapping >= this.tooManyLines,
+				becauseOfWrapping: true
+			};
 		}
 
-		return typeStr;
+		return {
+			lineCount,
+			kindaLong: lineCount >= this.tooManyLines,
+			becauseOfWrapping: false
+		};
+	}
+
+	async getTypeStr(value, awaitedPromise = null, i = 0) {
+		if (value instanceof TimeoutError) return `but it didn't resolve in ${this.getNiceDuration(this.timeout)}`;
+
+		const basicType = typeof value;
+		if (basicType === 'object') {
+			// The typeof operator mistakenly calls `null` an object
+			if (value === null) return 'null primitive';
+
+			let objType = value.constructor.name;
+			// A promise, or more precisely, a thenable
+			if (this.isThenable(value)) {
+				if (objType !== 'Promise') objType += ' promise';
+				return i <= this.typeRecursionLimit ?
+					// But we're gonna await the already-awaited promise, for efficiency
+					`awaited ${objType} object ➡ ${await this.getTypeStr(await awaitedPromise, null, i + 1)}` :
+					`${objType} object`;
+			} else if (value instanceof Boolean || value instanceof Number || value instanceof String) {
+				return `${objType} object (not a primitive!)`;
+			}
+
+			if (objType === 'Object') objType = 'plain';
+			return `${objType} object`;
+		} else if (basicType === 'function') {
+			const objType = value.constructor.name;
+			return objType === 'Function' ?
+				`${basicType} object` :
+				`${objType} ${basicType} object`;
+		}
+
+		return `${basicType} primitive`;
 	}
 
 	getNiceDuration(time) {
@@ -171,4 +227,14 @@ module.exports = class extends Command {
 		}
 	}
 
+	isThenable(value) {
+		return value && typeof value.then === 'function';
+	}
+
+	timeoutPromise(promise) {
+		return Promise.race([promise, sleep(this.timeout, new TimeoutError('Promise timed out'))]);
+	}
+
 };
+
+class TimeoutError extends Error {}
