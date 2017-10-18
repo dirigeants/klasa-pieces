@@ -13,7 +13,7 @@ module.exports = class extends Command {
 
 	async run(msg) {
 		const { body: data } = await snek.get("https://dog.ceo/api/breeds/image/random");
-                await msg.channel.send({ files: [{ attachment: data.message, name: "Doggy.png" }] }).catch(e => msg.channel.send(e));
+        await msg.channel.send({ files: [{ attachment: data.message, name: "Doggy.png" }] }).catch(e => msg.channel.send(e));
 	}
 
 };
