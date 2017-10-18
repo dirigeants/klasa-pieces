@@ -7,13 +7,13 @@ module.exports = class extends Command {
 		super(...args, {
 			aliases: ['randomdog', 'woof'],
 			description: 'Grabs a random dog image from random.dog.',
-			extendedHelp: 'This command grabs a random dog from "https://random.dog/woof.json".'
+			extendedHelp: 'This command grabs a random dog from "https://dog.ceo/api/breeds/image/random".'
 		});
 	}
 
 	async run(msg) {
-		const { body } = await snek.get('https://random.dog/woof.json');
-		return msg.send('I found this dog image. Here you go!', { files: [{ attachment: body.url, name: `dog.${body.url.split('.')[2]}` }] });
+		const { body: data } = await snek.get("https://dog.ceo/api/breeds/image/random");
+                await msg.channel.send({ files: [{ attachment: data.message, name: "Doggy.png" }] }).catch(e => msg.channel.send(e));
 	}
 
 };
