@@ -112,9 +112,9 @@ module.exports = class extends Command {
 		];
 	}
 
-	async run(msg, [mentioned]) {
-		const member = mentioned || msg.member;
-		return msg.send(`${member.username}: ${this.compliments[Math.floor(Math.random() * this.compliments.length)]}`);
+	async run(msg, [mentioned = msg.member]) {
+		
+		return msg.send(`${mentioned.user.tag}: ${this.compliments[Math.floor(Math.random() * this.compliments.length)]}`);
 	}
 
 };
