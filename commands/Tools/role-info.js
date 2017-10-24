@@ -42,7 +42,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [role]) {
-		const allPermissions = Object.entries(role.permissions.serialize()).filter(([allowed]) => allowed).map(([perm]) => this.perms[perm]).join(', ');
+		const allPermissions = Object.entries(role.permissions.serialize()).filter(allowed => allowed[1]).map(([perm]) => this.perms[perm]).join(', ');
 		const roleInfo = new this.client.methods.Embed()
 			.setColor(role.hexColor || '#FFF')
 			.addField('❯ Name', role.name, true)
