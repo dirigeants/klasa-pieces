@@ -6,14 +6,13 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['randomcat', 'meow'],
-			description: 'Grabs a random cat image from random.cat.',
-			extendedHelp: 'This command grabs a random cat from "http://random.cat/meow".'
+			description: 'Grabs a random cat image from random.cat.'
 		});
 	}
 
 	async run(msg) {
-		const { body } = await snek.get('http://random.cat/meow');
-		return msg.send('I found this cat image. Here you go!', { files: [{ attachment: body.file, name: `cat.${body.file.split('.')[2]}` }] });
+		const { body: { file } } = await snek.get('http://random.cat/meow');
+		return msg.channel.sendFile(file, `cat.${file.split('.')[2]}`);
 	}
 
 };

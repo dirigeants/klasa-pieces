@@ -12,8 +12,8 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const { body } = await snek.get('https://random.dog/woof.json');
-		return msg.send('I found this dog image. Here you go!', { files: [{ attachment: body.url, name: `dog.${body.url.split('.')[2]}` }] });
+		const { body: { message } } = await snek.get('https://dog.ceo/api/breeds/image/random');
+		return msg.channel.sendFile(message);
 	}
 
 };
