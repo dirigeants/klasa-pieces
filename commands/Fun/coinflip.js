@@ -11,7 +11,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	async run(msg, [coins = 0]) {
+	run(msg, [coins = 0]) {
 		let heads = 0;
 		let tails = 0;
 
@@ -20,9 +20,9 @@ module.exports = class extends Command {
 				if (Math.random() > 0.5) heads++;
 				else tails++;
 			}
-			msg.send(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
+			return msg.send(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
 		} else {
-			msg.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
+			return msg.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 		}
 	}
 
