@@ -12,18 +12,16 @@ module.exports = class extends Command {
 	}
 
 	run(msg, [coins = 0]) {
-		let heads = 0;
-		let tails = 0;
-
 		if (coins > 1) {
+			let heads = 0;
+			let tails = 0;
 			for (let i = 0; i < coins; i++) {
 				if (Math.random() > 0.5) heads++;
 				else tails++;
 			}
 			return msg.send(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
-		} else {
-			return msg.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 		}
+		return msg.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 	}
 
 };
