@@ -8,7 +8,7 @@ module.exports = class extends Extendable {
 
 	async extend(arg, currentUsage, possible, repeat, msg) {
 		const matches = channelRegex.exec(arg);
-		if (matches) return this.channel(matches[1]);
+		if (matches) return this.channel(arg, currentUsage, possible, repeat, msg);
 		const search = arg.toLowerCase();
 		let channels = msg.guild.channels.filterArray(channel => channel.name.toLowerCase().indexOf(search));
 		if (channels.length === 1) return channels[0];

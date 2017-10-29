@@ -1,6 +1,6 @@
 const { Extendable } = require('klasa');
 const roleRegex = new RegExp(/^(?:<@&)?(\\d{17,19})>?$/);
- module.exports = class extends Extendable {
+module.exports = class extends Extendable {
 
 	constructor(...args) {
 		super(...args, ['ArgResolver'], { klasa: true });
@@ -8,7 +8,7 @@ const roleRegex = new RegExp(/^(?:<@&)?(\\d{17,19})>?$/);
 
 	async extend(arg, currentUsage, possible, repeat, msg) {
 		const matches = roleRegex.exec(arg);
-		if (matches) return this.role(matches[1], msg.guild);
+		if (matches) return this.role(arg, currentUsage, possible, repeat, msg);
 		const search = arg.toLowerCase();
 		let roles = msg.guild.roles.filterArray(role => role.name.toLowerCase().indexOf(search));
 

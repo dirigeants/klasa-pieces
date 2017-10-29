@@ -1,6 +1,6 @@
 const { Extendable } = require('klasa');
 const memberRegex = new RegExp(/^(?:<@!?)?(\\d{17,19})>?$/);
- module.exports = class extends Extendable {
+module.exports = class extends Extendable {
 
 	constructor(...args) {
 		super(...args, ['ArgResolver'], { klasa: true });
@@ -8,7 +8,7 @@ const memberRegex = new RegExp(/^(?:<@!?)?(\\d{17,19})>?$/);
 
 	async extend(arg, currentUsage, possible, repeat, msg) {
 		const matches = memberRegex.exec(arg);
-		if (matches) return this.member(matches[1]);
+		if (matches) return this.member(arg, currentUsage, possible, repeat, msg);
 
 		const search = arg.toLowerCase();
 		let members = msg.guild.members.filterArray(mem => mem.user.username.toLowerCase().indexOf(search) ||
