@@ -1,5 +1,6 @@
 const { Extendable } = require('klasa');
 const channelRegex = new RegExp(/^(?:<#)?(\\d{17,19})>?$/);
+
 module.exports = class extends Extendable {
 
 	constructor(...args) {
