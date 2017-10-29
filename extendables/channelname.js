@@ -12,9 +12,9 @@ module.exports = class extends Extendable {
 		const matches = channelRegex.exec(arg);
 		if (matches && msg.guild.channels.has(matches[1])) return msg.guild.channels.get(matches[1]) || null;
 		const search = arg.toLowerCase();
-		let channels = msg.guild.channels.filterArray(nameFilterInexact(search));
+		let channels = msg.guild.channels.filterArray(channelFilterInexact(search));
 		if (channels.length === 1) return channels[0];
-		const exactChannels = channels.filter(nameFilterExact(search));
+		const exactChannels = channels.filter(channelFilterExact(search));
 		if (exactChannels.length === 1) return exactChannels[0];
 		if (exactChannels.length > 0) channels = exactChannels;
 		if (currentUsage.type === 'optional' && !repeat) return null;
@@ -25,10 +25,10 @@ module.exports = class extends Extendable {
 
 };
 
-function nameFilterExact(search) {
-	return thing => thing.name.toLowerCase() === search;
+function channelFilterExact(search) {
+	return channel => channel.name.toLowerCase() === search;
 }
 
-function nameFilterInexact(search) {
-	return thing => thing.name.toLowerCase().includes(search);
+function channelFilterInexact(search) {
+	return channel => channel.name.toLowerCase().includes(search);
 }
