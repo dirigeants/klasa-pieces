@@ -8,7 +8,6 @@ const channelRegex = new RegExp(/^(?:<#)?(\\d{17,19})>?$/);
 	}
 
 	async extend(arg, currentUsage, possible, repeat, msg) {
-		if (arg instanceof GuildChannel) return arg;
 		const matches = channelRegex.exec(arg);
 		if (matches && msg.guild.channels.has(matches[1])) return msg.guild.channels.get(matches[1]) || null;
 		const search = arg.toLowerCase();
