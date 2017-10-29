@@ -1,5 +1,4 @@
 const { Extendable } = require('klasa');
-const { Role } = require('discord.js');
 const roleRegex = new RegExp(/^(?:<@&)?(\\d{17,19})>?$/);
 module.exports = class extends Extendable {
 
@@ -8,16 +7,15 @@ module.exports = class extends Extendable {
 	}
 
 	async extend(arg, currentUsage, possible, repeat, msg) {
-		if (arg instanceof Role) return arg;
-		if (!msg.guild) return null;
 		const matches = roleRegex.exec(arg);
-		if (matches) return msg.guild.roles.get(matches[1]) || null;
+		if (matches) return this.role(matches[1], msg.guild);
 		const search = arg.toLowerCase();
-		let roles = msg.guild.roles.filterArray(roleFilterInexact(search));
+		let roles = msg.guild.roles.filterArray(role => role.name.toLowerCase().indexOf(search));
+
 		if (roles.length === 1) return roles[0];
-		const exactRoles = roles.filter(roleFilterExact(search));
-		if (exactRoles.length === 1) return exactRoles[0];
-		if (exactRoles.length > 0) roles = exactRoles;
+		roles = roles.filter(role => role.name.toLowerCase() === search);
+
+		if (roles.length === 1) return roles[0];
 		if (currentUsage.type === 'optional' && !repeat) return null;
 		if (roles.length > 15) throw 'Multiple roles found. Please be more specific.';
 		throw `${currentUsage.possibles[possible].name} Must be a vaild name, id or mention`;
@@ -26,10 +24,3 @@ module.exports = class extends Extendable {
 
 };
 
-function roleFilterExact(search) {
-	return role => role.name.toLowerCase() === search;
-}
-
-function roleFilterInexact(search) {
-	return role => role.name.toLowerCase().includes(search);
-}

@@ -1,5 +1,4 @@
 const { Extendable } = require('klasa');
-const { GuildMember, User, Message } = require('discord.js');
 const userRegex = new RegExp(/^(?:<@!?)?(\\d{17,19})>?$/);
 module.exports = class extends Extendable {
 
@@ -8,23 +7,17 @@ module.exports = class extends Extendable {
 	}
 
 	async extend(arg, currentUsage, possible, repeat, msg) {
-		if (arg instanceof User) return arg;
-		if (arg instanceof GuildMember) return arg.user;
-		if (arg instanceof Message) return arg.author;
 		const matches = userRegex.exec(arg);
-		if (matches) {
-			try {
-				return await msg.client.users.fetch(matches[1]);
-			} catch (err) {
-				throw `${currentUsage.possibles[possible].name} Must be a vaild mention, id or username`;
-			}
-		}
+		if (matches) return this.user(matches[1]);
 		const search = arg.toLowerCase();
-		let users = msg.client.users.filterArray(userFilterInexact(search));
+		let users = msg.client.users.filterArray(user => user.username.toLowerCase().includes(search) ||
+		`${user.username.toLowerCase()}#${user.discriminator}`.includes(search));
+
 		if (users.length === 1) return users[0];
-		const exactUsers = users.filter(userFilterExact(search));
-		if (exactUsers.length === 1) return exactUsers[0];
-		if (exactUsers.length > 0) users = exactUsers;
+		users = users.filter(user => user.username.toLowerCase() === search ||
+		`${user.username.toLowerCase()}#${user.discriminator}` === search);
+
+		if (users.length === 1) return users[0];
 		if (currentUsage.type === 'optional' && !repeat) return null;
 		if (users.length > 15) throw 'Multiple users found. Please be more specific.';
 		throw `${currentUsage.possibles[possible].name} Must be a vaild mention, id or username`;
@@ -32,14 +25,4 @@ module.exports = class extends Extendable {
 
 
 };
-
-function userFilterExact(search) {
-	return user => user.username.toLowerCase() === search ||
-		`${user.username.toLowerCase()}#${user.discriminator}` === search;
-}
-
-function userFilterInexact(search) {
-	return user => user.username.toLowerCase().includes(search) ||
-		`${user.username.toLowerCase()}#${user.discriminator}`.includes(search);
-}
 
