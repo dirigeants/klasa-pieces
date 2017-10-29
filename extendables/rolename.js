@@ -1,14 +1,13 @@
 const { Extendable } = require('klasa');
 const { Role } = require('discord.js');
 const roleRegex = new RegExp(/^(?:<@&)?(\\d{17,19})>?$/);
-module.exports = class extends Extendable {
+ module.exports = class extends Extendable {
 
 	constructor(...args) {
 		super(...args, ['ArgResolver'], { klasa: true });
 	}
 
 	async extend(arg, currentUsage, possible, repeat, msg) {
-		if (arg instanceof Role) return arg;
 		if (!msg.guild) return null;
 		const matches = roleRegex.exec(arg);
 		if (matches) return msg.guild.roles.get(matches[1]) || null;
@@ -31,5 +30,5 @@ function roleFilterExact(search) {
 }
 
 function roleFilterInexact(search) {
-	return role => role.name.toLowerCase().includes(search);
+	return role => role.name.toLowerCase().indexOf(search);
 }
