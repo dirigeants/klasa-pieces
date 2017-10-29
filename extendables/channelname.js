@@ -1,7 +1,7 @@
 const { Extendable } = require('klasa');
 const { GuildChannel } = require('discord.js');
 const channelRegex = new RegExp(/^(?:<#)?(\\d{17,19})>?$/);
-module.exports = class extends Extendable {
+ module.exports = class extends Extendable {
 
 	constructor(...args) {
 		super(...args, ['ArgResolver'], { klasa: true });
