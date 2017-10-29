@@ -15,7 +15,6 @@ const channelRegex = new RegExp(/^(?:<#)?(\\d{17,19})>?$/);
 		if (channels.length === 1) return channels[0];
 		const exactChannels = channels.filter(channelFilterExact(search));
 		if (exactChannels.length === 1) return exactChannels[0];
-		if (exactChannels.length > 0) channels = exactChannels;
 		if (currentUsage.type === 'optional' && !repeat) return null;
 		if (channels.length > 15) throw 'Multiple channels found. Please be more specific.';
 		throw `${currentUsage.possibles[possible].name} Must be a vaild name, id or mention`;
