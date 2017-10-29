@@ -28,5 +28,5 @@ function channelFilterExact(search) {
 }
 
 function channelFilterInexact(search) {
-	return channel => channel.name.toLowerCase().includes(search);
+	return channel => channel.name.toLowerCase().indexOf(search);
 }
