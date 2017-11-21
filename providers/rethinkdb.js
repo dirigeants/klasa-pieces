@@ -58,7 +58,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	getAll(table) {
-		return this.db.table(table) || [];
+		return this.db.table(table).then(resolvePromise);
 	}
 
 	/**
@@ -67,24 +67,24 @@ module.exports = class extends Provider {
 	 * @returns {Promise<string[]>}
 	 */
 	getAllKeys(table) {
-		return this.db.table(table)('id') || [];
+		return this.db.table(table)('id').then(resolvePromise);
 	}
 
 	/**
 	 * Get an entry from a table.
 	 * @param {string} table the name of the table.
 	 * @param {string|number} id the entry's ID.
-	 * @returns {?Object}
+	 * @returns {Promise<Object>}
 	 */
 	get(table, id) {
-		return this.db.table(table).get(id) || null;
+		return this.db.table(table).get(id).then(resolvePromise);
 	}
 
 	/**
 	 * Check if an entry exists from a table.
 	 * @param {string} table the name of the table.
 	 * @param {string|number} id the entry's ID.
-	 * @returns {boolean}
+	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
 		return this.get(table, id).then(data => !!data).catch(() => false);
@@ -93,7 +93,7 @@ module.exports = class extends Provider {
 	/**
 	 * Get a random entry from a table.
 	 * @param {string} table the name of the table.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
 		return this.all(table).then(data => data[Math.floor(Math.random() * data.length)]);
@@ -151,7 +151,7 @@ module.exports = class extends Provider {
 	 * @param {string} table the name of the table.
 	 * @param {string} id the id of the record.
 	 * @param {Object} doc the object you want to insert in the table.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	create(table, id, doc) {
 		return this.db.table(table).insert(Object.assign(doc, { id })).then(resolvePromise);
@@ -170,7 +170,7 @@ module.exports = class extends Provider {
 	 * @param {string} table the name of the table.
 	 * @param {string|number} id the entry's ID.
 	 * @param {Object} doc the object you want to insert in the table.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	update(table, id, doc) {
 		return this.db.table(table).get(id).update(doc).then(resolvePromise);
@@ -224,7 +224,7 @@ module.exports = class extends Provider {
 	 * @param {string} table the name of the table.
 	 * @param {string|number} id the entry's ID.
 	 * @param {Object} doc the document in question to replace the current entry's properties.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	replace(table, id, doc) {
 		return this.db.table(table).get(id).replace(doc).then(resolvePromise);
@@ -234,7 +234,7 @@ module.exports = class extends Provider {
 	 * Delete an entry from the table.
 	 * @param {string} table the name of the table.
 	 * @param {string|number} id the entry's ID.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	delete(table, id) {
 		return this.db.table(table).get(id).delete().then(resolvePromise);
@@ -246,7 +246,7 @@ module.exports = class extends Provider {
 	 * @param {string|number} id the entry's ID.
 	 * @param {string} uArray the name of the array you want to update.
 	 * @param {Object} doc the object you want to insert in the table.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	append(table, id, uArray, doc) {
 		return this.db.table(table).get(id).update(object => ({ [uArray]: object(uArray).default([]).append(doc) })).then(resolvePromise);
@@ -259,7 +259,7 @@ module.exports = class extends Provider {
 	 * @param {string} uArray the name of the array you want to update.
 	 * @param {number} index the position of the object inside the array.
 	 * @param {Object} doc the object you want to insert in the table.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	updateArrayByIndex(table, id, uArray, index, doc) {
 		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).changeAt(index, this.db.row(uArray).nth(index).merge(doc)) }).then(resolvePromise);
@@ -272,7 +272,7 @@ module.exports = class extends Provider {
 	 * @param {string} uArray the name of the array you want to update.
 	 * @param {string} index the ID of the object inside the array.
 	 * @param {Object} doc the object you want to insert in the table.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	updateArrayByID(table, id, uArray, index, doc) {
 		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).map(da => this.db.branch(da('id').eq(index), da.merge(doc), da)) }).then(resolvePromise);
@@ -284,7 +284,7 @@ module.exports = class extends Provider {
 	 * @param {string|number} id the entry's ID.
 	 * @param {string} uArray the name of the array you want to update.
 	 * @param {number} index the position of the object inside the array.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	removeFromArrayByIndex(table, id, uArray, index) {
 		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).deleteAt(index) }).then(resolvePromise);
@@ -296,7 +296,7 @@ module.exports = class extends Provider {
 	 * @param {string|number} id the entry's ID.
 	 * @param {string} uArray the name of the array you want to update.
 	 * @param {string} index the ID of the object inside the array.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	removeFromArrayByID(table, id, uArray, index) {
 		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).filter(it => it('id').ne(index)) }).then(resolvePromise);
@@ -308,7 +308,7 @@ module.exports = class extends Provider {
 	 * @param {string|number} id the entry's ID.
 	 * @param {string} uArray the name of the array you want to update.
 	 * @param {number} index the position of the object inside the array.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	getFromArrayByIndex(table, id, uArray, index) {
 		return this.db.table(table).get(id)(uArray).nth(index).then(resolvePromise);
@@ -320,7 +320,7 @@ module.exports = class extends Provider {
 	 * @param {string|number} id the entry's ID.
 	 * @param {string} uArray the name of the array you want to update.
 	 * @param {string} index the ID of the object inside the array.
-	 * @returns {?Object}
+	 * @returns {Promise<?Object>}
 	 */
 	getFromArrayByID(table, id, uArray, index) {
 		return this.db.table(table).get(id)(uArray).filter(rethink.row('id').eq(index)).then(res => res.length ? res[0] : null);
