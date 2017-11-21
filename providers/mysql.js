@@ -232,6 +232,38 @@ module.exports = class MySQL extends Provider {
 	}
 
 	/**
+	 * Add a new column to a table's schema.
+	 * @param {string} table The name of the table to edit.
+	 * @param {string} key The key to add.
+	 * @param {string} datatype The datatype for the new key.
+	 * @returns {Promise<any[]>}
+	 */
+	addColumn(table, key, datatype) {
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(key)} ${datatype};`);
+	}
+
+	/**
+	 * Remove a column from a table's schema.
+	 * @param {string} table The name of the table to edit.
+	 * @param {string} key The key to remove.
+	 * @returns {Promise<any[]>}
+	 */
+	removeColumn(table, key) {
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(key)};`);
+	}
+
+	/**
+	 * Edit the key's datatype from the table's schema.
+	 * @param {string} table The name of the table to edit.
+	 * @param {string} key The name of the column to update.
+	 * @param {string} datatype The new datatype for the column.
+	 * @returns {Promise<any[]>}
+	 */
+	async updateColumn(table, key, datatype) {
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(key)} ${datatype};`);
+	}
+
+	/**
 	 * Get a row from an arbitrary SQL query.
 	 * @param {string} sql The query to execute.
 	 * @returns {Promise<Object>}
