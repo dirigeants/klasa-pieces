@@ -5,7 +5,7 @@ module.exports = class extends Provider {
 
 	constructor(...args) {
 		super(...args);
-		this.db = rethink({ db: 'test' });
+		this.db = rethink(this.client.provider.rethinkdb || { db: 'test' });
 	}
 
 	/* Table methods */
@@ -17,48 +17,57 @@ module.exports = class extends Provider {
 	/**
 	 * Checks if the table exists.
 	 * @param {string} table the name of the table you want to check.
-	 * @returns {boolean}
+	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.tableList().run().then(data => data.includes(table));
+		return this.db.tableList().then(data => data.includes(table));
 	}
 
 	/**
 	 * Creates a new table.
 	 * @param {string} table the name for the new table.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	createTable(table) {
-		return this.db.tableCreate(table).run();
+		return this.db.tableCreate(table).then(resolvePromise);
 	}
 
 	/**
 	 * Deletes a table.
 	 * @param {string} table the name of the table you want to drop.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	deleteTable(table) {
-		return this.db.tableDrop(table).run();
+		return this.db.tableDrop(table).then(resolvePromise);
 	}
 
 	/**
 	 * Sync the database.
 	 * @param {string} table the name of the table you want to sync.
-	 * @returns {Object}
+	 * @returns {Promise<Object>}
 	 */
 	sync(table) {
-		return this.db.table(table).sync().run();
+		return this.db.table(table).sync().then(resolvePromise);
 	}
 
 	/* Document methods */
 
 	/**
 	 * Get all entries from a table.
-	 * @param {string} table the name of the table you want to get the data from.
-	 * @returns {?array}
+	 * @param {string} table The name of the table you want to get the data from.
+	 * @returns {Promise<Object[]>}
 	 */
 	getAll(table) {
-		return this.db.table(table) || null;
+		return this.db.table(table) || [];
+	}
+
+	/**
+	 *
+	 * @param {string} table The name of the table you want to get the data from.
+	 * @returns {Promise<string[]>}
+	 */
+	getAllKeys(table) {
+		return this.db.table(table)('id') || [];
 	}
 
 	/**
@@ -91,6 +100,53 @@ module.exports = class extends Provider {
 	}
 
 	/**
+	 * Update or insert a new value to all entries.
+	 * @param {string} table The name of the table.
+	 * @param {string} path The object to remove or a path to update.
+	 * @param {any} newValue The new value for the key.
+	 * @returns {Promise<Object>}
+	 */
+	updateValue(table, path, newValue) {
+		// { channels: { modlog: '340713281972862976' } } | undefined
+		if (typeof path === 'object' && typeof newValue === 'undefined') {
+			return this.db.table(table).update(path).then(resolvePromise);
+		}
+		// 'channels.modlog' | '340713281972862976'
+		if (typeof path === 'string' && typeof newValue !== 'undefined') {
+			const route = path.split('.');
+			const object = {};
+			let ref = object;
+			for (let i = 0; i < route.length - 1; i++) ref = ref[route[i]] = {};
+			ref[route[route.length - 1]] = newValue;
+			return this.db.table(table).update(object).then(resolvePromise);
+		}
+		throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
+	}
+
+	/**
+	 * Remove a value or object from all entries.
+	 * @param {string} table The name of the table.
+	 * @param {string} doc The object to remove or a path to update.
+	 * @returns {Promise<Object>}
+	 */
+	removeValue(table, doc) {
+		// { channels: { modlog: true } }
+		if (typeof doc === 'object') {
+			return this.db.table(table).replace(this.db.row.without(doc)).then(resolvePromise);
+		}
+		// 'channels.modlog'
+		if (typeof doc === 'string') {
+			const route = doc.split('.');
+			const object = {};
+			let ref = object;
+			for (let i = 0; i < route.length - 1; i++) ref = ref[route[i]] = {};
+			ref[route[route.length - 1]] = true;
+			return this.db.table(table).replace(this.db.row.without(object)).then(resolvePromise);
+		}
+		throw new TypeError(`Expected an object or a string as first parameter. Got: ${typeof doc}`);
+	}
+
+	/**
 	 * Insert a new document into a table.
 	 * @param {string} table the name of the table.
 	 * @param {string} id the id of the record.
@@ -98,7 +154,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	create(table, id, doc) {
-		return this.db.table(table).insert(Object.assign(doc, { id })).run();
+		return this.db.table(table).insert(Object.assign(doc, { id })).then(resolvePromise);
 	}
 
 	set(...args) {
@@ -117,7 +173,50 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	update(table, id, doc) {
-		return this.db.table(table).get(id).update(doc).run();
+		return this.db.table(table).get(id).update(doc).then(resolvePromise);
+	}
+
+	/**
+	 * @param {string} table The name of the table to update the data from
+	 * @param {string} id The id of the row to update
+	 * @param {string} key The key to update
+	 * @param {number} [amount] The value to increase
+	 * @returns {Promise<number>}
+	 */
+	incrementValue(table, id, key, amount) {
+		return this.mathValue(table, id, key, 'add', amount);
+	}
+
+	/**
+	 * @param {string} table The name of the table to update the data from
+	 * @param {string} id The id of the row to update
+	 * @param {string} key The key to update
+	 * @param {number} [amount] The value to decrease
+	 * @returns {Promise<number>}
+	 */
+	decrementValue(table, id, key, amount) {
+		return this.mathValue(table, id, key, 'sub', amount);
+	}
+
+	/**
+	 * @param {string} table The name of the table to update the data from
+	 * @param {string} id The id of the row to update
+	 * @param {string} key The key to update
+	 * @param {'add'|'sub'|'mul'|'div'|'mod'} type The math operation to perform.
+	 * @param {number} [amount=1] The value to decrease
+	 * @returns {Promise<number>}
+	 */
+	mathValue(table, id, key, type, amount = 1) {
+		if (isNaN(amount) || Number.isInteger(amount) === false || Number.isSafeInteger(amount) === false) {
+			throw new TypeError(`RethinkDB#mathValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
+		}
+
+		const path = key.split('.');
+		let upd = this.db.table(table).get(id);
+		for (let i = 0; i < path.length; i++) upd = upd(path[i]);
+
+		if (typeof upd[type] === 'function') return upd[type](amount).then(resolvePromise);
+		throw new Error(`The type ${type} is not a function. Expected: 'add', 'sub', 'mul', 'div' or 'mod'.`);
 	}
 
 	/**
@@ -128,7 +227,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	replace(table, id, doc) {
-		return this.db.table(table).get(id).replace(doc).run();
+		return this.db.table(table).get(id).replace(doc).then(resolvePromise);
 	}
 
 	/**
@@ -138,7 +237,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	delete(table, id) {
-		return this.db.table(table).get(id).delete().run();
+		return this.db.table(table).get(id).delete().then(resolvePromise);
 	}
 
 	/**
@@ -150,7 +249,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	append(table, id, uArray, doc) {
-		return this.db.table(table).get(id).update(object => ({ [uArray]: object(uArray).default([]).append(doc) })).run();
+		return this.db.table(table).get(id).update(object => ({ [uArray]: object(uArray).default([]).append(doc) })).then(resolvePromise);
 	}
 
 	/**
@@ -163,7 +262,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	updateArrayByIndex(table, id, uArray, index, doc) {
-		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).changeAt(index, this.db.row(uArray).nth(index).merge(doc)) }).run();
+		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).changeAt(index, this.db.row(uArray).nth(index).merge(doc)) }).then(resolvePromise);
 	}
 
 	/**
@@ -176,7 +275,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	updateArrayByID(table, id, uArray, index, doc) {
-		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).map(da => this.db.branch(da('id').eq(index), da.merge(doc), da)) }).run();
+		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).map(da => this.db.branch(da('id').eq(index), da.merge(doc), da)) }).then(resolvePromise);
 	}
 
 	/**
@@ -188,7 +287,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	removeFromArrayByIndex(table, id, uArray, index) {
-		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).deleteAt(index) }).run();
+		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).deleteAt(index) }).then(resolvePromise);
 	}
 
 	/**
@@ -200,7 +299,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	removeFromArrayByID(table, id, uArray, index) {
-		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).filter(it => it('id').ne(index)) }).run();
+		return this.db.table(table).get(id).update({ [uArray]: this.db.row(uArray).filter(it => it('id').ne(index)) }).then(resolvePromise);
 	}
 
 	/**
@@ -212,7 +311,7 @@ module.exports = class extends Provider {
 	 * @returns {Object}
 	 */
 	getFromArrayByIndex(table, id, uArray, index) {
-		return this.db.table(table).get(id)(uArray).nth(index).run();
+		return this.db.table(table).get(id)(uArray).nth(index).then(resolvePromise);
 	}
 
 	/**
@@ -224,7 +323,11 @@ module.exports = class extends Provider {
 	 * @returns {?Object}
 	 */
 	getFromArrayByID(table, id, uArray, index) {
-		return this.db.table(table).get(id)(uArray).filter(rethink.row('id').eq(index)).run().then(res => res.length ? res[0] : null);
+		return this.db.table(table).get(id)(uArray).filter(rethink.row('id').eq(index)).then(res => res.length ? res[0] : null);
 	}
 
 };
+
+function resolvePromise(value) {
+	return value;
+}
