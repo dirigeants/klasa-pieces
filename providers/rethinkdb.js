@@ -5,7 +5,7 @@ module.exports = class extends Provider {
 
 	constructor(...args) {
 		super(...args);
-		this.db = rethink(this.client.provider.rethinkdb || { db: 'test' });
+		this.db = rethink(this.client.config.provider.rethinkdb || { db: 'test' });
 	}
 
 	/* Table methods */

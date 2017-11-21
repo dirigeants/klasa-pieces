@@ -13,7 +13,7 @@ module.exports = class MySQL extends Provider {
 	}
 
 	async init() {
-		this.db = await mysql.createConnection(this.client.provider.mysql || {
+		this.db = await mysql.createConnection(this.client.config.provider.mysql || {
 			host: 'localhost',
 			port: '3306',
 			user: 'root',
