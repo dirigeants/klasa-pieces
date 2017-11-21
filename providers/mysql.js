@@ -7,7 +7,7 @@ module.exports = class MySQL extends Provider {
 		super(...args, {
 			enabled: true,
 			sql: true,
-			description: ''
+			description: 'Allows you to use MySQL functionality throught Klasa'
 		});
 		this.db = null;
 	}
