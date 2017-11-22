@@ -105,6 +105,17 @@ module.exports = class extends Provider {
 	 * @param {string} path The object to remove or a path to update.
 	 * @param {any} newValue The new value for the key.
 	 * @returns {Promise<Object>}
+	 * @example
+	 * // Editing a single value
+	 * // You can edit a single value in a very similar way to Gateway#updateOne.
+	 * updateValue('339942739275677727', 'channels.modlogs', '340713281972862976');
+	 *
+	 * // However, you can also update it by passing an object.
+	 * updateValue('339942739275677727', { channels: { modlogs: '340713281972862976' } });
+	 *
+	 * // Editing multiple values
+	 * // As RethinkDB#updateValue can also work very similar to Gateway#updateMany, it also accepts an entire object with multiple values.
+	 * updateValue('339942739275677727', { prefix: 'k!', roles: { administrator: '339959033937264641' } });
 	 */
 	updateValue(table, path, newValue) {
 		// { channels: { modlog: '340713281972862976' } } | undefined

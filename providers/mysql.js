@@ -259,7 +259,7 @@ module.exports = class MySQL extends Provider {
 	 * @param {string} datatype The new datatype for the column.
 	 * @returns {Promise<any[]>}
 	 */
-	async updateColumn(table, key, datatype) {
+	updateColumn(table, key, datatype) {
 		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(key)} ${datatype};`);
 	}
 
