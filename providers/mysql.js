@@ -149,18 +149,14 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * @param {string} table The name of the table to insert the new data
 	 * @param {string} id The id of the new row to insert
-	 * @param {string[]} keys The keys to insert
-	 * @param {any[]} values The values to insert
+	 * @param {(string|string[]|{})} param1 The first parameter to validate.
+	 * @param {any} [param2] The second parameter to validate.
 	 * @returns {Promise<any[]>}
 	 */
-	insert(table, id, keys, values) {
+	insert(table, id, param1, param2) {
 		requestType('MySQL#insert', 'table', 'string', table);
 		requestType('MySQL#insert', 'id', 'string', id);
-		requestType('MySQL#insert', 'keys', 'object', keys);
-		requestType('MySQL#insert', 'values', 'object', values);
-		if (Array.isArray(keys) === false || Array.isArray(values) === false || keys.length !== values.length) {
-			throw new TypeError(`MySQL#insert expects the parameters 'keys' and 'values' to be arrays with the same length`);
-		}
+		const [keys, values] = acceptArbitraryInput(param1, param2);
 
 		// Push the id to the inserts.
 		keys.push('id');
@@ -171,16 +167,19 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * @param {string} table The name of the table to update the data from
 	 * @param {string} id The id of the row to update
-	 * @param {string} key The key to update
-	 * @param {any} value The new value for the key
+	 * @param {(string|string[]|{})} param1 The first parameter to validate.
+	 * @param {any} [param2] The second parameter to validate.
 	 * @returns {Promise<any[]>}
 	 */
-	update(table, id, key, value) {
+	update(table, id, param1, param2) {
 		requestType('MySQL#update', 'table', 'string', table);
 		requestType('MySQL#update', 'id', 'string', id);
-		requestType('MySQL#update', 'key', 'string', key);
-		requestValue('MySQL#update', 'value', value);
-		return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${sanitizeKeyName(key)} = ${sanitizeInput(value)} WHERE id = ${sanitizeString(id)};`);
+
+		const [keys, values] = acceptArbitraryInput(param1, param2);
+		const update = new Array(keys.length);
+		for (let i = 0; i < keys.length; i++) update[i] = `${sanitizeKeyName(keys[i])} = ${sanitizeInput(values[i])}`;
+
+		return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${update.join(', ')} WHERE id = ${sanitizeString(id)};`);
 	}
 
 	/**
@@ -296,6 +295,59 @@ module.exports = class MySQL extends Provider {
 	}
 
 };
+
+/**
+ * Accept any kind of input from two parameters.
+ * @param {(string|string[]|{})} param1 The first parameter to validate.
+ * @param {any} [param2] The second parameter to validate.
+ * @returns {[[], []]}
+ * @private
+ */
+function acceptArbitraryInput(param1, param2) {
+	if (typeof param1 === 'string' && typeof param2 !== 'undefined') return [[param1], [param2]];
+	if (Array.isArray(param1) && Array.isArray(param2)) {
+		if (param1.length !== param2.length) throw new TypeError(`The array lengths do not match: ${param1.length}-${param2.length}`);
+		if (param1.some(value => typeof value !== 'string')) throw new TypeError(`The array of keys must be an array of strings, but found a value that does not match.`);
+		return [param1, param2];
+	}
+	if (isObject(param1) && typeof param2 === 'undefined') {
+		const entries = [[], []];
+		getEntriesFromObject(param1, entries, '');
+		return entries;
+	}
+	throw new TypeError('Invalid input. Expected a key type of string and a value, tuple of arrays, or an object and undefined.');
+}
+
+/**
+ * Get all entries from an object.
+ * @param {Object} object The object to "flatify".
+ * @param {[string[], any[]]} param1 The tuple of keys and values to check.
+ * @param {string} path The current path.
+ * @private
+ */
+function getEntriesFromObject(object, [keys, values], path) {
+	const objectKeys = Object.keys(object);
+	for (let i = 0; i < objectKeys.length; i++) {
+		const key = objectKeys[i];
+		const value = object[key];
+		if (isObject(value)) {
+			getEntriesFromObject(value, [keys, values], path.length > 0 ? `${path}.${key}` : key);
+		} else {
+			keys.push(path.length > 0 ? `${path}.${key}` : key);
+			values.push(value);
+		}
+	}
+}
+
+/**
+ * Check if a value is an object.
+ * @param {any} object The object to validate.
+ * @returns {boolean}
+ * @private
+ */
+function isObject(object) {
+	return Object.prototype.toString.call(object) === '[object Object]';
+}
 
 /**
  * @param {number} [min] The minimum value
