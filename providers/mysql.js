@@ -9,6 +9,7 @@ module.exports = class MySQL extends Provider {
 			sql: true,
 			description: 'Allows you to use MySQL functionality throught Klasa'
 		});
+		this.TYPES = DATATYPES;
 		this.db = null;
 	}
 
@@ -162,6 +163,15 @@ module.exports = class MySQL extends Provider {
 		keys.push('id');
 		values.push(id);
 		return this.exec(`INSERT INTO ${sanitizeKeyName(table)} (${keys.map(sanitizeKeyName).join(', ')}) VALUES (${values.map(sanitizeInput).join(', ')});`);
+	}
+
+	/**
+	 * @param {...*} args The arguments
+	 * @alias MySQL#insert
+	 * @returns {Promise<any[]>}
+	 */
+	create(...args) {
+		return this.insert(...args);
 	}
 
 	/**
@@ -445,7 +455,7 @@ function sanitizeKeyName(value) {
  */
 function sanitizeObject(value) {
 	if (value === null) return 'NULL';
-	if (Array.isArray(value)) return JSON.stringify(value.map(sanitizeInput));
+	if (Array.isArray(value)) return sanitizeString(JSON.stringify(value));
 	const type = Array.prototype.toString.call(value);
 	if (type === '[object Object]') return sanitizeString(JSON.stringify(value));
 	throw new TypeError(`%MySQL.sanitizeObject expects NULL, an array, or an object. Got: ${type}`);
@@ -470,3 +480,34 @@ function sanitizeInput(value) {
 // In several V8 versions, Promise errors do not bubble up, this workaround
 // forces errors to do so.
 const throwError = (err) => { throw err; };
+
+const DATATYPES = {
+	DECIMAL: 'DECIMAL',
+	TINYINT: 'TINY',
+	SMALLINT: 'SHORT',
+	INT: 'LONG',
+	FLOAT: 'FLOAT',
+	DOUBLE: 'DOUBLE',
+	NULL: 'NULL',
+	TIMESTAMP: 'TIMESTAMP',
+	BIGINT: 'LONGLONG',
+	MEDIUMINT: 'INT24',
+	DATE: 'DATE',
+	TIME: 'TIME',
+	DATETIME: 'DATETIME',
+	YEAR: 'YEAR',
+	NEWDATE: 'NEWDATE',
+	VARCHAR: 'VARCHAR',
+	BIT: 'BIT',
+	JSON: 'JSON',
+	NEWDECIMAL: 'NEWDECIMAL',
+	ENUM: 'ENUM',
+	SET: 'SET',
+	TINYBLOB: 'TINY_BLOB',
+	MEDIUMBLOB: 'MEDIUM_BLOB',
+	LONGBLOB: 'LONG_BLOB',
+	BLOB: 'BLOB',
+	TEXT: 'TEXT',
+	STRING: 'STRING',
+	GEOMETRY: 'GEOMETRY'
+};
