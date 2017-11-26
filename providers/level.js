@@ -16,7 +16,7 @@ module.exports = class extends Provider {
 	}
 
 	async init() {
-		fs.ensureDir(this.baseDir).catch(err => this.client.emit('log', err, 'error'));
+		await fs.ensureDir(this.baseDir).catch(err => this.client.emit('log', err, 'error'));
 		const files = await fs.readdir(this.baseDir).catch(err => this.client.emit('log', err, 'error'));
 		files.map(file => {
 			const db = new Level(this.baseDir + sep + file);

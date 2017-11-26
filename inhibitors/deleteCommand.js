@@ -12,8 +12,8 @@ module.exports = class extends Inhibitor {
 	}
 
 	init() {
-		if (!this.client.settings.guilds.schema.deleteCommand) {
-			return this.client.settings.guilds.add('deleteCommand', { type: 'Boolean', default: false });
+		if (!this.client.settings.guilds.schema.hasKey('deleteCommand')) {
+			return this.client.settings.guilds.addKey('deleteCommand', { type: 'Boolean', default: false });
 		}
 		return null;
 	}

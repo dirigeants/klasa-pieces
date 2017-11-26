@@ -12,8 +12,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [search, index = 1]) {
-		const body = await snekfetch.get(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(search)}`)
-			.then(data => JSON.parse(data.text));
+		const { body } = await snekfetch.get(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(search)}`);
 
 		const definition = this.getDefinition(search, body, --index);
 		return msg.send(search, definition, index);

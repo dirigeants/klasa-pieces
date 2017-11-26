@@ -9,10 +9,10 @@ module.exports = class extends Command {
 			usage: '[Member:member]'
 		});
 		this.statuses = {
-			online: ':green_heart: Online',
-			idle: ':yellow_heart: Idle',
-			dnd: ':heart: Do Not Disturb',
-			offline: ':broken_heart: Offline'
+			online: '💚 Online',
+			idle: '💛 Idle',
+			dnd: '❤ Do Not Disturb',
+			offline: '💔 Offline'
 		};
 	}
 
@@ -29,6 +29,7 @@ module.exports = class extends Command {
 			.addField('❯ Playing', member.user.presence.activity ? member.user.presence.activity.name : 'N/A', true)
 			.addField('❯ Highest Role', member.highestRole.name !== '@everyone' ? member.highestRole.name : 'None', true)
 			.addField('❯ Hoist Role', member.hoistRole ? member.hoistRole.name : 'None', true);
+
 		return msg.sendEmbed(userInfo);
 	}
 

@@ -28,8 +28,8 @@ module.exports = class extends Command {
 	}
 
 	init() {
-		if (!this.client.settings.guilds.schema.minAccAge) {
-			return this.client.settings.guilds.add('minAccAge', { type: 'Integer', default: 1800000 });
+		if (!this.client.settings.guilds.schema.hasKey('minAccAge')) {
+			return this.client.settings.guilds.schema.addKey('minAccAge', { type: 'Integer', default: 1800000 });
 		}
 		return null;
 	}

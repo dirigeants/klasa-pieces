@@ -12,9 +12,6 @@
 	"license": "ISC",
 	"homepage": "https://github.com/dirigeants/klasa-pieces#readme",
 	"devDependencies": {
-		"eslint": "^4.3.0"
-	},
-	"dependencies": {
-		"rethinkdbdash": "^2.3.31"
+		"eslint": "^4.11.0"
 	}
 }

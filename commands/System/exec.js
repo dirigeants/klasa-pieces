@@ -16,7 +16,7 @@ module.exports = class extends Command {
 
 		const output = result.stdout ? `**\`OUTPUT\`**${util.codeBlock('sh', result.stdout)}` : '';
 		const outerr = result.stderr ? `**\`ERROR\`**${util.codeBlock('sh', result.stderr)}` : '';
-		return msg.send([output, outerr].join('\n'));
+		return msg.send(output, outerr);
 	}
 
 };
