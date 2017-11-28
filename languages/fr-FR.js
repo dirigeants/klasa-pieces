@@ -41,6 +41,7 @@ module.exports = class extends Language {
 			INHIBITOR_COOLDOWN: (remaining) => `Vous venez d'utiliser cette commande. Vous pourrez à nouveau utiliser cette commande dans ${remaining} secondes.`,
 			INHIBITOR_DISABLED: 'Cette commande est actuellement désactivée',
 			INHIBITOR_MISSING_BOT_PERMS: (missing) => `Permissions insuffisantes, il manque : **${missing}**`,
+			INHIBITOR_NSFW: 'Vous ne pouvez pas utiliser de commande NSFW dans ce salon.',
 			INHIBITOR_PERMISSIONS: 'Vous n\'avez pas la permission d\'utiliser cette commmande',
 			// eslint-disable-next-line max-len
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `Votre serveur n'a pas le${settings.length > 1 ? 's' : ''} paramètre${settings.length > 1 ? 's' : ''} **${settings.join(', ')}** et ne peux pas s'exécuter.`,
@@ -91,6 +92,7 @@ module.exports = class extends Language {
 			COMMAND_DISABLE_WARN: 'Vous ne voulez probablement pas désactiver cela, car vous ne serez plus capable d\'exécuter une commande pour le réactiver',
 			COMMAND_CONF_NOKEY: 'Vous devez fournir une clef',
 			COMMAND_CONF_NOVALUE: 'Vous devez fournir une valeur',
+			COMMAND_CONF_GUARDED: (name) => `${util.toTitleCase(name)} ne peut pas être désactivé.`,
 			COMMAND_CONF_ADDED: (value, key) => `La valeur \`${value}\` a été ajoutée avec succès à la clef : **${key}**`,
 			COMMAND_CONF_UPDATED: (key, response) => `La clef **${key}** a été mise à jour avec succès : \`${response}\``,
 			COMMAND_CONF_KEY_NOT_ARRAY: 'Cette clef n\'est pas une matrice. Utilisez plutôt l\'action \'reset\'.',
