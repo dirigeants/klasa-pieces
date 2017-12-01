@@ -85,6 +85,8 @@ module.exports = class extends Language {
 				'Nous aspirons à être un framework personnalisable à 100% pour répondre à tous les publics. Nous faisons de fréquentes mises-à-jour et corrections de bugs.',
 				'Si vous vous intéressez à nous, consultez notre site https://klasa.js.org'
 			],
+			COMMAND_HELP_DESCRIPTION: 'Affiche l\'aide pour une commande.',
+			COMMAND_HELP_NO_EXTENDED: 'Pas d\'aide étendue disponible.',
 			COMMAND_HELP_DM: '📥 | Les commandes ont été envoyées dans vos MPs.',
 			COMMAND_HELP_NODM: '❌ | Vous avez désactivé vos MPs, je ne peux pas vous envoyer les commandes.',
 			COMMAND_HELP_USAGE: (usage) => `utilisation :: ${usage}`,
