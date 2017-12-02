@@ -92,6 +92,16 @@ module.exports = class MySQL extends Provider {
 
 	/**
 	 * @param {string} table The name of the table to get the data from
+	 * @returns {Promise<Object[]>}
+	 */
+	getKeys(table) {
+		requestType('MySQL#getKeys', 'table', 'string', table);
+		return this.runAll(`SELECT id FROM ${sanitizeKeyName(table)};`)
+			.then(rows => rows.map(row => row.id));
+	}
+
+	/**
+	 * @param {string} table The name of the table to get the data from
 	 * @param {string} key The key to filter the data from
 	 * @param {any}    [value] The value of the filtered key
 	 * @returns {Promise<Object>}

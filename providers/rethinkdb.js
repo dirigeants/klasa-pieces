@@ -66,7 +66,7 @@ module.exports = class extends Provider {
 	 * @param {string} table The name of the table you want to get the data from.
 	 * @returns {Promise<string[]>}
 	 */
-	getAllKeys(table) {
+	getKeys(table) {
 		return this.db.table(table)('id').then(resolvePromise);
 	}
 
