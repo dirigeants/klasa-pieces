@@ -103,7 +103,7 @@ module.exports = class extends Provider {
 	 * Update or insert a new value to all entries.
 	 * @param {string} table The name of the table.
 	 * @param {string} path The object to remove or a path to update.
-	 * @param {any} newValue The new value for the key.
+	 * @param {*} newValue The new value for the key.
 	 * @returns {Promise<Object>}
 	 * @example
 	 * // Editing a single value

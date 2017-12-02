@@ -112,7 +112,7 @@ module.exports = class extends Provider {
 	 * @param {string} table The name of the table.
 	 * @param {string} row The row id.
 	 * @param {Array<string[]>} inserts The object with all properties you want to insert into the document.
-	 * @returns {Promise<any>}
+	 * @returns {Promise<*>}
 	 */
 	create(table, row, inserts = []) {
 		if (Array.isArray(inserts) === false) throw new TypeError('SQLite#create only accepts string[][] as input for the inserts parameter.');
@@ -164,7 +164,7 @@ module.exports = class extends Provider {
 	 * @param {string} table The name of the table to edit.
 	 * @param {string} key The key to add.
 	 * @param {string} datatype The datatype for the new key.
-	 * @returns {Promise<any>}
+	 * @returns {Promise<*>}
 	 */
 	addColumn(table, key, datatype) {
 		return this.exec(`ALTER TABLE \`${table}\` ADD \`${key}\` ${datatype}`);

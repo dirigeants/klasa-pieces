@@ -75,7 +75,7 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} [key] The key to filter the data from. Requires the value parameter
-	 * @param {any}    [value] The value to filter the data from. Requires the key parameter
+	 * @param {*}    [value] The value to filter the data from. Requires the key parameter
 	 * @param {number} [limitMin] The minimum range. Must be higher than zero
 	 * @param {number} [limitMax] The maximum range. Must be higher than the limitMin parameter
 	 * @returns {Promise<Object[]>}
@@ -103,7 +103,7 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} key The key to filter the data from
-	 * @param {any}    [value] The value of the filtered key
+	 * @param {*}    [value] The value of the filtered key
 	 * @returns {Promise<Object>}
 	 */
 	get(table, key, value) {
@@ -161,7 +161,7 @@ module.exports = class MySQL extends Provider {
 	 * @param {string} table The name of the table to insert the new data
 	 * @param {string} id The id of the new row to insert
 	 * @param {(string|string[]|{})} param1 The first parameter to validate.
-	 * @param {any} [param2] The second parameter to validate.
+	 * @param {*} [param2] The second parameter to validate.
 	 * @returns {Promise<any[]>}
 	 */
 	insert(table, id, param1, param2) {
@@ -188,7 +188,7 @@ module.exports = class MySQL extends Provider {
 	 * @param {string} table The name of the table to update the data from
 	 * @param {string} id The id of the row to update
 	 * @param {(string|string[]|{})} param1 The first parameter to validate.
-	 * @param {any} [param2] The second parameter to validate.
+	 * @param {*} [param2] The second parameter to validate.
 	 * @returns {Promise<any[]>}
 	 */
 	update(table, id, param1, param2) {
@@ -319,7 +319,7 @@ module.exports = class MySQL extends Provider {
 /**
  * Accept any kind of input from two parameters.
  * @param {(string|string[]|{})} param1 The first parameter to validate.
- * @param {any} [param2] The second parameter to validate.
+ * @param {*} [param2] The second parameter to validate.
  * @returns {[[], []]}
  * @private
  */
@@ -361,7 +361,7 @@ function getEntriesFromObject(object, [keys, values], path) {
 
 /**
  * Check if a value is an object.
- * @param {any} object The object to validate.
+ * @param {*} object The object to validate.
  * @returns {boolean}
  * @private
  */
@@ -402,7 +402,7 @@ function parseRange(min, max) {
  * @param {string} method The name of the method
  * @param {string} parameter The parameter name
  * @param {string} type The expected primitive type of the parameter
- * @param {any} value The value to test
+ * @param {*} value The value to test
  * @private
  */
 function requestType(method, parameter, type, value) {
@@ -413,7 +413,7 @@ function requestType(method, parameter, type, value) {
 /**
  * @param {string} method The name of the method
  * @param {string} parameter The parameter name
- * @param {any} value The value to test if undefined
+ * @param {*} value The value to test if undefined
  * @private
  */
 function requestValue(method, parameter, value) {
@@ -473,7 +473,7 @@ function sanitizeObject(value) {
 
 /**
  *
- * @param {any} value The value to sanitize
+ * @param {*} value The value to sanitize
  * @returns {string}
  * @private
  */
