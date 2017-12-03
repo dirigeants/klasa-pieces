@@ -2,17 +2,17 @@
 	"name": "klasa-pieces",
 	"description": "This repository contains the various *Pieces* submitted by users and collaborators.",
 	"scripts": {
-	  "test": "eslint .",
-	  "lint": "npm test -- --fix"
+		"test": "eslint .",
+		"lint": "npm test -- --fix"
 	},
 	"repository": {
-	  "type": "git",
-	  "url": "git+https://github.com/dirigeants/klasa-pieces.git"
+		"type": "git",
+		"url": "git+https://github.com/dirigeants/klasa-pieces.git"
 	},
 	"license": "ISC",
 	"homepage": "https://github.com/dirigeants/klasa-pieces#readme",
 	"devDependencies": {
-	  "eslint": "^4.3.0"
+		"eslint": "^4.3.0",
+		"klasa": "^0.3.0"
 	}
-  }
-  
+}
