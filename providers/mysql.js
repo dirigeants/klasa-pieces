@@ -253,22 +253,31 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * Add a new column to a table's schema.
 	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The key to add.
-	 * @param {string} datatype The datatype for the new key.
+	 * @param {(string|Array<string[]>)} key The key to add.
+	 * @param {string} [datatype] The datatype for the new key.
 	 * @returns {Promise<any[]>}
 	 */
 	addColumn(table, key, datatype) {
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(key)} ${datatype};`);
+		requestType('MySQL#addColumn', 'table', 'string', table);
+		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${sanitizeKeyName(key)} ${datatype};`);
+		if (typeof datatype === 'undefined' && Array.isArray(key)) {
+			return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ${key.map(([column, type]) =>
+				`ADD COLUMN ${sanitizeKeyName(column)} ${type}`).join(', ')};`);
+		}
+		throw new TypeError('Invalid usage of MySQL#addColumn. Expected a string and string or string[][] and undefined.');
 	}
 
 	/**
 	 * Remove a column from a table's schema.
 	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The key to remove.
+	 * @param {(string|string[])} key The key to remove.
 	 * @returns {Promise<any[]>}
 	 */
 	removeColumn(table, key) {
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(key)};`);
+		requestType('MySQL#removeColumn', 'table', 'string', table);
+		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(key)};`);
+		if (Array.isArray(key)) return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP ${key.map(sanitizeKeyName).join(', ')};`);
+		throw new TypeError('Invalid usage of MySQL#removeColumn. Expected a string or string[].');
 	}
 
 	/**
@@ -279,6 +288,7 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	updateColumn(table, key, datatype) {
+		requestType('MySQL#updateColumn', 'table', 'string', table);
 		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(key)} ${datatype};`);
 	}
 
@@ -472,6 +482,15 @@ function sanitizeObject(value) {
 }
 
 /**
+ * @param {boolean} value The boolean to sanitize
+ * @returns {number}
+ * @private
+ */
+function sanitizeBoolean(value) {
+	return value ? 1 : 0;
+}
+
+/**
  *
  * @param {*} value The value to sanitize
  * @returns {string}
@@ -483,6 +502,7 @@ function sanitizeInput(value) {
 		case 'string': return sanitizeString(value);
 		case 'number': return sanitizeInteger(value);
 		case 'object': return sanitizeObject(value);
+		case 'boolean': return sanitizeBoolean(value);
 		default: throw new TypeError(`%MySQL.sanitizeInput expects type of string, number, or object. Got: ${type}`);
 	}
 }
@@ -509,6 +529,7 @@ const DATATYPES = {
 	NEWDATE: 'NEWDATE',
 	VARCHAR: 'VARCHAR',
 	BIT: 'BIT',
+	BOOLEAN: 'BIT(1)',
 	JSON: 'JSON',
 	NEWDECIMAL: 'NEWDECIMAL',
 	ENUM: 'ENUM',
