@@ -48,7 +48,7 @@ module.exports = class extends Language {
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `Votre serveur n'a pas le${settings.length > 1 ? 's' : ''} paramètre${settings.length > 1 ? 's' : ''} **${settings.join(', ')}** et ne peux pas s'exécuter.`,
 			INHIBITOR_RUNIN: (types) => `Cette commande est uniquement disponible dans les salons ${types}`,
 			INHIBITOR_RUNIN_NONE: (name) => `La commande ${name} n'est pas configurée pour s'exécuter dans un salon.`,
-			//COMMAND_EVAL_DESCRIPTION: 'Evaluates arbitrary Javascript. Reserved for bot owner.',
+			COMMAND_EVAL_DESCRIPTION: 'Evalue du Javascript arbitraire. Reservé aux propriétaires du bot.',
 			COMMAND_UNLOAD: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} déchargé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
 			//COMMAND_UNLOAD_DESCRIPTION: 'Unloads the klasa piece.',
 			COMMAND_TRANSFER_ERROR: '❌ Ce fichier a déjà été transféré ou n\'a jamais existé.',
@@ -59,9 +59,9 @@ module.exports = class extends Language {
 			COMMAND_RELOAD_ALL: (type) => `✅ Tou${this.isFeminine(type) ? 'te' : ''}s les ${this.piece(type)} ont été rechargé${this.isFeminine(type) ? 'e' : ''}s.`,
 			//COMMAND_RELOAD_DESCRIPTION: 'Reloads a klasa piece, or all pieces of a klasa store.',
 			COMMAND_REBOOT: 'Redémarrage...',
-			//COMMAND_REBOOT_DESCRIPTION: 'Reboots the bot.',
+			COMMAND_REBOOT_DESCRIPTION: 'Redémarre le bot.',
 			COMMAND_PING: 'Ping ?',
-			//COMMAND_PING_DESCRIPTION: 'Runs a connection test to Discord.',
+			COMMAND_PING_DESCRIPTION: 'Exécute un test de connexion à Discord.',
 			COMMAND_PINGPONG: (diff, ping) => `Pong ! (L'aller-retour a pris : ${diff}ms. Pulsation : ${ping}ms.)`,
 			COMMAND_INVITE_SELFBOT: 'Pourquoi auriez-vous besoin d\'un lien d\'invitation pour un selfbot...',
 			COMMAND_INVITE: (client) => [
@@ -74,7 +74,7 @@ module.exports = class extends Language {
 				].join(' ')),
 				'Veuillez soumettre un problème à <https://github.com/dirigeants/klasa> si vous trouvez un bug.'
 			],
-			//COMMAND_INVITE_DESCRIPTION: 'Displays the join server link of the bot.',
+			COMMAND_INVITE_DESCRIPTION: 'Affiche le lien d\'invitation du bot.',
 			COMMAND_INFO: [
 				"Klasa est un framework 'plug-and-play' qui étend la librairie Discord.js.",
 				'Une grande partie du code est modularisée, ce qui permet aux développeurs de modifier Klasa pour répondre à leurs besoins.',
@@ -93,7 +93,7 @@ module.exports = class extends Language {
 				'Nous aspirons à être un framework personnalisable à 100% pour répondre à tous les publics. Nous faisons de fréquentes mises-à-jour et corrections de bugs.',
 				'Si vous vous intéressez à nous, consultez notre site https://klasa.js.org'
 			],
-			//COMMAND_INFO_DESCRIPTION: 'Provides some information about this bot.',
+			COMMAND_INFO_DESCRIPTION: 'Fournit des informations à propos du bot.',
 			COMMAND_HELP_DESCRIPTION: 'Affiche l\'aide pour une commande.',
 			COMMAND_HELP_NO_EXTENDED: 'Pas d\'aide étendue disponible.',
 			COMMAND_HELP_DM: '📥 | Les commandes ont été envoyées dans vos MPs.',
@@ -102,9 +102,9 @@ module.exports = class extends Language {
 			COMMAND_HELP_USAGE: (usage) => `utilisation :: ${usage}`,
 			COMMAND_HELP_EXTENDED: 'Aide étendue ::',
 			COMMAND_ENABLE: (type, name) => `+ ${util.toTitleCase(this.piece(type))} activé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
-			//COMMAND_ENABLE_DESCRIPTION: 'Re-enables or temporarily enables a command/inhibitor/monitor/finalizer. Default state restored on reboot.',
+			COMMAND_ENABLE_DESCRIPTION: 'Re-active ou active temporairement un(e) commande/inhibiteur/moniteur/finaliseur/événement. L\'état par défaut sera rétabli au redémarrage.',
 			COMMAND_DISABLE: (type, name) => `+ ${util.toTitleCase(this.piece(type))} désactivé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
-			//COMMAND_DISABLE_DESCRIPTION: 'Re-disables or temporarily disables a command/inhibitor/monitor/finalizer/event. Default state restored on reboot.',
+			COMMAND_DISABLE_DESCRIPTION: 'Re-désactive ou désactive temporairement un(e) commande/inhibiteur/moniteur/finaliseur/événement. L\'état par défaut sera rétabli au redémarrage.',
 			COMMAND_DISABLE_WARN: 'Vous ne voulez probablement pas désactiver cela, car vous ne serez plus capable d\'exécuter une commande pour le réactiver',
 			COMMAND_CONF_NOKEY: 'Vous devez fournir une clef',
 			COMMAND_CONF_NOVALUE: 'Vous devez fournir une valeur',
@@ -132,7 +132,7 @@ module.exports = class extends Language {
 				`• Discord.js      :: v${discordVersion}`,
 				`• Node.js         :: ${processVersion}`
 			],
-			COMMAND_STATS_DESCRIPTION: 'Fournit quelques détails et statistiques à propos du bot.'
+			COMMAND_STATS_DESCRIPTION: 'Fournit des détails et statistiques à propos du bot.'
 		};
 	}
 
