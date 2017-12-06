@@ -115,7 +115,7 @@ module.exports = class extends Language {
 			COMMAND_CONF_REMOVE: (value, key) => `La valeur \`${value}\` a été otée avec succès de la clef : **${key}**`,
 			COMMAND_CONF_GET_NOEXT: (key) => `La clef **${key}** ne semble pas exister.`,
 			COMMAND_CONF_GET: (key, value) => `La valeur pour la clef **${key}** est : \`${value}\``,
-			COMMAND_CONF_RESET: (key, response) => `The key **${key}** has been reset to: \`${response}\``,
+			COMMAND_CONF_RESET: (key, response) => `La clef **${key}** a été réinitialisée à : \`${response}\``,
 			COMMAND_CONF_SERVER_DESCRIPTION: 'Établit une configuration par serveur.',
 			COMMAND_CONF_SERVER: (key, list) => `**Configuration Serveur${key}**\n${list}`,
 			COMMAND_CONF_USER_DESCRIPTION: 'Établit une configuration par utilisateur.',
