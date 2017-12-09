@@ -2,6 +2,7 @@ const { Command } = require('klasa');
 
 const moment = require('moment');
 require('moment-duration-format');
+// Remind me to remove this to use Klasa's Timestamp anytime soon.
 
 module.exports = class extends Command {
 
@@ -30,7 +31,7 @@ module.exports = class extends Command {
 	async sendStar(msg, message, channel) {
 		if (!await this.provider.has('starboard', message.guild.id)) await this.provider.set('starboard', message.guild.id, JSON.stringify([]));
 
-		const msgArray = JSON.parse(await this.provider.get('starboard', message.guild.id));
+		const msgArray = await this.provider.get('starboard', message.guild.id);
 		if (msgArray.includes(message.id)) throw 'This message has already been starred.';
 		else if (msg.author === message.author) throw 'You cannot star yourself.';
 

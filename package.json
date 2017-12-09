@@ -9,9 +9,9 @@
 		"type": "git",
 		"url": "git+https://github.com/dirigeants/klasa-pieces.git"
 	},
-	"license": "ISC",
+	"license": "MIT",
 	"homepage": "https://github.com/dirigeants/klasa-pieces#readme",
 	"devDependencies": {
-		"eslint": "^4.11.0"
+		"eslint": "^4.13.0"
 	}
 }

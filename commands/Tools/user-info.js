@@ -16,10 +16,9 @@ module.exports = class extends Command {
 		};
 	}
 
-	async run(msg, [mentioned]) {
-		const member = mentioned || msg.member;
+	async run(msg, [member = msg.member]) {
 		const userInfo = new this.client.methods.Embed()
-			.setColor(member.displayHexColor || 0)
+			.setColor(member.displayHexColor || 0xFFFFFF)
 			.setThumbnail(member.user.displayAvatarURL())
 			.addField('❯ Name', member.user.tag, true)
 			.addField('❯ ID', member.id, true)

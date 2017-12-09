@@ -13,7 +13,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const accAge = msg.guild.settings.minAccAge;
+		const accAge = msg.guild.configs.minAccAge;
 		const mtime = msg.createdTimestamp;
 
 		const users = [];
@@ -27,11 +27,10 @@ module.exports = class extends Command {
 			'No users less than Minimum Account Age were found in this server.');
 	}
 
-	init() {
-		if (!this.client.settings.guilds.schema.hasKey('minAccAge')) {
-			return this.client.settings.guilds.schema.addKey('minAccAge', { type: 'Integer', default: 1800000 });
+	async init() {
+		if (!this.client.gateways.guilds.schema.hasKey('minAccAge')) {
+			await this.client.gateways.guilds.schema.addKey('minAccAge', { type: 'integer', default: 1800000 });
 		}
-		return null;
 	}
 
 };
