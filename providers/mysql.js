@@ -152,7 +152,9 @@ module.exports = class MySQL extends Provider {
 	async getSorted(table, key, order = 'DESC', limitMin, limitMax) {
 		requestType('MySQL#getSorted', 'table', 'string', table);
 		requestType('MySQL#getSorted', 'key', 'string', key);
-		if (order !== 'DESC' && order !== 'ASC') { throw new TypeError(`MySQL#getSorted 'order' parameter expects either 'DESC' or 'ASC'. Got: ${order}`); }
+		if (order !== 'DESC' && order !== 'ASC') {
+			throw new TypeError(`MySQL#getSorted 'order' parameter expects either 'DESC' or 'ASC'. Got: ${order}`);
+		}
 
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`);
 	}
