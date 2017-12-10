@@ -39,8 +39,9 @@ module.exports = class PostgreSQL extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.run(`SELECT EXISTS ( SELECT 1 FROM information_schema.tables WHERE table_name = '${table}' );`)
-			.then(result => !!result);
+		return this.runAll(`SELECT true FROM pg_tables WHERE tablename = '${table}';`)
+			.then(result => result.length !== 0 && result[0].bool === true)
+			.catch(() => false);
 	}
 
 	/**
@@ -65,7 +66,8 @@ module.exports = class PostgreSQL extends Provider {
 	 * @returns {Promise<number>}
 	 */
 	countRows(table) {
-		return this.run(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`);
+		return this.runOne(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`)
+			.then(result => result.count);
 	}
 
 	/* Row methods */
@@ -80,10 +82,19 @@ module.exports = class PostgreSQL extends Provider {
 	 */
 	getAll(table, key, value, limitMin, limitMax) {
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-			return this.run(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 ${parseRange(limitMin, limitMax)};`, [value]);
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 ${parseRange(limitMin, limitMax)};`, [value]);
 		}
 
-		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`);
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`);
+	}
+
+	/**
+	 * @param {string} table The name of the table to get the data from
+	 * @returns {Promise<Object[]>}
+	 */
+	getKeys(table) {
+		return this.runAll(`SELECT id FROM ${sanitizeKeyName(table)};`)
+			.then(rows => rows.map(row => row.id));
 	}
 
 	/**
@@ -98,8 +109,7 @@ module.exports = class PostgreSQL extends Provider {
 			value = key;
 			key = 'id';
 		}
-		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value])
-			.then(result => result[0]);
+		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value]);
 	}
 
 	/**
@@ -108,8 +118,8 @@ module.exports = class PostgreSQL extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
-		return this.run(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = $1 LIMIT 1;`, [id])
-			.then(result => Boolean(result[0]));
+		return this.runOne(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = $1 LIMIT 1;`, [id])
+			.then(result => Boolean(result));
 	}
 
 	/**
@@ -117,7 +127,7 @@ module.exports = class PostgreSQL extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1;`);
+		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1;`);
 	}
 
 	/**
@@ -133,7 +143,7 @@ module.exports = class PostgreSQL extends Provider {
 			throw new TypeError(`PostgreSQL#getSorted 'order' parameter expects either 'DESC' or 'ASC'. Got: ${order}`);
 		}
 
-		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`);
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`);
 	}
 
 	/**
@@ -253,13 +263,34 @@ module.exports = class PostgreSQL extends Provider {
 
 	/**
 	 * Get a row from an arbitrary SQL query.
-	 * @param {string} sql The query to execute.
+	 * @param {...any} sql The query to execute.
 	 * @returns {Promise<Object>}
 	 */
-	run(sql) {
-		return this.db.query(sql)
+	run(...sql) {
+		console.log(...sql);
+		return this.db.query(...sql)
 			.then(result => result)
 			.catch(error => { throw error; });
+	}
+
+	/**
+	 * Get all entries from a table.
+	 * @param {...any} sql The query to execute.
+	 * @returns {Promise<any[]>}
+	 */
+	runAll(...sql) {
+		return this.run(...sql)
+			.then(result => result.rows);
+	}
+
+	/**
+	 * Get one entry from a table.
+	 * @param {...any} sql The query to execute.
+	 * @returns {Promise<Object>}
+	 */
+	runOne(...sql) {
+		return this.run(...sql)
+			.then(result => result.rows[0]);
 	}
 
 };
@@ -272,6 +303,7 @@ module.exports = class PostgreSQL extends Provider {
  * @private
  */
 function acceptArbitraryInput(param1, param2) {
+	if (typeof param1 === 'undefined' && typeof param2 === 'undefined') return [[], []];
 	if (typeof param1 === 'string' && typeof param2 !== 'undefined') return [[param1], [param2]];
 	if (Array.isArray(param1) && Array.isArray(param2)) {
 		if (param1.length !== param2.length) throw new TypeError(`The array lengths do not match: ${param1.length}-${param2.length}`);

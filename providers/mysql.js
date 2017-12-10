@@ -166,7 +166,7 @@ module.exports = class MySQL extends Provider {
 	 * @param {*} [param2] The second parameter to validate.
 	 * @returns {Promise<any[]>}
 	 */
-	insert(table, id, param1 = [], param2 = []) {
+	insert(table, id, param1, param2) {
 		requestType('MySQL#insert', 'table', 'string', table);
 		requestType('MySQL#insert', 'id', 'string', id);
 		const [keys, values] = acceptArbitraryInput(param1, param2);
@@ -336,6 +336,7 @@ module.exports = class MySQL extends Provider {
  * @private
  */
 function acceptArbitraryInput(param1, param2) {
+	if (typeof param1 === 'undefined' && typeof param2 === 'undefined') return [[], []];
 	if (typeof param1 === 'string' && typeof param2 !== 'undefined') return [[param1], [param2]];
 	if (Array.isArray(param1) && Array.isArray(param2)) {
 		if (param1.length !== param2.length) throw new TypeError(`The array lengths do not match: ${param1.length}-${param2.length}`);
