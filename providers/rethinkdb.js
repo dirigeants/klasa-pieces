@@ -164,7 +164,7 @@ module.exports = class extends Provider {
 	 * @param {Object} doc the object you want to insert in the table.
 	 * @returns {Promise<Object>}
 	 */
-	create(table, id, doc) {
+	create(table, id, doc = {}) {
 		return this.db.table(table).insert(Object.assign(doc, { id })).then(resolvePromise);
 	}
 
