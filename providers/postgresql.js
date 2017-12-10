@@ -267,7 +267,6 @@ module.exports = class PostgreSQL extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	run(...sql) {
-		console.log(...sql);
 		return this.db.query(...sql)
 			.then(result => result)
 			.catch(error => { throw error; });
