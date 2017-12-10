@@ -67,7 +67,7 @@ module.exports = class PostgreSQL extends Provider {
 	 */
 	countRows(table) {
 		return this.runOne(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`)
-			.then(result => result.count);
+			.then(result => parseInt(result.count));
 	}
 
 	/* Row methods */
