@@ -162,11 +162,11 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * @param {string} table The name of the table to insert the new data
 	 * @param {string} id The id of the new row to insert
-	 * @param {(string|string[]|{})} param1 The first parameter to validate.
+	 * @param {(string|string[]|{})} [param1] The first parameter to validate.
 	 * @param {*} [param2] The second parameter to validate.
 	 * @returns {Promise<any[]>}
 	 */
-	insert(table, id, param1, param2) {
+	insert(table, id, param1 = [], param2 = []) {
 		requestType('MySQL#insert', 'table', 'string', table);
 		requestType('MySQL#insert', 'id', 'string', id);
 		const [keys, values] = acceptArbitraryInput(param1, param2);
