@@ -184,6 +184,15 @@ module.exports = class PostgreSQL extends Provider {
 	}
 
 	/**
+	 * @param {...*} args The arguments
+	 * @alias PostgreSQL#update
+	 * @returns {Promise<any[]>}
+	 */
+	replace(...args) {
+		return this.update(...args);
+	}
+
+	/**
 	 * @param {string} table The name of the table to update the data from
 	 * @param {string} id The id of the row to update
 	 * @param {string} key The key to update

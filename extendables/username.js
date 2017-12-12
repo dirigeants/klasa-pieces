@@ -1,6 +1,5 @@
-const { Extendable } = require('klasa');
+const { Extendable, util: { regExpEsc } } = require('klasa');
 const { GuildMember, User } = require('discord.js');
-const { regExpEsc } = require('../util/util');
 
 const USER_REGEXP = new RegExp('^(?:<@!?)?(\\d{17,21})>?$');
 
