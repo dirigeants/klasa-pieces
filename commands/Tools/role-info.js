@@ -1,5 +1,4 @@
-const { Command } = require('klasa');
-const moment = require('moment');
+const { Command, Timestamp } = require('klasa');
 
 module.exports = class extends Command {
 
@@ -39,6 +38,7 @@ module.exports = class extends Command {
 			MOVE_MEMBERS: 'Move Members',
 			USE_VAD: 'Use Voice Activity'
 		};
+		this.timestamp = new Timestamp('MMMM dd YYYY');
 	}
 
 	async run(msg, [role]) {
@@ -48,7 +48,7 @@ module.exports = class extends Command {
 			.addField('❯ Name', role.name, true)
 			.addField('❯ ID', role.id, true)
 			.addField('❯ Color', role.hexColor || 'None', true)
-			.addField('❯ Creation Date', moment(role.createdAt).format('MMMM Do YYYY'), true)
+			.addField('❯ Creation Date', this.timestamp.display(role.createdAt), true)
 			.addField('❯ Hoisted', role.hoist ? 'Yes' : 'No', true)
 			.addField('❯ Mentionable', role.mentionable ? 'Yes' : 'No', true)
 			.addField('❯ Permissions', allPermissions);

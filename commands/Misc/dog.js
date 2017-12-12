@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snek = require('snekfetch');
+const snekfetch = require('snekfetch');
 
 module.exports = class extends Command {
 
@@ -12,7 +12,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const { body: { message } } = await snek.get('https://dog.ceo/api/breeds/image/random');
+		const { body: { message } } = await snekfetch.get('https://dog.ceo/api/breeds/image/random');
 		return msg.channel.sendFile(message);
 	}
 

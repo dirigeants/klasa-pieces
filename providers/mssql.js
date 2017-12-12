@@ -129,7 +129,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		return this.run('SELECT TOP 1 * FROM @0 ORDER BY NEWID()', [table]);
+		return this.run('SELECT TOP 1 * FROM @0 ORDER BY NEWID();', [table]);
 	}
 
 	create(table, id, param1, param2) {
@@ -170,7 +170,8 @@ module.exports = class extends Provider {
 	 */
 	update(table, id, param1, param2) {
 		const [keys, values] = acceptArbitraryInput(param1, param2);
-		return this.run(`UPDATE ${sanitizeKeyName(table)}
+		return this.run(`
+			UPDATE ${sanitizeKeyName(table)}
 			SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = @${i}`)}
 			WHERE id = ${sanitizeString(id)};`, values);
 	}
@@ -190,9 +191,10 @@ module.exports = class extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	delete(table, id) {
-		return this.run(`DELETE *
+		return this.run(`
+			DELETE *
 			FROM @0
-			WHERE id = @1`, [table, id]);
+			WHERE id = @1;`, [table, id]);
 	}
 
 	/**

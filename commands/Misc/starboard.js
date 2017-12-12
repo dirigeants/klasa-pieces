@@ -1,8 +1,4 @@
-const { Command } = require('klasa');
-
-const moment = require('moment');
-require('moment-duration-format');
-// Remind me to remove this to use Klasa's Timestamp anytime soon.
+const { Command, Timestamp } = require('klasa');
 
 module.exports = class extends Command {
 
@@ -19,6 +15,7 @@ module.exports = class extends Command {
 
 		this.providerEngine = 'json';
 		this.provider = null;
+		this.timestamp = new Timestamp('DD/MM/YYYY [@] HH:mm:ss');
 	}
 
 	async run(msg, [message]) {
@@ -51,7 +48,7 @@ module.exports = class extends Command {
 	}
 
 	generateMessage(message) {
-		const starTime = moment(message.createdTimestamp).format('D[/]M[/]Y [@] HH:mm:ss');
+		const starTime = this.timestamp.display(message.createdTimestamp);
 		const starFooter = `${message.author.tag} in #${message.channel.name} (ID: ${message.id})`;
 		return `⭐ ${message.cleanContent}\n\n- ${starTime} by ${starFooter}`;
 	}
