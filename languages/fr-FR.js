@@ -19,6 +19,7 @@ module.exports = class extends Language {
 			RESOLVER_INVALID_USER: (name) => `${name} doit être une mention ou un identifiant d'utilisateur valide.`,
 			RESOLVER_INVALID_MEMBER: (name) => `${name} doit être une mention ou un identifiant d'utilisateur valide.`,
 			RESOLVER_INVALID_CHANNEL: (name) => `${name} doit être un tag ou un identifiant de salon valide.`,
+			RESOLVER_INVALID_EMOJI: (name) => `${name} doit être un tag d'émoji personnalisé ou un identifiant d'émoji valide.`,
 			RESOLVER_INVALID_GUILD: (name) => `${name} doit être un identifiant de serveur valide.`,
 			RESOLVER_INVALID_ROLE: (name) => `${name} doit être une mention ou un identifiant de rôle.`,
 			RESOLVER_INVALID_LITERAL: (name) => `Votre option ne correspond pas à la seule possibilité : ${name}`,
@@ -38,6 +39,7 @@ module.exports = class extends Language {
 			COMMANDMESSAGE_NOMATCH: (possibles) => `Votre option ne correspond à aucune des possibilités : (${possibles})`,
 			// eslint-disable-next-line max-len
 			MONITOR_COMMAND_HANDLER_REPROMPT: (tag, error, time) => `${tag} | **${error}** | Vous avez **${time}** secondes pour répondre à ce message avec un argument valide. Tapez **"ABORT"** pour annuler ce message.`,
+			MONITOR_COMMAND_HANDLER_REPEATING_REPROMPT: (tag, name, time) => `${tag} | **${name}** est un argument répétitif | Vous avez **${time}** secondes pour répondre à ce message avec des arguments additionnels valides. Saisissez **"CANCEL"** pour annuler.`, // eslint-disable-line max-len
 			MONITOR_COMMAND_HANDLER_ABORTED: 'Annulé',
 			INHIBITOR_COOLDOWN: (remaining) => `Vous venez d'utiliser cette commande. Vous pourrez à nouveau utiliser cette commande dans ${remaining} secondes.`,
 			INHIBITOR_DISABLED: 'Cette commande est actuellement désactivée',
@@ -49,6 +51,18 @@ module.exports = class extends Language {
 			INHIBITOR_RUNIN: (types) => `Cette commande est uniquement disponible dans les salons ${types}`,
 			INHIBITOR_RUNIN_NONE: (name) => `La commande ${name} n'est pas configurée pour s'exécuter dans un salon.`,
 			COMMAND_EVAL_DESCRIPTION: 'Evalue du Javascript arbitraire. Reservé aux propriétaires du bot.',
+			COMMAND_EVAL_EXTENDEDHELP: [
+				'La commande eval évalue du code tel quel, toute erreur en résultant sera géré.',
+				'Elle utilise également les flags. Écrivez --silent, --depth=number ou --async pour personnaliser le résultat.',
+				'Le flag --silent la fera ne rien afficher.',
+				'Le flag --depth accèpte un nombre, par exemple, --depth=2, pour personnaliser la profondeur d\'util.inspect.',
+				'Le flag --async englobera le code dans une fonction async où vous pourrez profiter de l\'usage du await, à noter que si vous voulez que le code retourner quelque chose, vous aurez besoin d\'utiliser le mot-clef return',
+				'Le flag --showHidden autorisera l\'option showHidden d\'util.inspect.',
+				'Si le résultat est trop large, il l\'affichera dans un fichier, ou dans la console si le bot n\'a pas la permission ATTACH_FILES.'
+			].join('\n'),
+			COMMAND_EVAL_ERROR_HEADER: 'ERREUR',
+			COMMAND_EVAL_SENDFILE: 'Le résultat état trop large... le résultat a été envoyé dans un fichier.',
+			COMMAND_EVAL_SENDCONSOLE: 'Le résultat était trop long... le résultat a été affiché dans la console.',
 			COMMAND_UNLOAD: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} déchargé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
 			COMMAND_UNLOAD_DESCRIPTION: 'Décharge le composant.',
 			COMMAND_TRANSFER_ERROR: '❌ Ce fichier a déjà été transféré ou n\'a jamais existé.',
