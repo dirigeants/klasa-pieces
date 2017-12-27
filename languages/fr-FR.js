@@ -56,7 +56,7 @@ module.exports = class extends Language {
 				'Elle utilise également les flags. Écrivez --silent, --depth=number ou --async pour personnaliser le résultat.',
 				'Le flag --silent la fera ne rien afficher.',
 				'Le flag --depth accèpte un nombre, par exemple, --depth=2, pour personnaliser la profondeur d\'util.inspect.',
-				'Le flag --async englobera le code dans une fonction async où vous pourrez profiter de l\'usage du await, à noter que si vous voulez que le code retourner quelque chose, vous aurez besoin d\'utiliser le mot-clef return',  // eslint-disable-line max-len
+				'Le flag --async englobera le code dans une fonction async où vous pourrez profiter de l\'usage du await, à noter que si vous voulez que le code retourner quelque chose, vous aurez besoin d\'utiliser le mot-clef return', // eslint-disable-line max-len
 				'Le flag --showHidden autorisera l\'option showHidden d\'util.inspect.',
 				'Si le résultat est trop large, il l\'affichera dans un fichier, ou dans la console si le bot n\'a pas la permission ATTACH_FILES.'
 			].join('\n'),
