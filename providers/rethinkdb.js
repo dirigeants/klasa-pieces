@@ -117,7 +117,7 @@ module.exports = class extends Provider {
 	 * // As RethinkDB#updateValue can also work very similar to Gateway#updateMany, it also accepts an entire object with multiple values.
 	 * updateValue('339942739275677727', { prefix: 'k!', roles: { administrator: '339959033937264641' } });
 	 */
-	updateValue(table, path, newValue) {
+	async updateValue(table, path, newValue) {
 		// { channels: { modlog: '340713281972862976' } } | undefined
 		if (typeof path === 'object' && typeof newValue === 'undefined') {
 			return this.db.table(table).update(path).then(resolvePromise);
@@ -140,7 +140,7 @@ module.exports = class extends Provider {
 	 * @param {string} doc The object to remove or a path to update.
 	 * @returns {Promise<Object>}
 	 */
-	removeValue(table, doc) {
+	async removeValue(table, doc) {
 		// { channels: { modlog: true } }
 		if (typeof doc === 'object') {
 			return this.db.table(table).replace(this.db.row.without(doc)).then(resolvePromise);
