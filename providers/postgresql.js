@@ -304,15 +304,19 @@ module.exports = class PostgreSQL extends Provider {
 };
 
 /**
- * Accept any kind of input from two parameters.
- * @param {(string|string[]|{})} param1 The first parameter to validate.
- * @param {*} [param2] The second parameter to validate.
- * @returns {[[], []]}
- * @private
- */
+	 * Accept any kind of input from two parameters.
+	 * @param {(string|string[]|{})} param1 The first parameter to validate.
+	 * @param {*} [param2] The second parameter to validate.
+	 * @returns {[[], []]}
+	 * @private
+	 */
 function acceptArbitraryInput(param1, param2) {
-	if (typeof param1 === 'undefined' && typeof param2 === 'undefined') return [[], []];
-	if (typeof param1 === 'string' && typeof param2 !== 'undefined') return [[param1], [param2]];
+	if (typeof param1 === 'undefined' && typeof param2 === 'undefined') {
+		return [[], []];
+	}
+	if (typeof param1 === 'string' && typeof param2 !== 'undefined') {
+		return [[param1], [param2]];
+	}
 	if (Array.isArray(param1) && Array.isArray(param2)) {
 		if (param1.length !== param2.length) throw new TypeError(`The array lengths do not match: ${param1.length}-${param2.length}`);
 		if (param1.some(value => typeof value !== 'string')) throw new TypeError(`The array of keys must be an array of strings, but found a value that does not match.`);
@@ -327,12 +331,12 @@ function acceptArbitraryInput(param1, param2) {
 }
 
 /**
- * Get all entries from an object.
- * @param {Object} object The object to "flatify".
- * @param {[string[], any[]]} param1 The tuple of keys and values to check.
- * @param {string} path The current path.
- * @private
- */
+	 * Get all entries from an object.
+	 * @param {Object} object The object to "flatify".
+	 * @param {[string[], any[]]} param1 The tuple of keys and values to check.
+	 * @param {string} path The current path.
+	 * @private
+	 */
 function getEntriesFromObject(object, [keys, values], path) {
 	const objectKeys = Object.keys(object);
 	for (let i = 0; i < objectKeys.length; i++) {
@@ -348,10 +352,10 @@ function getEntriesFromObject(object, [keys, values], path) {
 }
 
 /**
- * @param {string} value The string to sanitize
- * @returns {string}
- * @private
- */
+	 * @param {string} value The string to sanitize
+	 * @returns {string}
+	 * @private
+	 */
 function sanitizeString(value) {
 	if (value.length === 0) {
 		throw new TypeError('%PostgreSQL.sanitizeString expects a string with a length bigger than 0.');
@@ -361,23 +365,29 @@ function sanitizeString(value) {
 }
 
 /**
- * @param {string} value The string to sanitize as a key
- * @returns {string}
- * @private
- */
+	 * @param {string} value The string to sanitize as a key
+	 * @returns {string}
+	 * @private
+	 */
 function sanitizeKeyName(value) {
-	if (typeof value !== 'string') { throw new TypeError(`%PostgreSQL.sanitizeString expects a string, got: ${typeof value}`); }
-	if (/`/.test(value)) { throw new TypeError(`Invalid input (${value}).`); }
-
-	return value;
+	if (typeof value !== 'string') {
+		throw new TypeError(`%PostgreSQL.sanitizeString expects a string, got: ${typeof value}`);
+	}
+	if (/`|"/.test(value)) {
+		throw new TypeError(`Invalid input (${value}).`);
+	}
+	if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+		return value;
+	}
+	return `"${value}"`;
 }
 
 /**
- * @param {number} [min] The minimum value
- * @param {number} [max] The maximum value
- * @returns {string}
- * @private
- */
+	 * @param {number} [min] The minimum value
+	 * @param {number} [max] The maximum value
+	 * @returns {string}
+	 * @private
+	 */
 function parseRange(min, max) {
 	// Min value validation
 	if (typeof min === 'undefined') return '';
