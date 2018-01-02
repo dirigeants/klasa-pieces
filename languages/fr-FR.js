@@ -19,6 +19,7 @@ module.exports = class extends Language {
 			RESOLVER_INVALID_USER: (name) => `${name} doit être une mention ou un identifiant d'utilisateur valide.`,
 			RESOLVER_INVALID_MEMBER: (name) => `${name} doit être une mention ou un identifiant d'utilisateur valide.`,
 			RESOLVER_INVALID_CHANNEL: (name) => `${name} doit être un tag ou un identifiant de salon valide.`,
+			RESOLVER_INVALID_EMOJI: (name) => `${name} doit être un tag d'émoji personnalisé ou un identifiant d'émoji valide.`,
 			RESOLVER_INVALID_GUILD: (name) => `${name} doit être un identifiant de serveur valide.`,
 			RESOLVER_INVALID_ROLE: (name) => `${name} doit être une mention ou un identifiant de rôle.`,
 			RESOLVER_INVALID_LITERAL: (name) => `Votre option ne correspond pas à la seule possibilité : ${name}`,
@@ -38,6 +39,7 @@ module.exports = class extends Language {
 			COMMANDMESSAGE_NOMATCH: (possibles) => `Votre option ne correspond à aucune des possibilités : (${possibles})`,
 			// eslint-disable-next-line max-len
 			MONITOR_COMMAND_HANDLER_REPROMPT: (tag, error, time) => `${tag} | **${error}** | Vous avez **${time}** secondes pour répondre à ce message avec un argument valide. Tapez **"ABORT"** pour annuler ce message.`,
+			MONITOR_COMMAND_HANDLER_REPEATING_REPROMPT: (tag, name, time) => `${tag} | **${name}** est un argument répétitif | Vous avez **${time}** secondes pour répondre à ce message avec des arguments additionnels valides. Saisissez **"CANCEL"** pour annuler.`, // eslint-disable-line max-len
 			MONITOR_COMMAND_HANDLER_ABORTED: 'Annulé',
 			INHIBITOR_COOLDOWN: (remaining) => `Vous venez d'utiliser cette commande. Vous pourrez à nouveau utiliser cette commande dans ${remaining} secondes.`,
 			INHIBITOR_DISABLED: 'Cette commande est actuellement désactivée',
@@ -48,14 +50,32 @@ module.exports = class extends Language {
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `Votre serveur n'a pas le${settings.length > 1 ? 's' : ''} paramètre${settings.length > 1 ? 's' : ''} **${settings.join(', ')}** et ne peux pas s'exécuter.`,
 			INHIBITOR_RUNIN: (types) => `Cette commande est uniquement disponible dans les salons ${types}`,
 			INHIBITOR_RUNIN_NONE: (name) => `La commande ${name} n'est pas configurée pour s'exécuter dans un salon.`,
+			COMMAND_EVAL_DESCRIPTION: 'Evalue du Javascript arbitraire. Reservé aux propriétaires du bot.',
+			COMMAND_EVAL_EXTENDEDHELP: [
+				'La commande eval évalue du code tel quel, toute erreur en résultant sera géré.',
+				'Elle utilise également les flags. Écrivez --silent, --depth=number ou --async pour personnaliser le résultat.',
+				'Le flag --silent la fera ne rien afficher.',
+				'Le flag --depth accèpte un nombre, par exemple, --depth=2, pour personnaliser la profondeur d\'util.inspect.',
+				'Le flag --async englobera le code dans une fonction async où vous pourrez profiter de l\'usage du await, à noter que si vous voulez que le code retourner quelque chose, vous aurez besoin d\'utiliser le mot-clef return', // eslint-disable-line max-len
+				'Le flag --showHidden autorisera l\'option showHidden d\'util.inspect.',
+				'Si le résultat est trop large, il l\'affichera dans un fichier, ou dans la console si le bot n\'a pas la permission ATTACH_FILES.'
+			].join('\n'),
+			COMMAND_EVAL_ERROR_HEADER: 'ERREUR',
+			COMMAND_EVAL_SENDFILE: 'Le résultat état trop large... le résultat a été envoyé dans un fichier.',
+			COMMAND_EVAL_SENDCONSOLE: 'Le résultat était trop long... le résultat a été affiché dans la console.',
 			COMMAND_UNLOAD: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} déchargé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
+			COMMAND_UNLOAD_DESCRIPTION: 'Décharge le composant.',
 			COMMAND_TRANSFER_ERROR: '❌ Ce fichier a déjà été transféré ou n\'a jamais existé.',
 			COMMAND_TRANSFER_SUCCESS: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} transféré${this.isFeminine(type) ? 'e' : ''} avec succès : ${name}`,
 			COMMAND_TRANSFER_FAILED: (type, name) => `Le transfert de ${this.piece(type)} : ${name} au Client a échoué. Veuillez vérifier votre Console.`,
+			COMMAND_TRANSFER_DESCRIPTION: 'Transfert un composant du noyau dans son dossier respectif',
 			COMMAND_RELOAD: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} rechargé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
 			COMMAND_RELOAD_ALL: (type) => `✅ Tou${this.isFeminine(type) ? 'te' : ''}s les ${this.piece(type)} ont été rechargé${this.isFeminine(type) ? 'e' : ''}s.`,
+			COMMAND_RELOAD_DESCRIPTION: 'Recharge un composant, ou tous les composants d\'un cache.',
 			COMMAND_REBOOT: 'Redémarrage...',
+			COMMAND_REBOOT_DESCRIPTION: 'Redémarre le bot.',
 			COMMAND_PING: 'Ping ?',
+			COMMAND_PING_DESCRIPTION: 'Exécute un test de connexion à Discord.',
 			COMMAND_PINGPONG: (diff, ping) => `Pong ! (L'aller-retour a pris : ${diff}ms. Pulsation : ${ping}ms.)`,
 			COMMAND_INVITE_SELFBOT: 'Pourquoi auriez-vous besoin d\'un lien d\'invitation pour un selfbot...',
 			COMMAND_INVITE: (client) => [
@@ -68,6 +88,7 @@ module.exports = class extends Language {
 				].join(' ')),
 				'Veuillez soumettre un problème à <https://github.com/dirigeants/klasa> si vous trouvez un bug.'
 			],
+			COMMAND_INVITE_DESCRIPTION: 'Affiche le lien d\'invitation du bot.',
 			COMMAND_INFO: [
 				"Klasa est un framework 'plug-and-play' qui étend la librairie Discord.js.",
 				'Une grande partie du code est modularisée, ce qui permet aux développeurs de modifier Klasa pour répondre à leurs besoins.',
@@ -86,6 +107,7 @@ module.exports = class extends Language {
 				'Nous aspirons à être un framework personnalisable à 100% pour répondre à tous les publics. Nous faisons de fréquentes mises-à-jour et corrections de bugs.',
 				'Si vous vous intéressez à nous, consultez notre site https://klasa.js.org'
 			],
+			COMMAND_INFO_DESCRIPTION: 'Fournit des informations à propos du bot.',
 			COMMAND_HELP_DESCRIPTION: 'Affiche l\'aide pour une commande.',
 			COMMAND_HELP_NO_EXTENDED: 'Pas d\'aide étendue disponible.',
 			COMMAND_HELP_DM: '📥 | Les commandes ont été envoyées dans vos MPs.',
@@ -94,7 +116,9 @@ module.exports = class extends Language {
 			COMMAND_HELP_USAGE: (usage) => `utilisation :: ${usage}`,
 			COMMAND_HELP_EXTENDED: 'Aide étendue ::',
 			COMMAND_ENABLE: (type, name) => `+ ${util.toTitleCase(this.piece(type))} activé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
+			COMMAND_ENABLE_DESCRIPTION: 'Réactive ou active temporairement un(e) commande/inhibiteur/moniteur/finaliseur/événement. L\'état par défaut sera rétabli au redémarrage.',
 			COMMAND_DISABLE: (type, name) => `+ ${util.toTitleCase(this.piece(type))} désactivé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
+			COMMAND_DISABLE_DESCRIPTION: 'Redésactive ou désactive temporairement un(e) commande/inhibiteur/moniteur/finaliseur/événement. L\'état par défaut sera rétabli au redémarrage.',
 			COMMAND_DISABLE_WARN: 'Vous ne voulez probablement pas désactiver cela, car vous ne serez plus capable d\'exécuter une commande pour le réactiver',
 			COMMAND_CONF_NOKEY: 'Vous devez fournir une clef',
 			COMMAND_CONF_NOVALUE: 'Vous devez fournir une valeur',
@@ -105,7 +129,24 @@ module.exports = class extends Language {
 			COMMAND_CONF_REMOVE: (value, key) => `La valeur \`${value}\` a été otée avec succès de la clef : **${key}**`,
 			COMMAND_CONF_GET_NOEXT: (key) => `La clef **${key}** ne semble pas exister.`,
 			COMMAND_CONF_GET: (key, value) => `La valeur pour la clef **${key}** est : \`${value}\``,
-			COMMAND_CONF_RESET: (key, response) => `La clef **${key}** a été réinitialisée à : \`${response}\``
+			COMMAND_CONF_RESET: (key, response) => `La clef **${key}** a été réinitialisée à : \`${response}\``,
+			COMMAND_CONF_SERVER_DESCRIPTION: 'Établit une configuration par serveur.',
+			COMMAND_CONF_SERVER: (key, list) => `**Configuration Serveur${key}**\n${list}`,
+			COMMAND_CONF_USER_DESCRIPTION: 'Établit une configuration par utilisateur.',
+			COMMAND_CONF_USER: (key, list) => `**Configuration Utilisateur${key}**\n${list}`,
+			COMMAND_STATS: (memUsage, uptime, users, servers, channels, klasaVersion, discordVersion, processVersion) => [
+				'= STATISTIQUES =',
+				'',
+				`• Utilisation Mem :: ${memUsage} Mo`,
+				`• Disponibilité   :: ${uptime}`,
+				`• Utilisateurs    :: ${users}`,
+				`• Serveurs        :: ${servers}`,
+				`• Salons          :: ${channels}`,
+				`• Klasa           :: v${klasaVersion}`,
+				`• Discord.js      :: v${discordVersion}`,
+				`• Node.js         :: ${processVersion}`
+			],
+			COMMAND_STATS_DESCRIPTION: 'Fournit des détails et statistiques à propos du bot.'
 		};
 	}
 
