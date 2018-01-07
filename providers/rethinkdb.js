@@ -87,7 +87,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
-		return this.get(table, id).then(data => !!data).catch(() => false);
+		return this.get(table, id).then(Boolean).catch(() => false);
 	}
 
 	/**
