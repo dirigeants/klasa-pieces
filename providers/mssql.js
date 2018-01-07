@@ -18,9 +18,7 @@ module.exports = class extends Provider {
 			db: 'klasa',
 			user: 'database-user',
 			password: 'database-password',
-			options: {
-				encrypt: false
-			}
+			options: { encrypt: false }
 		}, this.client.options.providers.mssql);
 		this.pool = new mssql.ConnectionPool({
 			user: connection.user,
