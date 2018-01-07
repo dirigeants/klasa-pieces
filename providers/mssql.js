@@ -28,7 +28,7 @@ module.exports = class extends Provider {
 			server: connection.host,
 			database: connection.database,
 			// If you're on Windows Azure, you will need this enabled:
-			options: { encrypt: connection.options.encrypt }
+			options: connection.options
 		});
 
 		await this.pool.connect();
