@@ -13,15 +13,27 @@ module.exports = class PostgreSQL extends Provider {
 	}
 
 	async init() {
-		this.db = new Pool({
+		const connection = util.mergeDefault({
 			host: 'localhost',
 			port: 5432,
 			user: 'database-user',
 			password: 'database-password',
-			database: 'Klasa',
-			max: 20,
-			idleTimeoutMillis: 30000,
-			connectionTimeoutMillis: 2000
+			db: 'klasa',
+			options: {
+				max: 20,
+				idleTimeoutMillis: 30000,
+				connectionTimeoutMillis: 2000
+			}
+		}, this.client.options.providers.postgresql);
+		this.db = new Pool({
+			host: connection.host,
+			port: connection.port,
+			user: connection.user,
+			password: connection.password,
+			database: connection.db,
+			max: connection.options.max,
+			idleTimeoutMillis: connection.options.idleTimeoutMillis,
+			connectionTimeoutMillis: connection.options.connectionTimeoutMillis
 		});
 
 		this.db.on('error', err => this.client.emit('error', err));
