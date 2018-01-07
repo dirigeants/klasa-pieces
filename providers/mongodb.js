@@ -1,4 +1,4 @@
-const { Provider, util: { mergeDefault} } = require('klasa');
+const { Provider, util: { mergeDefault } } = require('klasa');
 
 const Mongo = require('mongodb').MongoClient;
 
@@ -11,11 +11,11 @@ module.exports = class extends Provider {
 
 	async init() {
 		const connection = mergeDefault(this.client.options.providers.mongodb, {
-			host: "localhost",
+			host: 'localhost',
 			port: 27017,
-			db: "klasa"
+			db: 'klasa'
 		});
-		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connectino.port}/`, { auth: { user: connection.user, password: connection.password } });
+		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, { auth: { user: connection.user, password: connection.password } });
 		this.db = mongoClient.db(connection.db);
 	}
 
