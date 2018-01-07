@@ -1,4 +1,4 @@
-const { Provider } = require('klasa');
+const { Provider, util: { mergeDefault} } = require('klasa');
 
 const Mongo = require('mongodb').MongoClient;
 
@@ -10,7 +10,13 @@ module.exports = class extends Provider {
 	}
 
 	async init() {
-		this.db = await Mongo.connect(`mongodb://localhost:27017/Klasa`);
+		const connection = mergeDefault(this.client.options.providers.mongodb, {
+			host: "localhost",
+			port: 27017,
+			db: "klasa"
+		});
+		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connectino.port}/`, { auth: { user: connection.user, password: connection.password } });
+		this.db = mongoClient.db(connection.db);
 	}
 
 	/* Table methods */
@@ -25,7 +31,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.getCollectionNames().then(collections => collections.includes(table));
+		return this.db.listCollections().toArray().then(collections => collections.some(col => col.name === table));
 	}
 
 	/**
