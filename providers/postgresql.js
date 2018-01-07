@@ -25,16 +25,13 @@ module.exports = class PostgreSQL extends Provider {
 				connectionTimeoutMillis: 2000
 			}
 		}, this.client.options.providers.postgresql);
-		this.db = new Pool({
+		this.db = new Pool(Object.assign({
 			host: connection.host,
 			port: connection.port,
 			user: connection.user,
 			password: connection.password,
-			database: connection.db,
-			max: connection.options.max,
-			idleTimeoutMillis: connection.options.idleTimeoutMillis,
-			connectionTimeoutMillis: connection.options.connectionTimeoutMillis
-		});
+			database: connection.db
+		}, connection.options));
 
 		this.db.on('error', err => this.client.emit('error', err));
 		await this.db.connect();
