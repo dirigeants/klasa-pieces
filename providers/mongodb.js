@@ -25,8 +25,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.getCollectionNames()
-			.then(collections => collections.includes(table));
+		return this.db.getCollectionNames().then(collections => collections.includes(table));
 	}
 
 	/**
@@ -101,9 +100,8 @@ module.exports = class extends Provider {
 	 * @param {string} table Name of the Collection
 	 * @returns {Promise<Object>}
 	 */
-	async getRandom(table) {
-		const results = await this.getAll(table);
-		return results[Math.floor(Math.random() * results.length)];
+	getRandom(table) {
+		return this.getAll(table).then(results => results[Math.floor(Math.random() * results.length)]);
 	}
 
 	/**
