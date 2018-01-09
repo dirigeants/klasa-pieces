@@ -16,8 +16,6 @@ module.exports = class PostgreSQL extends Provider {
 		const connection = util.mergeDefault({
 			host: 'localhost',
 			port: 5432,
-			user: 'database-user',
-			password: 'database-password',
 			db: 'klasa',
 			options: {
 				max: 20,
