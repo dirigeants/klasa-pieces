@@ -5,7 +5,7 @@ module.exports = class extends Provider {
 
 	constructor(...args) {
 		super(...args);
-		this.db = rethink(this.client.options.provider.rethinkdb || { db: 'test' });
+		this.db = rethink(this.client.options.providers.rethinkdb || { db: 'test' });
 	}
 
 	/* Table methods */
@@ -87,7 +87,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
-		return this.get(table, id).then(data => !!data).catch(() => false);
+		return this.get(table, id).then(Boolean).catch(() => false);
 	}
 
 	/**

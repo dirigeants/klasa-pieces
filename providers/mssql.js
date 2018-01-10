@@ -13,13 +13,20 @@ module.exports = class extends Provider {
 	}
 
 	async init() {
-		this.pool = new mssql.ConnectionPool({
+		const connection = util.mergeDefault({
+			host: 'localhost',
+			db: 'klasa',
 			user: 'database-user',
 			password: 'database-password',
-			server: 'localhost',
-			database: 'klasa',
-			// If you're on Windows Azure, you will need this enabled:
 			options: { encrypt: false }
+		}, this.client.options.providers.mssql);
+		this.pool = new mssql.ConnectionPool({
+			user: connection.user,
+			password: connection.password,
+			server: connection.host,
+			database: connection.database,
+			// If you're on Windows Azure, you will need this enabled:
+			options: connection.options
 		});
 
 		await this.pool.connect();

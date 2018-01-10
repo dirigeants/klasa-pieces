@@ -1,4 +1,4 @@
-const { Provider } = require('klasa');
+const { Provider, util: { mergeDefault } } = require('klasa');
 
 const Mongo = require('mongodb').MongoClient;
 
@@ -10,7 +10,14 @@ module.exports = class extends Provider {
 	}
 
 	async init() {
-		this.db = await Mongo.connect(`mongodb://localhost:27017/Klasa`);
+		const connection = mergeDefault({
+			host: 'localhost',
+			port: 27017,
+			db: 'klasa',
+			options: {}
+		}, this.client.options.providers.mongodb);
+		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, Object.assign(connection.options, { auth: { user: connection.user, password: connection.password } }));
+		this.db = mongoClient.db(connection.db);
 	}
 
 	/* Table methods */
@@ -25,8 +32,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.getCollectionNames()
-			.then(collections => collections.includes(table));
+		return this.db.listCollections().toArray().then(collections => collections.some(col => col.name === table));
 	}
 
 	/**
@@ -93,7 +99,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
-		return this.get(table, id).then(res => !!res);
+		return this.get(table, id).then(Boolean);
 	}
 
 	/**
@@ -101,9 +107,8 @@ module.exports = class extends Provider {
 	 * @param {string} table Name of the Collection
 	 * @returns {Promise<Object>}
 	 */
-	async getRandom(table) {
-		const results = await this.getAll(table);
-		return results[Math.floor(Math.random() * results.length)];
+	getRandom(table) {
+		return this.getAll(table).then(results => results[Math.floor(Math.random() * results.length)]);
 	}
 
 	/**

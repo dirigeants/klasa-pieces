@@ -1,4 +1,4 @@
-const { Provider } = require('klasa');
+const { Provider, util: { mergeDefault } } = require('klasa');
 const mysql = require('mysql2/promise');
 
 module.exports = class MySQL extends Provider {
@@ -14,12 +14,19 @@ module.exports = class MySQL extends Provider {
 	}
 
 	async init() {
-		this.db = await mysql.createConnection(this.client.config.provider.mysql || {
+		const connection = mergeDefault({
 			host: 'localhost',
-			port: '3306',
+			port: 3306,
 			user: 'root',
 			password: '',
-			database: 'Klasa'
+			db: 'klasa'
+		}, this.client.options.providers.mysql);
+		this.db = await mysql.createConnection({
+			host: connection.host,
+			port: connection.port.toString(),
+			user: connection.user,
+			password: connection.password,
+			database: connection.db
 		});
 		this.heartBeatInterval = setInterval(() => {
 			this.db.query('SELECT 1=1')
