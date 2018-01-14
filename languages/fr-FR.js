@@ -28,6 +28,9 @@ module.exports = class extends Language {
 			RESOLVER_INVALID_FLOAT: (name) => `${name} doit être un nombre valide.`,
 			RESOLVER_INVALID_REGEX_MATCH: (name, pattern) => `${name} doit respecter ce motif regex \`${pattern}\`.`,
 			RESOLVER_INVALID_URL: (name) => `${name} doit être une url valide.`,
+			RESOLVER_INVALID_DATE: (name) => `${name} doit être une date valide.`,
+			RESOLVER_INVALID_DURATION: (name) => `${name} doit être une chaîne de caractères de durée valide.`,
+			RESOLVER_INVALID_TIME: (name) => `${name} doit être une chaîne de caractères de durée ou de date valide.`,
 			RESOLVER_STRING_SUFFIX: ' caractères',
 			RESOLVER_MINMAX_EXACTLY: (name, min, suffix) => `${name} doit être exactement ${min}${suffix}.`,
 			RESOLVER_MINMAX_BOTH: (name, min, max, suffix) => `${name} doit être entre ${min} et ${max}${suffix}.`,
@@ -50,6 +53,13 @@ module.exports = class extends Language {
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `Votre serveur n'a pas le${settings.length > 1 ? 's' : ''} paramètre${settings.length > 1 ? 's' : ''} **${settings.join(', ')}** et ne peux pas s'exécuter.`,
 			INHIBITOR_RUNIN: (types) => `Cette commande est uniquement disponible dans les salons ${types}`,
 			INHIBITOR_RUNIN_NONE: (name) => `La commande ${name} n'est pas configurée pour s'exécuter dans un salon.`,
+			COMMAND_BLACKLIST_DESCRIPTION: 'Ajoute ou retire des utilisateurs et des guildes sur la liste noire du bot.',
+			COMMAND_BLACKLIST_SUCCESS: (usersAdded, usersRemoved, guildsAdded, guildsRemoved) => [
+				usersAdded.length ? `**Utilisateurs Ajoutés**\n${util.codeBlock('', usersAdded.join(', '))}` : '',
+				usersRemoved.length ? `**Utilisateurs Retirés**\n${util.codeBlock('', usersRemoved.join(', '))}` : '',
+				guildsAdded.length ? `**Guildes Ajoutées**\n${util.codeBlock('', guildsAdded.join(', '))}` : '',
+				guildsRemoved.length ? `**Guildes Retirées**\n${util.codeBlock('', guildsRemoved.join(', '))}` : ''
+			].filter(val => val !== '').join('\n'),
 			COMMAND_EVAL_DESCRIPTION: 'Evalue du Javascript arbitraire. Reservé aux propriétaires du bot.',
 			COMMAND_EVAL_EXTENDEDHELP: [
 				'La commande eval évalue du code tel quel, toute erreur en résultant sera géré.',
@@ -60,9 +70,10 @@ module.exports = class extends Language {
 				'Le flag --showHidden autorisera l\'option showHidden d\'util.inspect.',
 				'Si le résultat est trop large, il l\'affichera dans un fichier, ou dans la console si le bot n\'a pas la permission ATTACH_FILES.'
 			].join('\n'),
-			COMMAND_EVAL_ERROR_HEADER: 'ERREUR',
-			COMMAND_EVAL_SENDFILE: 'Le résultat état trop large... le résultat a été envoyé dans un fichier.',
-			COMMAND_EVAL_SENDCONSOLE: 'Le résultat était trop long... le résultat a été affiché dans la console.',
+			COMMAND_EVAL_ERROR: (time, output, type) => `**Erreur**:${output}\n**Type**:${type}\n${time}`,
+			COMMAND_EVAL_OUTPUT: (time, output, type) => `**Résultat**:${output}\n**Type**:${type}\n${time}`,
+			COMMAND_EVAL_SENDFILE: (time, type) => `Le résultat état trop long... le résultat a été envoyé dans un fichier.\n**Type**:${type}\n${time}`,
+			COMMAND_EVAL_SENDCONSOLE: (time, type) => `Le résultat était trop long... le résultat a été affiché dans la console.\n**Type**:${type}\n${time}`,
 			COMMAND_UNLOAD: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} déchargé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
 			COMMAND_UNLOAD_DESCRIPTION: 'Décharge le composant.',
 			COMMAND_TRANSFER_ERROR: '❌ Ce fichier a déjà été transféré ou n\'a jamais existé.',
@@ -134,7 +145,7 @@ module.exports = class extends Language {
 			COMMAND_CONF_SERVER: (key, list) => `**Configuration Serveur${key}**\n${list}`,
 			COMMAND_CONF_USER_DESCRIPTION: 'Établit une configuration par utilisateur.',
 			COMMAND_CONF_USER: (key, list) => `**Configuration Utilisateur${key}**\n${list}`,
-			COMMAND_STATS: (memUsage, uptime, users, servers, channels, klasaVersion, discordVersion, processVersion) => [
+			COMMAND_STATS: (memUsage, uptime, users, servers, channels, klasaVersion, discordVersion, processVersion, msg) => [
 				'= STATISTIQUES =',
 				'',
 				`• Utilisation Mem :: ${memUsage} Mo`,
@@ -144,7 +155,8 @@ module.exports = class extends Language {
 				`• Salons          :: ${channels}`,
 				`• Klasa           :: v${klasaVersion}`,
 				`• Discord.js      :: v${discordVersion}`,
-				`• Node.js         :: ${processVersion}`
+				`• Node.js         :: ${processVersion}`,
+				this.client.options.shardCount ? `• Shard           :: ${((msg.guild ? msg.guild.shardID : msg.channel.shardID) || this.client.options.shardId) + 1} / ${this.client.options.shardCount}` : ''
 			],
 			COMMAND_STATS_DESCRIPTION: 'Fournit des détails et statistiques à propos du bot.'
 		};
