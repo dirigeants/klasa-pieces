@@ -176,7 +176,7 @@ module.exports = class extends Provider {
 	 * @param {Object} doc Document Object to insert
 	 * @returns {Promise}
 	 */
-	create(table, id, doc) {
+	create(table, id, doc = {}) {
 		return this.db.collection(table).insertOne(Object.assign(doc, resolveQuery(id)));
 	}
 
