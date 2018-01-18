@@ -1,4 +1,4 @@
-const { Command, util: { codeBlock } } = require('klasa');
+onst { Command, util: { codeBlock } } = require('klasa');
 
 module.exports = class extends Command {
 
@@ -14,33 +14,32 @@ module.exports = class extends Command {
 	async run(msg, [when, ...text]) {
 		if (msg.flags.list) {
 			const reminders = this.client.schedule.tasks.filter(task => task.taskName === 'reminder' && task.data.user === msg.author.id);
-			if (reminders.length === 0) throw 'You have no pending reminders currently.';
+			if (!reminders.length) throw 'You have no pending reminders currently.';
 
-			const send = [];
-			for (let i = 0; i < reminders.length; i++) {
-				send.push(`[${i + 1}] ${reminders[i].id} :: ${reminders[i].data.text || 'No text'}`);
-			}
+			const send = reminders.map((reminder, i) => `[${i + 1}] ${reminder.id} :: ${reminder.data.text ? reminder.data.text.substr(0, 15) : 'No text'}`);
 
 			return msg.send(`**Your reminders**: ${codeBlock('asciidoc', send.join('\n'))}`);
 		}
 
 		if (msg.flags.delete) {
-			return this.client.schedule.delete(msg.flags.delete)
-				.then(() => msg.send('Succesfully removed reminder.'))
-				.catch(() => msg.send('This reminder ID does not exist.'));
+			const toDelete = this.client.schedule.get(msg.flags.delete);
+			if (!toDelete) throw 'This reminder ID does not exist.';
+			if (toDelete.data.user !== msg.author.id) throw 'You can only delete your own reminders.';
+			await this.client.schedule.delete(msg.flags.delete);
+			return msg.send('Succesfully deleted the reminder.');
 		}
 
 		if (msg.flags.clear) {
-			const promises = [];
 			const reminders = this.client.schedule.tasks.filter(task => task.taskName === 'reminder' && task.data.user === msg.author.id);
-			if (reminders.length === 0) throw 'You have no reminders.';
-			for (const reminder of reminders) promises.push(this.client.schedule.delete(reminder.id));
+			if (!reminders.length) throw 'You have no reminders.';
 
-			return Promise.all(promises)
-				.then(() => msg.send(`Deleted ${reminders.length} reminders. ðŸ‘Œ`));
+			await Promise.all(reminders.map(reminder => reminder.delete()));
+			return msg.send(`Deleted ${reminders.length} reminders. 👌`);
 		}
 
-		if (!when || text.length === 0) throw 'You must specify a time and reminder.';
+		if (!when || !text.length) throw 'You must specify a time and reminder.';
+		if (when.getTime() - Date.now() <= 60000) throw 'Reminders at least have to be one minute long.';
+
 		const reminder = await this.client.schedule.create('reminder', when, {
 			data: {
 				channel: msg.channel.id,
