@@ -1,4 +1,4 @@
-onst { Command, util: { codeBlock } } = require('klasa');
+const { Command, util: { codeBlock } } = require('klasa');
 
 module.exports = class extends Command {
 
