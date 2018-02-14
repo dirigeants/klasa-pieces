@@ -7,7 +7,7 @@ module.exports = class extends Inhibitor {
 	}
 
 	async run(msg) {
-		if (msg.channel.type === 'text' && msg.guild.configs.deleteCommand === true) return msg.delete();
+		if (msg.guild && msg.guild.configs.deleteCommand) return msg.delete();
 		return null;
 	}
 

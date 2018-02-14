@@ -1,3 +1,10 @@
+/**
+ * ###################################
+ * #             OUTDATED            #
+ * # THIS PROVIDER IS NOT UP-TO-DATE #
+ * ###################################
+ */
+
 const { Provider } = require('klasa');
 const { resolve } = require('path');
 const db = require('sqlite');

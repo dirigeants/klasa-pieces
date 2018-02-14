@@ -1,3 +1,10 @@
+/**
+ * #####################################
+ * #              UNTESTED             #
+ * # THIS PROVIDER MAY OR MAY NOT WORK #
+ * #####################################
+ */
+
 const { Provider, util } = require('klasa');
 const mssql = require('mssql');
 

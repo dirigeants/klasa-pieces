@@ -16,8 +16,8 @@ module.exports = class extends Extendable {
 		super(...args, ['ArgResolver'], { klasa: true });
 	}
 
-	async extend(arg, currentUsage, possible, repeat, msg) {
-		if (!msg.guild) return this.channel(arg, currentUsage, possible, repeat, msg);
+	async extend(arg, possible, msg) {
+		if (!msg.guild) return this.channel(arg, possible, msg);
 		const resChannel = resolveChannel(arg, msg.guild);
 		if (resChannel) return resChannel;
 
@@ -37,9 +37,7 @@ module.exports = class extends Extendable {
 		}
 
 		switch (querySearch.length) {
-			case 0:
-				if (currentUsage.type === 'optional' && !repeat) return null;
-				throw `${currentUsage.possibles[possible].name} Must be a valid name, id or channel mention`;
+			case 0: throw `${possible.name} Must be a valid name, id or channel mention`;
 			case 1: return querySearch[0];
 			default: throw `Found multiple matches: \`${querySearch.map(channel => channel.name).join('`, `')}\``;
 		}
