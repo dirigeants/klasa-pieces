@@ -16,7 +16,7 @@ module.exports = class extends Command {
 			.then(data => JSON.parse(data.text));
 
 		const definition = this.getDefinition(search, body, --index);
-		return msg.send(definition);
+		return msg.channel.send(/*search, */definition/*, index*/);
 	}
 
 	getDefinition(search, body, index) {
@@ -31,6 +31,9 @@ module.exports = class extends Command {
 			`**Word:** ${search}`,
 			`\n**Definition:** ${++index} out of ${body.list.length}\n_${wdef}_`,
 			`\n**Example:**\n${result.example}`,
+      `\n**${result.thumbs_up}** :thumbsup: **| ${result.thumbs_down}** :thumbsdown:`,
+      `\n*By ${result.author}*`,
+      `\n**Tags**: ${body.tags.join(", ")}`,
 			`<${result.permalink}>`
 		].join('\n');
 	}
