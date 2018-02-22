@@ -16,7 +16,7 @@ module.exports = class extends Command {
 			.then(data => JSON.parse(data.text));
 
 		const definition = this.getDefinition(search, body, --index);
-		return msg.channel.send(/*search, */definition/*, index*/);
+		return msg.channel.send(definition);
 	}
 
 	getDefinition(search, body, index) {
