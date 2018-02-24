@@ -76,6 +76,7 @@ module.exports = class extends Language {
 			COMMAND_EVAL_SENDCONSOLE: (time, type) => `La salida era demasiado largo... enviado el resultado a la consola.\n**Tipo**:${type}\n${time}`,
 			COMMAD_UNLOAD: (type, name) => `✅ Descargado la pieza tipo ${type}: ${name}`,
 			COMMAND_UNLOAD_DESCRIPTION: 'Descarga una pieza de Klasa.',
+			COMMAND_UNLOAD: (type, name) => `✅ Descargado la pieza tipo ${type}: ${name}`,
 			COMMAND_TRANSFER_ERROR: '❌ El archivo ha sido transferido o nunca existió.',
 			COMMAND_TRANSFER_SUCCESS: (type, name) => `✅ Transferido la pieza tipo ${type}: ${name} con éxito.`,
 			COMMAND_TRANSFER_FAILED: (type, name) => `La transferencia de la pieza tipo ${type}: ${name} al Cliente ha fallado. Por favor, revisa su consola.`,

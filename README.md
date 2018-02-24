@@ -22,16 +22,17 @@ Pieces can include:
 
 Check out the documentation:
 
-- **[Getting Started](https://klasa.js.org/tutorial-GettingStarted.html)**
+- **[Getting Started](https://klasa.js.org/#/docs/main/master/Getting%20Started/GettingStarted)**
 
-- **[Creating Commands](https://klasa.js.org/tutorial-CreatingCommands.html)**
-- **[Creating Events](https://klasa.js.org/tutorial-CreatingEvents.html)**
-- **[Creating Extendables](https://klasa.js.org/tutorial-CreatingExtendables.html)**
-- **[Creating Finalizers](https://klasa.js.org/tutorial-CreatingFinalizers.html)**
-- **[Creating Inhibitors](https://klasa.js.org/tutorial-CreatingInhibitors.html)**
-- **[Creating Languages](https://klasa.js.org/tutorial-CreatingLanguages.html)**
-- **[Creating Monitors](https://klasa.js.org/tutorial-CreatingMonitors.html)**
-- **[Creating Providers](https://klasa.js.org/tutorial-CreatingProviders.html)**
+- **[Creating Commands](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingCommands)**
+- **[Creating Events](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingEvents)**
+- **[Creating Extendables](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingExtendables)**
+- **[Creating Finalizers](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingFinalizers)**
+- **[Creating Inhibitors](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingInhibitors)**
+- **[Creating Languages](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingLanguages)**
+- **[Creating Monitors](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingMonitors)**
+- **[Creating Providers](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingProviders)**
+- **[Creating Tasks](https://klasa.js.org/#/docs/main/master/Piece%20Basics/CreatingTasks)**
 
 To submit your own pieces for approval (quick steps):
 
