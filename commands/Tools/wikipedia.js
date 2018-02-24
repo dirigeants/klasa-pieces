@@ -12,7 +12,7 @@ module.exports = class extends Command {
   }
 
   async run(msg, [query]) {
-    await snekfetch
+    snekfetch
       .get(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`)
       .then(r => {
         const article = r.body;
