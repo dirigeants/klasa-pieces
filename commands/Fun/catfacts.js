@@ -11,8 +11,8 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		return snekfetch.get('https://catfact.ninja/fact')
-			.then(res => msg.send(`📢 **Catfact:** *${res.body.fact}*`));
+		const { body } = await snekfetch.get('https://catfact.ninja/fact');
+		return msg.send(`📢 **Catfact:** *${body.fact}*`);
 	}
 
 };

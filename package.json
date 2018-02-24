@@ -9,10 +9,10 @@
 		"type": "git",
 		"url": "git+https://github.com/dirigeants/klasa-pieces.git"
 	},
-	"license": "ISC",
+	"license": "MIT",
 	"homepage": "https://github.com/dirigeants/klasa-pieces#readme",
 	"devDependencies": {
-		"eslint": "^4.3.0",
-		"klasa": "^0.3.0"
+		"eslint": "^4.13.0",
+		"eslint-config-klasa": "github:dirigeants/klasa-lint"
 	}
 }

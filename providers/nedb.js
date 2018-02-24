@@ -9,7 +9,7 @@ module.exports = class extends Provider {
 
 	constructor(...args) {
 		super(...args, { description: 'Allows you to use NeDB functionality throught Klasa' });
-		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'nedbnedb');
+		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'nedb');
 		this.dataStores = new this.client.methods.Collection();
 	}
 
@@ -63,9 +63,9 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	async getAll(table) {
-		const data = await this.dataStores.get(table).findAsync({});
-		for (let i = 0; i < data.length; i++) { delete data[i]._id; }
-		return data;
+		const entries = await this.dataStores.get(table).findAsync({});
+		for (const entry of entries) delete entry._id;
+		return entries;
 	}
 
 	/**

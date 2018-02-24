@@ -1,4 +1,4 @@
-const { Command, util } = require('klasa');
+const { Command } = require('klasa');
 
 module.exports = class extends Command {
 
@@ -11,11 +11,13 @@ module.exports = class extends Command {
 		});
 	}
 
-	async run(msg, [input]) {
-		const result = await util.exec(input).catch((err) => { throw err; });
+	async run(msg, [code]) {
+		const result = await this.client.methods.util.exec(code, { timeout: 30000 })
+			.catch(error => ({ stdout: null, stderr: error && error.message ? error.message : error }));
 
-		const output = result.stdout ? `**\`OUTPUT\`**${util.codeBlock('sh', result.stdout)}` : '';
-		const outerr = result.stderr ? `**\`ERROR\`**${util.codeBlock('sh', result.stderr)}` : '';
+		const output = result.stdout ? `**\`OUTPUT\`**${'`​`​`​prolog'}\n${result.stdout}\n${'`​`​`​'}` : '';
+		const outerr = result.stderr ? `**\`ERROR\`**${'`​`​`​prolog'}\n${result.stderr}\n${'`​`​`​'}` : '';
+
 		return msg.send([output, outerr].join('\n'));
 	}
 

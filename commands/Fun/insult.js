@@ -10,7 +10,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	async run(msg, [user]) {
+	run(msg, [user]) {
 		return msg.send(`${user}, you know what? you're nothing but ${roll(start)} ${roll(middle)} ${roll(end)}.`);
 	}
 

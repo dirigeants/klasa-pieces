@@ -7,15 +7,14 @@ module.exports = class extends Inhibitor {
 	}
 
 	async run(msg) {
-		if (msg.channel.type === 'text' && msg.guild.settings.deleteCommand === true) return msg.delete();
+		if (msg.guild && msg.guild.configs.deleteCommand) return msg.delete();
 		return null;
 	}
 
-	init() {
-		if (!this.client.settings.guilds.schema.deleteCommand) {
-			return this.client.settings.guilds.add('deleteCommand', { type: 'Boolean', default: false });
+	async init() {
+		if (!this.client.gateways.guilds.schema.hasKey('deleteCommand')) {
+			await this.client.gateways.guilds.schema.addKey('deleteCommand', { type: 'boolean', default: false });
 		}
-		return null;
 	}
 
 };

@@ -1,8 +1,5 @@
-const { Command } = require('klasa');
-
+const { Command, Timestamp } = require('klasa');
 const snekfetch = require('snekfetch');
-const moment = require('moment');
-require('moment-duration-format');
 
 /**
  * https://dev.twitch.tv/docs/v5/guides/authentication/
@@ -16,6 +13,7 @@ module.exports = class extends Command {
 			description: 'Returns information on a Twitch.tv Account',
 			usage: '<name:str>'
 		});
+		this.timestamp = new Timestamp('DD-MM-YYYY');
 	}
 
 	async run(msg, [twitchName]) {
@@ -23,7 +21,7 @@ module.exports = class extends Command {
 			.then(res => res.body)
 			.catch(() => { throw 'Unable to find account. Did you spell it correctly?'; });
 
-		const creationDate = moment(body.created_at).format('DD-MM-YYYY');
+		const creationDate = this.timestamp.display(body.created_at);
 		const embed = new this.client.methods.Embed()
 			.setColor(6570406)
 			.setThumbnail(body.logo)
@@ -33,7 +31,7 @@ module.exports = class extends Command {
 			.addField('Created On', creationDate, true)
 			.addField('Channel Views', body.views, true);
 
-		return msg.send({ embed });
+		return msg.sendEmbed(embed);
 	}
 
 };

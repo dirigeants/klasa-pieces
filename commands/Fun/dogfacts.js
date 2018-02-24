@@ -6,7 +6,7 @@ module.exports = class extends Command {
 		super(...args, { description: 'Gives you a random dog fact.' });
 	}
 
-	async run(msg) {
+	run(msg) {
 		return msg.send(facts[Math.floor(Math.random() * facts.length)]);
 	}
 

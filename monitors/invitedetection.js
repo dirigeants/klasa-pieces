@@ -10,17 +10,17 @@ module.exports = class extends Monitor {
 		});
 	}
 
-	run(msg) {
-		if (msg.channel.type !== 'text' || msg.guild.settings.antiinvite !== true) return null;
-		if (msg.hasAtleastPermissionLevel(6)) return null;
+	async run(msg) {
+		if (!msg.guild || !msg.guild.configs.antiinvite) return null;
+		if (await msg.hasAtLeastPermissionLevel(6)) return null;
 		if (!/(https?:\/\/)?(www\.)?(discord\.(gg|li|me|io)|discordapp\.com\/invite)\/.+/.test(msg.content)) return null;
 		return msg.delete()
 			.catch(err => this.client.emit('log', err, 'error'));
 	}
 
 	async init() {
-		if (!this.client.settings.guilds.schema.antiinvite) {
-			await this.client.settings.guilds.add('antiinvite', { type: 'Boolean', default: false });
+		if (!this.client.gateways.guilds.schema.hasKey('antiinvite')) {
+			await this.client.gateways.guilds.schema.addKey('antiinvite', { type: 'boolean', default: false });
 		}
 	}
 

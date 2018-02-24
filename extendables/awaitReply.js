@@ -6,10 +6,10 @@ module.exports = class extends Extendable {
 		super(...args, ['Message']);
 	}
 
-	async extend(question, limit = 60000, embed = null) {
+	async extend(question, time = 60000, embed) {
 		await (embed ? this.send(question, { embed }) : this.send(question));
 		return this.channel.awaitMessages(msg => msg.author.id === this.author.id,
-			{ max: 1, time: limit, errors: ['time'] })
+			{ max: 1, time, errors: ['time'] })
 			.then(msgs => msgs.first().content)
 			.catch(() => false);
 	}

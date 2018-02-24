@@ -5,11 +5,11 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			description: 'Rings a bell on the server shaming the mentioned person.',
-			usage: '<user:mention>'
+			usage: '<user:user>'
 		});
 	}
 
-	async run(msg, [user]) {
+	run(msg, [user]) {
 		return msg.send(`🔔 SHAME 🔔 ${user} 🔔 SHAME 🔔`);
 	}
 

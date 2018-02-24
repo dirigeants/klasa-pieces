@@ -12,10 +12,9 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const res = await snekfetch.get('http://api.yomomma.info')
-			.then(data => JSON.parse(data.text));
+		const { body } = await snekfetch.get('http://api.yomomma.info');
 
-		return msg.send(`📢 **Yomomma joke:** *${res.joke}*`);
+		return msg.send(`📢 **Yomomma joke:** *${body.joke}*`);
 	}
 
 };
