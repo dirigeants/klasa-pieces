@@ -15,7 +15,7 @@ module.exports = class extends Command {
 		const { body } = await snekfetch.get(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(search)}`);
 
 		const definition = this.getDefinition(search, body, --index);
-		return msg.send(definition);
+		return msg.sendMessage(definition);
 	}
 
 	getDefinition(search, body, index) {
@@ -28,8 +28,11 @@ module.exports = class extends Command {
 
 		return [
 			`**Word:** ${search}`,
-			`\n**Definition:** ${++index} out of ${body.list.length}\n_${wdef}_`,
+			`\n**Definition:** ${index + 1} out of ${body.list.length}\n_${wdef}_`,
 			`\n**Example:**\n${result.example}`,
+			`\n**${result.thumbs_up}** 👍 | **${result.thumbs_down}** 👎`,
+			`\n*By ${result.author}*`,
+			`\n**Tags**: ${body.tags.join(', ')}`,
 			`<${result.permalink}>`
 		].join('\n');
 	}
