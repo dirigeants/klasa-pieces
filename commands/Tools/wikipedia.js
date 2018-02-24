@@ -12,18 +12,18 @@ module.exports = class extends Command {
   }
 
   async run(msg, [query]) {
-    snekfetch
+    const article = await snekfetch
       .get(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`)
-      .then(r => {
-        const article = r.body;
-        const embed = new this.client.methods.Embed()
-          .setColor(4886754)
-          .setThumbnail((article.thumbnail && article.thumbnail.source) || "https://i.imgur.com/fnhlGh5.png")
-          .setURL(article.content_urls.desktop.page)
-          .setTitle(article.title)
-          .setDescription(article.extract);
-        return msg.send({ embed });
-      })
-      .catch(err => msg.send("I couldn't find a Wikipedia article with that title!"));
+      .then(res => res.body)
+      .catch(() => {
+        throw "I couldn't find a Wikipedia Article with that title!";
+      });
+    const embed = new this.client.methods.Embed()
+      .setColor(4886754)
+      .setThumbnail((article.thumbnail && article.thumbnail.source) || "https://i.imgur.com/fnhlGh5.png")
+      .setURL(article.content_urls.desktop.page)
+      .setTitle(article.title)
+      .setDescription(article.extract);
+    return msg.send({ embed });
   }
 };
