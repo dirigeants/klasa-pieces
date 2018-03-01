@@ -10,13 +10,11 @@ Pieces can include:
 
 - **Commands**: Chat commands that generally respond with a message after taking some actions.
 - **Events**: Pieces that get executed when a Discord event triggers.
-- **Functions**: Functions that are made available to other Pieces. These functions can range from utility functions to blocks of code repeated enough to justify making a function out of it. They are not seen by the members.
 - **Inhibitors**: Inhibitors are pieces that run before a command is executed and may take action on the message received, and block a command from running in certain cases (thus *inhibit* a command).
 - **Monitors**: Monitors are pieces that can run on every message, whether or not it triggers a command. Useful for spam monitoring, swear filters, etc.
 - **Providers**: Support for a specific database type. By default a very small amount of DBs are supported, but you can extend the support by adding a provider for whatever database you choose, and configure it to point to your own database.
 - **Finalizers**: Pieces that run on messages after a successful command.
 - **Extendables**: Pieces that act passively, attaching new [getters](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get), [setters](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/set) or [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Method_definitions) to the current Discord.js classes. They're executed at startup before any other piece.
-- **Packages**: A *Pieces Package* containing one or more of other pieces. Packages are presumed to work as a single entity, meaning, custom functions are used by commands, so are data providers, etc.
 
 ## Submitting Pieces
 
