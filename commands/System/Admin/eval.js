@@ -94,7 +94,7 @@ module.exports = class extends Command {
 		let thenable = false;
 		let type = '';
 		try {
-			if (msg.flags.async) code = `(async () => { ${code} })();`;
+			if (msg.flags.async) code = `(async () => {\n${code}\n})();`;
 			result = eval(code);
 			syncTime = stopwatch.friendlyDuration;
 			if (this.client.methods.util.isThenable(result)) {
