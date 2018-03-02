@@ -20,7 +20,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.tableList().then(data => data.includes(table));
+		return this.db.tableList().contains(table).then(resolvePromise);
 	}
 
 	/**
