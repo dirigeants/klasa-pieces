@@ -114,7 +114,7 @@ module.exports = class extends Language {
 				'• ✅ "Finaliseurs" qui s\'exécutent après une commande réussie.',
 				'• ➕ "Extendables", code qui agit passivement. Ils ajoutent des propriétés et des méthodes aux classes existantes de Discord.js.',
 				'• 🌐 "Langages", qui vous permettent de localiser votre bot.',
-				'• ⏲ <"Tasks" needs translated>',
+				'• ⏲ "Tâches", qui peuvent être planifiées pour s\'exécuter dans le futur, potentiellement de manière récurrente.',
 				'',
 				'Nous aspirons à être un framework personnalisable à 100% pour répondre à tous les publics. Nous faisons de fréquentes mises-à-jour et corrections de bugs.',
 				'Si vous vous intéressez à nous, consultez notre site https://klasa.js.org'
