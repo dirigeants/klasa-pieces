@@ -53,11 +53,11 @@ module.exports = class PostgreSQL extends Provider {
 
 	/**
 	 * @param {string} table The name of the table to create
-	 * @param {string} rows The rows with their respective datatypes
+	 * @param {Array<Iterable>} rows The rows with their respective datatypes
 	 * @returns {Promise<Object[]>}
 	 */
 	createTable(table, rows) {
-		return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows});`);
+		return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `"${k}" ${v}`).join(', ')});`);
 	}
 
 	/**
@@ -187,7 +187,7 @@ module.exports = class PostgreSQL extends Provider {
 	 */
 	update(table, id, param1, param2) {
 		const [keys, values] = acceptArbitraryInput(param1, param2);
-		return this.run(`UPDATE ${sanitizeKeyName(table)} SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = $${i + 1}`)} WHERE id = ${sanitizeString(id)};`, values);
+		return this.run(`UPDATE ${sanitizeKeyName(table)} SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = $${i + 1}`)} WHERE id = ${sanitizeString(id)};`, stringifyArrays(values));
 	}
 
 	/**
@@ -420,4 +420,14 @@ function parseRange(min, max) {
 
 function makeVariables(number) {
 	return new Array(number).fill().map((__, index) => `$${index + 1}`).join(', ');
+}
+
+/**
+ * Helper function to stringify arrays correctly
+ * @param {Array<*>} array Array out of Arrays where the entries should be stringified
+ * @returns {Array<string>}
+ */
+function stringifyArrays(array) {
+	for (let index = 0; index < array.length; index++) if (Array.isArray(array[index])) array[index] = JSON.stringify(array[index]);
+	return array;
 }
