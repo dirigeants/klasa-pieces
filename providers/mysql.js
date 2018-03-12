@@ -49,12 +49,12 @@ module.exports = class MySQL extends Provider {
 
 	/**
 	 * @param {string} table The name of the table to create
-	 * @param {string} rows The rows with their respective datatypes
+	 * @param {Array<Iterable>} rows The rows with their respective datatypes
 	 * @returns {Promise<Object[]>}
 	 */
 	createTable(table, rows) {
 		requestType('MySQL#createTable', 'table', 'string', table);
-		requestType('MySQL#createTable', 'rows', 'string', rows);
+		requestType('MySQL#createTable', 'rows', 'string', rows.map(([k, v]) => `${k} ${v}`).join(', '));
 		return this.runAll(`CREATE TABLE ${sanitizeKeyName(table)} (${rows});`);
 	}
 

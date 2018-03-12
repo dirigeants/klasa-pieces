@@ -66,11 +66,11 @@ module.exports = class extends Provider {
 
 	/**
 	 * @param {string} table The name of the table to create
-	 * @param {string} rows The rows with their respective datatypes
+	 * @param {Array<Iterable>} rows The rows with their respective datatypes
 	 * @returns {Promise<Object[]>}
 	 */
 	createTable(table, rows) {
-		return this.run(`CREATE TABLE @0 ( ${rows} );`, [table]);
+		return this.run(`CREATE TABLE @0 ( ${rows.map(([k, v]) => `${k} ${v}`).join(', ')} );`, [table]);
 	}
 
 	/**

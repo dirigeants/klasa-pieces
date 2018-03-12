@@ -49,7 +49,7 @@ module.exports = class extends Provider {
 	/**
 	 * Creates a new table.
 	 * @param {string} table The name for the new table.
-	 * @param {string} rows The rows for the table.
+	 * @param {Array<Iterable>} rows The rows for the table.
 	 * @returns {Promise<Object>}
 	 */
 	createTable(table, rows) {
