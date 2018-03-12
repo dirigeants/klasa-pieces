@@ -12,7 +12,7 @@
 	"license": "MIT",
 	"homepage": "https://github.com/dirigeants/klasa-pieces#readme",
 	"devDependencies": {
-		"eslint": "^4.13.0",
+		"eslint": "^4.18.2",
 		"eslint-config-klasa": "github:dirigeants/klasa-lint"
 	}
 }
