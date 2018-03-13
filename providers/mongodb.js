@@ -1,4 +1,4 @@
-const { Provider, util: { mergeDefault, makeObject, mergeObjects } } = require('klasa');
+const { Provider, util: { mergeDefault, makeObject } } = require('klasa');
 
 const Mongo = require('mongodb').MongoClient;
 
@@ -207,7 +207,7 @@ module.exports = class extends Provider {
 	 */
 	update(table, id, updated) {
 		const updateObject = {};
-		for (const entry of updated) mergeObjects(updateObject, makeObject(entry.data[0], entry.data[1]));
+		for (const entry of updated) makeObject(entry.data[0], entry.data[1], updateObject);
 		return this.db.collection(table).updateOne(resolveQuery(id), { $set: updateObject });
 	}
 
