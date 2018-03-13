@@ -1,4 +1,4 @@
-const { Provider, util: { mergeDefault } } = require('klasa');
+const { Provider, util: { mergeDefault, makeObject, mergeObjects } } = require('klasa');
 
 const Mongo = require('mongodb').MongoClient;
 
@@ -199,14 +199,16 @@ module.exports = class extends Provider {
 	}
 
 	/**
-	 * Updates a Document using MongoDB Update Operators. *
+	 * Updates a Document using MongoDB Update Operators.
 	 * @param {string} table Name of the Collection
 	 * @param {Object} id The Filter used to select the document to update
-	 * @param {Object} doc The update operations to be applied to the document
+	 * @param {Object} updated The update operations to be applied to the document
 	 * @returns {Promise<void>}
 	 */
-	update(table, id, doc) {
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: doc });
+	update(table, id, updated) {
+		const updateObject = {};
+		for (const entry of updated) mergeObjects(updateObject, makeObject(entry.data[0], entry.data[1]));
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: updateObject });
 	}
 
 	/**
