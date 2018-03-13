@@ -83,7 +83,7 @@ module.exports = class extends Language {
 				"• ✅ 'Finalizers', welche nach einer erfolreichen Durchführung eines Befehls ausgeführt werden",
 				"• ➕ 'Extenables' als passiv agierender Code. Sie fügen bestehenden Discord.js Klassen neue Methoden und Eigenschaften hinzu.",
 				"• 🌐 'Languages', welche es erlauben, den Bot in mehrere Sprachen zu übersetzen",
-				"• ⏲ <'Tasks' needs translated>",
+				"• ⏲ 'Tasks', welche es erlauben, den Bot Verzögert oder Geplante Aufgaben auszuführen zu lassen",
 				'',
 				'Wir versuchen ein zu 100% anpassbares Framework zu sein, welches es schafft den unterschiedlichen Ansprüchen gerecht zu werden.',
 				'Ebenso veröffentlichen wir regelmässig Aktualisierungen und Fehlerbehebungen.',
