@@ -19,7 +19,7 @@ module.exports = class extends Command {
 		if (!attachment || !attachment.height) throw 'Please upload an image.';
 
 		const { body: image } = await get(attachment.url).catch(() => {
-			throw "I couldn't find a wikipedia article with that title!";
+			throw 'I could not download the file. Can you try again with another image?';
 		});
 
 		const faceappImage = await faceapp
