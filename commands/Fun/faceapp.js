@@ -1,7 +1,7 @@
 const { Command } = require('klasa');
 const { MessageAttachment } = require('discord.js');
+const { get } = require('snekfetch');
 const faceapp = require('faceapp');
-const snekfetch = require('snekfetch');
 
 module.exports = class extends Command {
 
@@ -15,13 +15,12 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [filter]) {
-		if (!msg.attachments.first() || !msg.attachments.first().height) return msg.send('Please upload an image.');
-		const image = await snekfetch
-			.get(msg.attachments.first().url)
-			.then(res => res.body)
-			.catch(() => {
-				throw "I couldn't find a wikipedia article with that title!";
-			});
+		const [attachment] = msg.attachments.values();
+		if (!attachment || !attachment.height) throw 'Please upload an image.';
+
+		const { body: image } = await get(attachment.url).catch(() => {
+			throw "I couldn't find a wikipedia article with that title!";
+		});
 
 		const faceappImage = await faceapp
 			.process(image, filter)
