@@ -1,6 +1,6 @@
 const { Provider, util: { mergeDefault } } = require('klasa');
 
-const Mongo = require('mongodb').MongoClient;
+const { MongoClient: Mongo } = require('mongodb');
 
 module.exports = class extends Provider {
 
