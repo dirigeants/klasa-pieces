@@ -79,7 +79,7 @@ module.exports = class extends Language {
 				'• ✅ "Finalizzatori" che vengono eseguiti sul messaggio di risposta dopo aver eseguito un comando.',
 				'• ➕ "Estensibili", codice passivo. Aggiungono proprietà o metodi a classi già esistenti in Discord.js.',
 				'• 🌐 "Linguaggi", che permettono di tradurre il tuo bot.',
-				'• ⏲ <"Tasks" needs translated>',
+				'• ⏲ "Attività", che possono essere programmate per essere eseguite in futuro, ripetendo opzionalmente',
 				'',
 				'Speriamo di essere un framework 100% personalizzabile che possa servire qualsiasi audience. Rilasciamo aggiornamenti e correzioni di bug frequentemente.',
 				'Se sei interessato, dai una occhiata a https://klasa.js.org'
