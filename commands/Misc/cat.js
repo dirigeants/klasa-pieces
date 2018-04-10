@@ -11,7 +11,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const { body: { file } } = await snekfetch.get('http://random.cat/meow');
+		const { body: { file } } = await snekfetch.get('http://aws.random.cat/meow');
 		return msg.channel.sendFile(file, `cat.${file.slice(file.lastIndexOf('.'), file.length)}`);
 	}
 
