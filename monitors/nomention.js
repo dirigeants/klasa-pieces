@@ -12,7 +12,7 @@ module.exports = class extends Monitor {
 
 	run(msg) {
 		if (msg.channel.type !== 'text') return;
-		const user = `${msg.author.username}#${msg.author.discriminator} (${msg.author.id})`;
+		const user = `${msg.author.tag} (${msg.author.id})`;
 		const channel = `#${msg.channel.name} (${msg.channel.id}) from ${msg.guild.name}`;
 
 		if (msg.mentions.everyone) this.client.emit('log', `${user} mentioned everyone in ${channel}`);
