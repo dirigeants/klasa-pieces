@@ -18,8 +18,8 @@ module.exports = class extends Command {
 		const res = await snekfetch.get(`https://min-api.cryptocompare.com/data/price?fsym=${c1}&tsyms=${c2}`).catch(() => {
 			throw 'There was an error, please make sure you specified an appropriate coin and currency.';
 		});
-		if (!res.body[c2]) return msg.send('There was an error, please make sure you specified an appropriate coin and currency.');
-		return msg.send(`Current price of ${amount} ${c1} is ${(res.body[c2] * amount).toLocaleString()} ${c2}`);
+		if (!res.body[c2]) return msg.sendMessage('There was an error, please make sure you specified an appropriate coin and currency.');
+		return msg.sendMessage(`Current price of ${amount} ${c1} is ${(res.body[c2] * amount).toLocaleString()} ${c2}`);
 	}
 
 };

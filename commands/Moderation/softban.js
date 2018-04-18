@@ -30,7 +30,7 @@ module.exports = class extends Command {
 
 		await msg.guild.ban(user.id, options);
 		await msg.guild.unban(user.id, 'Softban released.');
-		return msg.send(`${member.user.tag} got softbanned.${reason ? ` With reason of: ${reason}` : ''}`);
+		return msg.sendMessage(`${member.user.tag} got softbanned.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
 };

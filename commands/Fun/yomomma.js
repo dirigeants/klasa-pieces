@@ -14,7 +14,7 @@ module.exports = class extends Command {
 	async run(msg) {
 		const { body } = await snekfetch.get('http://api.yomomma.info');
 
-		return msg.send(`📢 **Yomomma joke:** *${body.joke}*`);
+		return msg.sendMessage(`📢 **Yomomma joke:** *${body.joke}*`);
 	}
 
 };

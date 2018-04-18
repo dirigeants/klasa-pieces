@@ -25,10 +25,10 @@ module.exports = class extends Command {
 			.addField('You deserved it:', downdoot.childNodes[0].text, true);
 
 		if (article.childNodes[0].text.length < 5) {
-			return msg.send('Today, something went wrong, so you will have to try again in a few moments. FML again.');
+			return msg.sendMessage('Today, something went wrong, so you will have to try again in a few moments. FML again.');
 		}
 
-		return msg.send({ embed });
+		return msg.sendMessage({ embed });
 	}
 
 };

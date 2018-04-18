@@ -19,9 +19,9 @@ module.exports = class extends Command {
 				if (Math.random() > 0.5) heads++;
 				else tails++;
 			}
-			return msg.send(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
+			return msg.sendMessage(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
 		}
-		return msg.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
+		return msg.sendMessage(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 	}
 
 };
