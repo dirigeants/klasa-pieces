@@ -3,7 +3,7 @@ const { Extendable } = require('klasa');
 module.exports = class extends Extendable {
 
 	constructor(...args) {
-		super(...args, ['Message']);
+		super(...args, { appliesTo: ['Message'] });
 	}
 
 	async extend(question, time = 60000, embed) {
