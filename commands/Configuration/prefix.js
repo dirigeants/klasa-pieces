@@ -22,7 +22,7 @@ module.exports = class extends Command {
 
 	async reset(msg) {
 		await msg.guild.configs.update('prefix', this.client.options.prefix);
-		return msg.sendMessage(`Switched back the guild\'s prefix back to \`${this.client.options.prefix}\`!`);
+		return msg.sendMessage(`Switched back the guild's prefix back to \`${this.client.options.prefix}\`!`);
 	}
 
 };
