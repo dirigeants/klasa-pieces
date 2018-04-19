@@ -14,7 +14,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [prefix]) {
-		if (prefix === 'prefix') return this.reset(msg);
+		if (prefix === 'reset') return this.reset(msg);
 		if (msg.guild.configs.prefix === prefix) throw msg.language.get('CONFIGURATION_EQUALS');
 		await msg.guild.configs.update('prefix', prefix);
 		return msg.sendMessage(`The prefix for this guild has been set to ${prefix}`);
