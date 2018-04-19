@@ -9,11 +9,12 @@ module.exports = class extends Command {
 			description: 'Change the command prefix the bot uses in your server.',
 			permLevel: 6,
 			runIn: ['text'],
-			usage: '[prefix:str{1,10}]'
+			usage: '[reset|prefix:str{1,10}]'
 		});
 	}
 
 	async run(msg, [prefix]) {
+		if (prefix === 'prefix') return this.reset(msg);
 		if (msg.guild.configs.prefix === prefix) throw msg.language.get('CONFIGURATION_EQUALS');
 		await msg.guild.configs.update('prefix', prefix);
 		return msg.sendMessage(`The prefix for this guild has been set to ${prefix}`);
