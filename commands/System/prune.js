@@ -23,7 +23,7 @@ module.exports = class extends Command {
 		}
 		messages = messages.array().slice(0, limit);
 		await msg.channel.bulkDelete(messages);
-		return msg.send(`Successfully deleted ${messages.length} messages from ${limit}.`);
+		return msg.sendMessage(`Successfully deleted ${messages.length} messages from ${limit}.`);
 	}
 
 	getFilter(msg, filter, user) {

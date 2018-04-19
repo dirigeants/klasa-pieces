@@ -18,17 +18,17 @@ module.exports = class extends Command {
 		const embed = new this.client.methods.Embed()
 			.setTitle(`Requested by ${msg.author.tag}`)
 			.setAuthor('FML Stories')
-			.setColor(msg.member.highestRole.color || 0)
+			.setColor(msg.member.displayColor)
 			.setTimestamp()
 			.setDescription(`_${article.childNodes[0].text}\n\n_`)
 			.addField('I agree, your life sucks', updoot.childNodes[0].text, true)
 			.addField('You deserved it:', downdoot.childNodes[0].text, true);
 
 		if (article.childNodes[0].text.length < 5) {
-			return msg.send('Today, something went wrong, so you will have to try again in a few moments. FML again.');
+			return msg.sendMessage('Today, something went wrong, so you will have to try again in a few moments. FML again.');
 		}
 
-		return msg.send({ embed });
+		return msg.sendMessage({ embed });
 	}
 
 };

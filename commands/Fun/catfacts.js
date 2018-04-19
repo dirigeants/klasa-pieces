@@ -12,7 +12,7 @@ module.exports = class extends Command {
 
 	async run(msg) {
 		const { body } = await snekfetch.get('https://catfact.ninja/fact');
-		return msg.send(`📢 **Catfact:** *${body.fact}*`);
+		return msg.sendMessage(`📢 **Catfact:** *${body.fact}*`);
 	}
 
 };

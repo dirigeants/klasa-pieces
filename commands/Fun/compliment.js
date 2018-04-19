@@ -10,7 +10,7 @@ module.exports = class extends Command {
 	}
 
 	run(msg, [mentioned = msg.member]) {
-		return msg.send(`${mentioned.user.tag}: ${compliments[Math.floor(Math.random() * this.compliments.length)]}`);
+		return msg.sendMessage(`${mentioned.user.tag}: ${compliments[Math.floor(Math.random() * compliments.length)]}`);
 	}
 
 };

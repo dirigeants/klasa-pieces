@@ -22,7 +22,7 @@ module.exports = class extends Command {
 		const channel = this.getChannel(msg.guild);
 		await this.sendStar(msg, message, channel);
 		await message.react('⭐').catch(() => null);
-		return msg.send('Successfully starred!');
+		return msg.sendMessage('Successfully starred!');
 	}
 
 	async sendStar(msg, message, channel) {

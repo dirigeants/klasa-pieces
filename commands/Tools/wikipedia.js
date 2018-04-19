@@ -26,7 +26,7 @@ module.exports = class extends Command {
 			.setURL(article.content_urls.desktop.page)
 			.setTitle(article.title)
 			.setDescription(article.extract);
-		return msg.send({ embed });
+		return msg.sendMessage({ embed });
 	}
 
 };

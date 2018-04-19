@@ -13,7 +13,7 @@ function resolveChannel(query, guild) {
 module.exports = class extends Extendable {
 
 	constructor(...args) {
-		super(...args, ['ArgResolver'], { klasa: true });
+		super(...args, { appliesTo: ['ArgResolver'], klasa: true });
 	}
 
 	async extend(arg, possible, msg) {

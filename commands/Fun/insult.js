@@ -11,7 +11,7 @@ module.exports = class extends Command {
 	}
 
 	run(msg, [user]) {
-		return msg.send(`${user}, you know what? you're nothing but ${roll(start)} ${roll(middle)} ${roll(end)}.`);
+		return msg.sendMessage(`${user}, you know what? you're nothing but ${roll(start)} ${roll(middle)} ${roll(end)}.`);
 	}
 
 };

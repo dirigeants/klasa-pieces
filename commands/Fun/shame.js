@@ -10,7 +10,7 @@ module.exports = class extends Command {
 	}
 
 	run(msg, [user]) {
-		return msg.send(`🔔 SHAME 🔔 ${user} 🔔 SHAME 🔔`);
+		return msg.sendMessage(`🔔 SHAME 🔔 ${user} 🔔 SHAME 🔔`);
 	}
 
 };
