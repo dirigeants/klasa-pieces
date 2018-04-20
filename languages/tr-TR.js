@@ -79,7 +79,7 @@ module.exports = class extends Language {
 				'• ✅ Başarılı bir komuttan sonra çalışabilen "Sonlayıcılar"',
 				'• ➕ Pasiv çalışan "Esneticiler". Discord.js sınfılarından özellik veya method eklemek için kullanılır.',
 				'• 🌐 Botunuzu yerelleştirmek için kullanabileceğiniz "Diller".',
-				'• ⏲ <"Tasks" needs translated>',
+				'• ⏲ Zamanlayabileceğiniz ve istediğiniz zaman tekrar ettirebileceğiniz "Görevler".',
 				'',
 				'Herkese hitap eden ve %100 düzenlenebilir bir framework yaptığımızı umuyoruz. Sıklıkla güncelliyoruz ve bugları kapatmaya çalışıyoruz.',
 				'Eğer ilgilendiyseniz bize https://klasa.js.org adresinden ulaşabilirsiniz'
