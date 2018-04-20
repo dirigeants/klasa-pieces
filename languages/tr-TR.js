@@ -77,7 +77,7 @@ module.exports = class extends Language {
 				'• ⛔ Komutları belirlenen parametrelere göre kullanımlarını engelleyen (Yetkiler, Karaliste, vb.) "İnhibitörler"',
 				'• 🗄 Dış veritabanlarına bağlanmak için kullanılabilen "Sağlayıcılar"',
 				'• ✅ Başarılı bir komuttan sonra çalışabilen "Sonlayıcılar"',
-				'• ➕ Pasiv çalışan "Esneticiler". Discord.js sınfılarından özellik veya method eklemek için kullanılır.',
+				'• ➕ Pasif çalışan "Esneticiler". Discord.js sınfılarından özellik veya method eklemek için kullanılır.',
 				'• 🌐 Botunuzu yerelleştirmek için kullanabileceğiniz "Diller".',
 				'• ⏲ Zamanlayabileceğiniz ve istediğiniz zaman tekrar ettirebileceğiniz "Görevler".',
 				'',
