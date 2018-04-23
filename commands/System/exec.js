@@ -1,22 +1,22 @@
-const { Command } = require('klasa');
+const { Command, util: { exec, codeBlock } } = require('klasa');
 
 module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			permLevel: 10,
-
+			aliases: ['execute'],
 			description: 'Execute commands in the terminal, use with EXTREME CAUTION.',
-			usage: '<expression:str>'
+			guarded: true,
+			permLevel: 10,
+			usage: '<expression:string>'
 		});
 	}
 
-	async run(msg, [code]) {
-		const result = await this.client.methods.util.exec(code, { timeout: 30000 })
-			.catch(error => ({ stdout: null, stderr: error && error.message ? error.message : error }));
-
-		const output = result.stdout ? `**\`OUTPUT\`**${'```prolog'}\n${result.stdout}\n${'```'}` : '';
-		const outerr = result.stderr ? `**\`ERROR\`**${'```prolog'}\n${result.stderr}\n${'```'}` : '';
+	async run(msg, [input]) {
+		const result = await exec(input, { timeout: 'timeout' in msg.flags ? Number(msg.flags.timeout) : 60000 })
+			.catch(error => ({ stdout: null, stderr: error }));
+		const output = result.stdout ? `**\`OUTPUT\`**${codeBlock('prolog', result.stdout)}` : '';
+		const outerr = result.stderr ? `**\`ERROR\`**${codeBlock('prolog', result.stderr)}` : '';
 
 		return msg.sendMessage([output, outerr].join('\n'));
 	}
