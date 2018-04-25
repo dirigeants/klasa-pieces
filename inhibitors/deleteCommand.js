@@ -12,8 +12,8 @@ module.exports = class extends Inhibitor {
 	}
 
 	async init() {
-		if (!this.client.gateways.guilds.schema.hasKey('deleteCommand')) {
-			await this.client.gateways.guilds.schema.addKey('deleteCommand', { type: 'boolean', default: false });
+		if (!this.client.gateways.guilds.schema.has('deleteCommand')) {
+			await this.client.gateways.guilds.schema.add('deleteCommand', { type: 'boolean', default: false });
 		}
 	}
 
