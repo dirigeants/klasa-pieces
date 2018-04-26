@@ -28,7 +28,7 @@ module.exports = class extends Command {
 		reason = reason.length ? reason.join(' ') : null;
 		if (reason) options.reason = reason;
 
-		await msg.guild.ban(user.id, options);
+		await msg.guild.members.ban(user, options);
 		return msg.sendMessage(`${member.user.tag} got banned.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
