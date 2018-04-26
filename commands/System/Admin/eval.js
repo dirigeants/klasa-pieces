@@ -1,4 +1,4 @@
-const { Command, Stopwatch, util } = require('klasa');
+const { Command, Stopwatch, Type, util } = require('klasa');
 const { inspect } = require('util');
 const { post } = require('snekfetch');
 
@@ -7,26 +7,24 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['ev'],
-			permLevel: 10,
-			guarded: true,
 			description: (msg) => msg.language.get('COMMAND_EVAL_DESCRIPTION'),
-			extendedHelp: (msg) => msg.language.get('COMMAND_EVAL_EXTENDEDHELP'),
+			extendedHelp: (msg) => msg.language.get('COMMAND_EVAL_EXTENDED'),
+			guarded: true,
+			permLevel: 10,
 			usage: '<expression:str>'
 		});
 	}
 
 	async run(msg, [code]) {
-		const flagTime = 'wait' in msg.flags ? Number(msg.flags.wait) : 10000;
+		const flagTime = 'wait' in msg.flags ? Number(msg.flags.wait) : 30000;
 		const { success, result, time, type } = await this.timedEval(msg, code, flagTime);
-
-		if (msg.flags.delete) msg.delete().catch(() => null);
 
 		if (msg.flags.silent) {
 			if (!success && result && result.stack) this.client.emit('error', result.stack);
 			return null;
 		}
 
-		const footer = this.client.methods.util.codeBlock('ts', type);
+		const footer = util.codeBlock('ts', type);
 		const sendAs = msg.flags.output || msg.flags['output-to'] || (msg.flags.log ? 'log' : null);
 		return this.handleMessage(msg, { sendAs, hastebinUnavailable: false, url: null }, { success, result, time, footer });
 	}
@@ -59,7 +57,7 @@ module.exports = class extends Command {
 					return this.handleMessage(msg, options, { success, result, time, footer });
 				}
 				return msg.sendMessage(msg.language.get(success ? 'COMMAND_EVAL_OUTPUT' : 'COMMAND_EVAL_ERROR',
-					time, this.client.methods.util.codeBlock('js', result), footer));
+					time, util.codeBlock('js', result), footer));
 			}
 		}
 	}
@@ -92,14 +90,14 @@ module.exports = class extends Command {
 		const stopwatch = new Stopwatch();
 		let success, syncTime, asyncTime, result;
 		let thenable = false;
-		let type = '';
+		let type;
 		try {
 			if (msg.flags.async) code = `(async () => {\n${code}\n})();`;
 			result = eval(code);
 			syncTime = stopwatch.friendlyDuration;
-			if (this.client.methods.util.isThenable(result)) {
+			type = new Type(result);
+			if (util.isThenable(result)) {
 				thenable = true;
-				type += this.client.methods.util.getTypeName(result);
 				stopwatch.restart();
 				result = await result;
 				asyncTime = stopwatch.friendlyDuration;
@@ -108,19 +106,19 @@ module.exports = class extends Command {
 		} catch (error) {
 			if (!syncTime) syncTime = stopwatch.friendlyDuration;
 			if (thenable && !asyncTime) asyncTime = stopwatch.friendlyDuration;
+			if (!type) type = new Type(result);
 			result = error;
 			success = false;
 		}
 
 		stopwatch.stop();
-		type += thenable ? `<${this.client.methods.util.getDeepTypeName(result)}>` : this.client.methods.util.getDeepTypeName(result);
 		if (success && typeof result !== 'string') {
 			result = inspect(result, {
 				depth: msg.flags.depth ? parseInt(msg.flags.depth) || 0 : 0,
 				showHidden: Boolean(msg.flags.showHidden)
 			});
 		}
-		return { success, type, time: this.formatTime(syncTime, asyncTime), result: this.client.methods.util.clean(result) };
+		return { success, type, time: this.formatTime(syncTime, asyncTime), result: util.clean(result) };
 	}
 
 	formatTime(syncTime, asyncTime) {
@@ -155,3 +153,4 @@ module.exports = class extends Command {
 	COMMAND_EVAL_OUTPUT_FILE: (time, type) => `Sent the result as a file.\n**Type**:${type}\n${time}`,
 	COMMAND_EVAL_OUTPUT_HASTEBIN: (time, url, type) => `Sent the result to hastebin: ${url}\n**Type**:${type}\n${time}\n`
 */
+
