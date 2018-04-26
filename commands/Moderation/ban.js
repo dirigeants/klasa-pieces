@@ -20,15 +20,15 @@ module.exports = class extends Command {
 
 		const member = await msg.guild.members.fetch(user).catch(() => null);
 		if (member) {
-			if (member.highestRole.position >= msg.member.highestRole.position) throw 'You cannot ban this user.';
-			if (member.bannable === false) throw 'I cannot ban this user.';
+			if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot ban this user.';
+			if (!member.bannable) throw 'I cannot ban this user.';
 		}
 
 		const options = {};
-		reason = reason.length > 0 ? reason.join(' ') : null;
+		reason = reason.length ? reason.join(' ') : null;
 		if (reason) options.reason = reason;
 
-		await msg.guild.ban(user.id, options);
+		await msg.guild.members.ban(user, options);
 		return msg.sendMessage(`${member.user.tag} got banned.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
