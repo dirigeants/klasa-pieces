@@ -37,16 +37,17 @@ To submit your own pieces for approval (quick steps):
 
 - Fork this repository
 - Create a new piece in the appropriate folder
-- Create a Pull Request to the repository.
-- Be patient. Someone will approve/deny it as soon as they can.
+- Lint your code with [klasa-lint](https://github.com/dirigeants/klasa-lint)
+- Create a Pull Request to the repository
+- Be patient. Someone will approve/deny it as soon as they can
 
 We will automatically deny PRs that:
 
 - Have identical functionality to an existing *Piece*
 - Have code that breaks/does not catch errors/etc
-- Contain NSFW, NSFL contents or contents we deem to be unacceptable.
+- Contain NSFW, NSFL contents or contents we deem to be unacceptable
 - Contain hacks/exploits/etc
 - Have code that might cause a bot to break the TOS or Ratelimits
-- Any reason **WE** feel is valid.
+- Any reason **WE** feel is valid
 
 > WE RESERVE THE RIGHT TO REFUSE ANY CONTENTS FOR ANY REASON WHETHER YOU ACCEPT THEM OR NOT.
