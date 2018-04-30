@@ -1,7 +1,7 @@
 const { Command } = require('klasa');
 const snekfetch = require('snekfetch');
 // Create a TMDB account on https://www.themoviedb.org/ (if you haven't yet) and go to https://www.themoviedb.org/settings/api to get your API key.
-const tmdbAPIkey = "";
+const tmdbAPIkey = '';
 
 module.exports = class extends Command {
 
