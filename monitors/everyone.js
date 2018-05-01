@@ -1,4 +1,5 @@
 const { Monitor } = require('klasa');
+const { Permissions: { FLAGS } } = require('discord.js');
 
 module.exports = class extends Monitor {
 
@@ -7,7 +8,14 @@ module.exports = class extends Monitor {
 	}
 
 	async run(msg) {
-		if (!msg.member || !msg.guild.configs.everyoneRole || !msg.mentions.roles.size || !await msg.hasAtLeastPermissionLevel(1)) return;
+		if (!msg.member ||
+			!msg.guild.configs.everyoneRole ||
+			!msg.mentions.roles.size ||
+			msg.guild.me.roles.highest.position <= msg.member.roles.highest.position ||
+			!msg.guild.me.permissions.has(FLAGS.MANAGE_ROLES) ||
+			!await msg.hasAtLeastPermissionLevel(1)
+		) return;
+
 		const everyone = msg.guild.roles.get(msg.guild.configs.everyoneRole);
 		if (!everyone) {
 			await msg.guild.configs.reset('everyoneRole');
