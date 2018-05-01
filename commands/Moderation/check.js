@@ -28,8 +28,8 @@ module.exports = class extends Command {
 	}
 
 	async init() {
-		if (!this.client.gateways.guilds.schema.hasKey('minAccAge')) {
-			await this.client.gateways.guilds.schema.addKey('minAccAge', { type: 'integer', default: 1800000 });
+		if (!this.client.gateways.guilds.schema.has('minAccAge')) {
+			await this.client.gateways.guilds.schema.add('minAccAge', { type: 'integer', default: 1800000 });
 		}
 	}
 
