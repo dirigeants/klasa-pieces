@@ -5,7 +5,7 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			permLevel: 6,
-			botPerms: ['BAN_MEMBERS'],
+			requiredPermissions: ['BAN_MEMBERS'],
 			runIn: ['text'],
 
 			description: 'Softbans a mentioned user. Currently does not require reason (no mod-log).',
