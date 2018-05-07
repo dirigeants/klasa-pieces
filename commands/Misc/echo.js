@@ -4,7 +4,7 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			permLevel: 6,
+			permissionLevel: 6,
 			runIn: ['text'],
 
 			description: 'Send a message to a channel through the bot.',

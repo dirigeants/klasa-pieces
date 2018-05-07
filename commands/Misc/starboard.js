@@ -5,7 +5,7 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['star'],
-			permLevel: 6,
+			permissionLevel: 6,
 			runIn: ['text'],
 			requiredSettings: ['starboard'],
 
