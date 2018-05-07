@@ -1,4 +1,5 @@
 const { Provider } = require('klasa');
+const { Collection } = require('discord.js');
 const { resolve } = require('path');
 const fs = require('fs-nextra');
 
@@ -10,7 +11,7 @@ module.exports = class extends Provider {
 	constructor(...args) {
 		super(...args, { description: 'Allows you to use NeDB functionality throught Klasa' });
 		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'nedb');
-		this.dataStores = new this.client.methods.Collection();
+		this.dataStores = new Collection();
 	}
 
 	init() {

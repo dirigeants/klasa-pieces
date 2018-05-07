@@ -1,4 +1,5 @@
 const { Command } = require('klasa');
+const { MessageEmbed } = require('discord.js');
 const snekfetch = require('snekfetch');
 // Create a TMDB account on https://www.themoviedb.org/ (if you haven't yet) and go to https://www.themoviedb.org/settings/api to get your API key.
 const tmdbAPIkey = '';
@@ -21,7 +22,7 @@ module.exports = class extends Command {
 
 		if (!movie) throw `I couldn't find a movie with title **${query}** in page ${page}.`;
 
-		const embed = new this.client.methods.Embed()
+		const embed = new MessageEmbed()
 			.setImage(`https://image.tmdb.org/t/p/original${movie.poster_path}`)
 			.setTitle(`${movie.title} (${page} out of ${request.body.results.length} results)`)
 			.setDescription(movie.overview)

@@ -1,4 +1,5 @@
 const { Command } = require('klasa');
+const { MessageEmbed } = require('discord.js');
 const snekfetch = require('snekfetch');
 
 module.exports = class extends Command {
@@ -20,7 +21,7 @@ module.exports = class extends Command {
 				throw "I couldn't find a wikipedia article with that title!";
 			});
 
-		const embed = new this.client.methods.Embed()
+		const embed = new MessageEmbed()
 			.setColor(4886754)
 			.setThumbnail((article.thumbnail && article.thumbnail.source) || 'https://i.imgur.com/fnhlGh5.png')
 			.setURL(article.content_urls.desktop.page)

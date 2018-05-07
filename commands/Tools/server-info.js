@@ -1,4 +1,5 @@
 const { Command, Timestamp } = require('klasa');
+const { MessageEmbed } = require('discord.js');
 
 module.exports = class extends Command {
 
@@ -25,7 +26,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const serverInfo = new this.client.methods.Embed()
+		const serverInfo = new MessageEmbed()
 			.setColor(0x00AE86)
 			.setThumbnail(msg.guild.iconURL())
 			.addField('❯ Name', msg.guild.name, true)

@@ -1,5 +1,5 @@
 const { Command, Timestamp } = require('klasa');
-
+const { MessageEmbed } = require('discord.js');
 module.exports = class extends Command {
 
 	constructor(...args) {
@@ -43,7 +43,7 @@ module.exports = class extends Command {
 
 	async run(msg, [role]) {
 		const allPermissions = Object.entries(role.permissions.serialize()).filter(perm => perm[1]).map(([perm]) => this.perms[perm]).join(', ');
-		const roleInfo = new this.client.methods.Embed()
+		const roleInfo = new MessageEmbed()
 			.setColor(role.hexColor || 0xFFFFFF)
 			.addField('❯ Name', role.name, true)
 			.addField('❯ ID', role.id, true)
