@@ -1,4 +1,5 @@
 const { Command } = require('klasa');
+const { MessageEmbed } = require('discord.js');
 const snekfetch = require('snekfetch');
 const HTMLParser = require('fast-html-parser');
 
@@ -15,7 +16,7 @@ module.exports = class extends Command {
 		const downdoot = root.querySelector('.vote-down');
 		const updoot = root.querySelector('.vote-up');
 
-		const embed = new this.client.methods.Embed()
+		const embed = new MessageEmbed()
 			.setTitle(`Requested by ${msg.author.tag}`)
 			.setAuthor('FML Stories')
 			.setColor(msg.member.displayColor)

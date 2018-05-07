@@ -1,4 +1,5 @@
 const { Command, Timestamp } = require('klasa');
+const { MessageEmbed } = require('discord.js');
 
 module.exports = class extends Command {
 
@@ -17,7 +18,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [member = msg.member]) {
-		const userInfo = new this.client.methods.Embed()
+		const userInfo = new MessageEmbed()
 			.setColor(member.displayHexColor || 0xFFFFFF)
 			.setThumbnail(member.user.displayAvatarURL())
 			.addField('❯ Name', member.user.tag, true)

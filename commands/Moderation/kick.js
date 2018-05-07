@@ -4,8 +4,8 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			permLevel: 6,
-			botPerms: ['KICK_MEMBERS'],
+			permissionLevel: 6,
+			requiredPermissions: ['KICK_MEMBERS'],
 			runIn: ['text'],
 
 			description: 'Kicks a mentioned user. Currently does not require reason (no mod-log).',

@@ -7,7 +7,7 @@ module.exports = class extends Command {
 			aliases: ['execute'],
 			description: 'Execute commands in the terminal, use with EXTREME CAUTION.',
 			guarded: true,
-			permLevel: 10,
+			permissionLevel: 10,
 			usage: '<expression:string>'
 		});
 	}

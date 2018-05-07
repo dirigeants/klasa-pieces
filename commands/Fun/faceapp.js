@@ -8,7 +8,7 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			cooldown: 5,
-			botPerms: ['ATTACH_FILES'],
+			requiredPermissions: ['ATTACH_FILES'],
 			description: 'Applies a faceapp filter to an image.',
 			usage: '<smile|smile_2|hot|old|young|female|female_2|male|pan|hitman|makeup|wave|glasses|bangs|hipster|goatee|lion|impression|heisenberg|hollywood>'
 		});
