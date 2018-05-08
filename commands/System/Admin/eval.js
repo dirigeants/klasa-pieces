@@ -94,25 +94,25 @@ module.exports = class extends Command {
 		try {
 			if (msg.flags.async) code = `(async () => {\n${code}\n})();`;
 			result = eval(code);
-			syncTime = stopwatch.friendlyDuration;
+			syncTime = stopwatch.toString();
 			type = new Type(result);
 			if (util.isThenable(result)) {
 				thenable = true;
 				stopwatch.restart();
 				result = await result;
-				asyncTime = stopwatch.friendlyDuration;
+				asyncTime = stopwatch.toString();
 			}
 			success = true;
 		} catch (error) {
-			if (!syncTime) syncTime = stopwatch.friendlyDuration;
-			if (thenable && !asyncTime) asyncTime = stopwatch.friendlyDuration;
+			if (!syncTime) syncTime = stopwatch.toString();
+			if (thenable && !asyncTime) asyncTime = stopwatch.toString();
 			if (!type) type = new Type(result);
 			result = error;
 			success = false;
 		}
 
 		stopwatch.stop();
-		if (success && typeof result !== 'string') {
+		if (typeof result !== 'string') {
 			result = inspect(result, {
 				depth: msg.flags.depth ? parseInt(msg.flags.depth) || 0 : 0,
 				showHidden: Boolean(msg.flags.showHidden)
