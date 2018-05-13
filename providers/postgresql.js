@@ -59,11 +59,14 @@ module.exports = class PostgreSQL extends SQLProvider {
 
 	/**
 	 * @param {string} table The name of the table to create
-	 * @param {Array<Iterable>} rows The rows with their respective datatypes
+	 * @param {Array<Iterable>} [rows] The rows with their respective datatypes
 	 * @returns {Promise<Object[]>}
 	 */
 	createTable(table, rows) {
-		return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `"${k}" ${v}`).join(', ')});`);
+		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
+		const gateway = this.client.gateways[table];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
+		return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${[...gateway.schema.values(true)].map(this.qb.parse.bind(this.qb))})`);
 	}
 
 	/**
@@ -80,7 +83,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 	 */
 	countRows(table) {
 		return this.runOne(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`)
-			.then(result => parseInt(result.count));
+			.then(result => Number(result.count));
 	}
 
 	/* Row methods */
@@ -95,10 +98,12 @@ module.exports = class PostgreSQL extends SQLProvider {
 	 */
 	getAll(table, key, value, limitMin, limitMax) {
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 ${parseRange(limitMin, limitMax)};`, [value]);
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 ${parseRange(limitMin, limitMax)};`, [value])
+				.then(results => results.map(this.parseEntry.bind(this)));
 		}
 
-		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`);
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`)
+			.then(results => results.map(this.parseEntry.bind(this)));
 	}
 
 	/**
@@ -122,7 +127,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 			value = key;
 			key = 'id';
 		}
-		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value]);
+		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value]).then(this.parseEntry.bind(this));
 	}
 
 	/**
