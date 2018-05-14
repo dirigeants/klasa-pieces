@@ -14,7 +14,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` }
 		}, {
 			array: type => `${type}[]`,
-			arrayResolver: (values, piece, resolver) => values.length ? `array[${values.map(value => resolver(value, piece)).join(', ')}]` : '{}',
+			arrayResolver: (values, piece, resolver) => values.length ? `array[${values.map(value => resolver(value, piece)).join(', ')}]` : "'{}'",
 			formatDatatype: (name, datatype, def = null) => `"${name}" ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
 		});
 		this.db = null;
