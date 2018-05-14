@@ -97,7 +97,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} [key] The key to filter the data from. Requires the value parameter
-	 * @param {*}    [value] The value to filter the data from. Requires the key parameter
+	 * @param {*} [value] The value to filter the data from. Requires the key parameter
 	 * @param {number} [limitMin] The minimum range. Must be higher than zero
 	 * @param {number} [limitMax] The maximum range. Must be higher than the limitMin parameter
 	 * @returns {Promise<Object[]>}
@@ -105,11 +105,11 @@ module.exports = class PostgreSQL extends SQLProvider {
 	getAll(table, key, value, limitMin, limitMax) {
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
 			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 ${parseRange(limitMin, limitMax)};`, [value])
-				.then(results => results.map(this.parseEntry.bind(this, table)));
+				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`)
-			.then(results => results.map(this.parseEntry.bind(this, table)));
+			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
 	/**
@@ -124,7 +124,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} key The key to filter the data from
-	 * @param {*}    [value] The value of the filtered key
+	 * @param {*} [value] The value of the filtered key
 	 * @returns {Promise<Object>}
 	 */
 	get(table, key, value) {
@@ -133,7 +133,8 @@ module.exports = class PostgreSQL extends SQLProvider {
 			value = key;
 			key = 'id';
 		}
-		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value]).then(this.parseEntry.bind(this, table));
+		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value])
+			.then(output => this.parseEntry(table, output));
 	}
 
 	/**
