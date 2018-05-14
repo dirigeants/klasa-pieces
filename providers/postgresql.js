@@ -10,18 +10,11 @@ module.exports = class PostgreSQL extends SQLProvider {
 			integer: { type: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER' },
 			float: { type: 'DOUBLE PRECISION' },
 			uuid: { type: 'UUID' },
-			json: {
-				type: 'JSON', resolver: (input, { array }) => array ?
-					`array[${input.map(value => `'${JSON.stringify(value)}'::json`).join(', ')}]` :
-					`'${JSON.stringify(input)}'::json`
-			},
-			any: {
-				type: 'JSON', resolver: (input, { array }) => array ?
-					`array[${input.map(value => `'${JSON.stringify(value)}'::json`).join(', ')}]` :
-					`'${JSON.stringify(input)}'::json`
-			}
+			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
+			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` }
 		}, {
 			array: type => `${type}[]`,
+			arrayResolver: (values, piece, resolver) => `array[${values.map(value => resolver(value, piece)).join(', ')}]`,
 			formatDatatype: (name, datatype, def = null) => `"${name}" ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
 		});
 		this.db = null;
