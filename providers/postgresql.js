@@ -105,11 +105,11 @@ module.exports = class PostgreSQL extends SQLProvider {
 	getAll(table, key, value, limitMin, limitMax) {
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
 			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 ${parseRange(limitMin, limitMax)};`, [value])
-				.then(results => results.map(this.parseEntry.bind(this)));
+				.then(results => results.map(this.parseEntry.bind(this, table)));
 		}
 
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`)
-			.then(results => results.map(this.parseEntry.bind(this)));
+			.then(results => results.map(this.parseEntry.bind(this, table)));
 	}
 
 	/**
@@ -133,7 +133,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 			value = key;
 			key = 'id';
 		}
-		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value]).then(this.parseEntry.bind(this));
+		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = $1 LIMIT 1;`, [value]).then(this.parseEntry.bind(this, table));
 	}
 
 	/**
