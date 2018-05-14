@@ -184,7 +184,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 		values.push(id);
 		return this.run(`
 			INSERT INTO ${sanitizeKeyName(table)} (${keys.map(sanitizeKeyName).join(', ')})
-			VALUES (${Array.from({ length: 9 }, (__, i) => `$${i + 1}`).join(', ')});`, values);
+			VALUES (${Array.from({ length: keys.length }, (__, i) => `$${i + 1}`).join(', ')});`, values);
 	}
 
 	/**
