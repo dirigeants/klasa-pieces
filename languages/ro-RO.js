@@ -15,7 +15,7 @@ module.exports = class extends Language {
 			SETTING_GATEWAY_KEY_NOEXT: (key) => `Cheia ${key} nu există în schema de date curentă.`,
 			SETTING_GATEWAY_INVALID_TYPE: 'Parametrul tip trebuie să fie add sau remove.',
 			RESOLVER_INVALID_PIECE: (name, piece) => `${name} trebuie să fie un nume de ${piece} valid.`,
-			RESOLVER_INVALID_MSG: (name) => `${name} trebuie să fie un id de mesaj valid.`,
+			RESOLVER_INVALID_MESSAGE: (name) => `${name} trebuie să fie un id de mesaj valid.`,
 			RESOLVER_INVALID_USER: (name) => `${name} trebuie să fie un id de utilizator valid sau o mențiune.`,
 			RESOLVER_INVALID_MEMBER: (name) => `${name} trebuie să fie un id de utilizator valid sau o mențiune.`,
 			RESOLVER_INVALID_CHANNEL: (name) => `${name} trebuie să fie un id sau tag de canal valid.`,

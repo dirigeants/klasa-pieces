@@ -15,7 +15,7 @@ module.exports = class extends Language {
 			SETTING_GATEWAY_KEY_NOEXT: (key) => `La chiave ${key} non esiste nello schema dei dati corrente.`,
 			SETTING_GATEWAY_INVALID_TYPE: 'Il parametro \'type\' può essere solo \'add\' o \'remove\'.',
 			RESOLVER_INVALID_PIECE: (name, piece) => `${name} deve esserve il nome di un ${piece} valido.`,
-			RESOLVER_INVALID_MSG: (name) => `${name} deve essere l'id di un messaggio valido.`,
+			RESOLVER_INVALID_MESSAGE: (name) => `${name} deve essere l'id di un messaggio valido.`,
 			RESOLVER_INVALID_USER: (name) => `${name} deve essere una menzione o l'id di un utente valido.`,
 			RESOLVER_INVALID_MEMBER: (name) => `${name} deve essere una menzione o l'id di un utente valido.`,
 			RESOLVER_INVALID_CHANNEL: (name) => `${name} deve essere il tag di un canale o l'id di un canale valido.`,

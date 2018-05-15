@@ -15,7 +15,7 @@ module.exports = class extends Language {
 			SETTING_GATEWAY_KEY_NOEXT: (key) => `Das Attribut ${key} existiert nicht im aktuellen Datenschema.`,
 			SETTING_GATEWAY_INVALID_TYPE: 'Der Parameter "type" muss entweder hinzugefügt oder gelöscht werden.',
 			RESOLVER_INVALID_PIECE: (name, piece) => `${name} muss ein gültiger ${piece} Name sein.`,
-			RESOLVER_INVALID_MSG: (name) => `${name} muss eine gültige Message-ID sein.`,
+			RESOLVER_INVALID_MESSAGE: (name) => `${name} muss eine gültige Message-ID sein.`,
 			RESOLVER_INVALID_USER: (name) => `${name} muss ein "mention" oder eine gültige User-ID sein.`,
 			RESOLVER_INVALID_MEMBER: (name) => `${name} muss eine Benutzererwähnung oder eine gültige User ID sein.`,
 			RESOLVER_INVALID_CHANNEL: (name) => `${name} muss eine Kanalerwähnung oder eine gültige Kanal ID sein.`,
