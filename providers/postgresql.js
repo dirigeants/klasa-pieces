@@ -6,10 +6,10 @@ module.exports = class PostgreSQL extends SQLProvider {
 	constructor(...args) {
 		super(...args);
 		this.qb = new QueryBuilder({
-			boolean: { type: 'BOOL' },
-			integer: { type: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER' },
-			float: { type: 'DOUBLE PRECISION' },
-			uuid: { type: 'UUID' },
+			boolean: 'BOOL',
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			float: 'DOUBLE PRECISION',
+			uuid: 'UUID',
 			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
 			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
 			array: type => `${type}[]`,
