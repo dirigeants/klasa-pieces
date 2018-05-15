@@ -6,14 +6,12 @@ module.exports = class PostgreSQL extends SQLProvider {
 	constructor(...args) {
 		super(...args);
 		this.qb = new QueryBuilder({
-			datatypes: {
-				boolean: { type: 'BOOL' },
-				integer: { type: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER' },
-				float: { type: 'DOUBLE PRECISION' },
-				uuid: { type: 'UUID' },
-				json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
-				any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` }
-			},
+			boolean: { type: 'BOOL' },
+			integer: { type: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER' },
+			float: { type: 'DOUBLE PRECISION' },
+			uuid: { type: 'UUID' },
+			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
+			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
 			array: type => `${type}[]`,
 			arrayResolver: (values, piece, resolver) => values.length ? `array[${values.map(value => resolver(value, piece)).join(', ')}]` : "'{}'",
 			formatDatatype: (name, datatype, def = null) => `"${name}" ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
