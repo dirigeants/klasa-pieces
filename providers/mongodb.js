@@ -1,4 +1,4 @@
-const { Provider, util: { mergeDefault } } = require('klasa');
+const { Provider, util: { mergeDefault, mergeObjects, isObject } } = require('klasa');
 
 const { MongoClient: Mongo } = require('mongodb');
 
@@ -16,7 +16,7 @@ module.exports = class extends Provider {
 			db: 'klasa',
 			options: {}
 		}, this.client.options.providers.mongodb);
-		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, Object.assign(connection.options, { auth: { user: connection.user, password: connection.password } }));
+		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, { ...connection.options, auth: { user: connection.user, password: connection.password } });
 		this.db = mongoClient.db(connection.db);
 	}
 
@@ -38,11 +38,10 @@ module.exports = class extends Provider {
 	/**
 	 * Create a collection within a DB. Options may be specfied, refer to MongoDB docs.
 	 * @param {string} table Name of the Collection to crate
-	 * @param {Object} [options={}] Object containing various options for the created Collection
 	 * @returns {Promise<Collection>} Returns a promise containing the created Collection.
 	 */
-	createTable(table, options = {}) {
-		return this.db.createCollection(table, options);
+	createTable(table) {
+		return this.db.createCollection(table);
 	}
 
 	createCollection(...args) {
@@ -173,11 +172,11 @@ module.exports = class extends Provider {
 	 * Inserts a Document into a Collection using a user provided object.
 	 * @param {string} table Name of the Collection
 	 * @param {(string|Object)} id ID of the document
-	 * @param {Object} doc Document Object to insert
+	 * @param {Object} [doc={}] Document Object to insert
 	 * @returns {Promise}
 	 */
 	create(table, id, doc = {}) {
-		return this.db.collection(table).insertOne(Object.assign(doc, resolveQuery(id)));
+		return this.db.collection(table).insertOne({ doc, ...resolveQuery(id) });
 	}
 
 	set(...args) {
@@ -202,24 +201,25 @@ module.exports = class extends Provider {
 	 * Updates a Document using MongoDB Update Operators. *
 	 * @param {string} table Name of the Collection
 	 * @param {Object} id The Filter used to select the document to update
-	 * @param {Object} doc The update operations to be applied to the document
+	 * @param {Object} [doc={}] The update operations to be applied to the document
 	 * @returns {Promise<void>}
 	 */
-	update(table, id, doc) {
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: doc });
+	async update(table, id, doc = {}) {
+		const old = await this.get(table, id);
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: mergeObjects(old || { id }, doc) });
 	}
 
 	/**
 	 * Replaces a Document with a new Document specified by the user *
 	 * @param {string} table Name of the Collection
 	 * @param {Object} id The Filter used to select the document to update
-	 * @param {Object} doc The Document that replaces the matching document
+	 * @param {Object} [doc={}] The Document that replaces the matching document
 	 * @returns {Promise<void>}
 	 */
-	replace(table, id, doc) {
+	replace(table, id, doc = {}) {
 		return this.db.collection(table).replaceOne(resolveQuery(id), doc);
 	}
 
 };
 
-const resolveQuery = query => query instanceof Object ? query : { id: query };
+const resolveQuery = query => isObject(query) ? query : { id: query };
