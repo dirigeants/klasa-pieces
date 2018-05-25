@@ -67,9 +67,11 @@ module.exports = class PostgreSQL extends SQLProvider {
 		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
 		const gateway = this.client.gateways[table];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
+
+		const schemaValues = [...gateway.schema.values(true)];
 		return this.run(`
 			CREATE TABLE ${sanitizeKeyName(table)} (
-				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE, ${[...gateway.schema.values(true)].map(this.qb.parse.bind(this.qb)).join(', ')}
+				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''},
 			)`
 		);
 	}
