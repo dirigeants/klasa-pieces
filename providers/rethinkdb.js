@@ -16,10 +16,11 @@ module.exports = class extends Provider {
 
 	/**
 	 * Pings the Rethinkdb server.
-	 * @returns {number}
+	 * @returns {Promise<number>}
 	 */
 	async ping() {
-		return this.db.now().then(ping => Date.now() - ping);
+		const now = Date.now();
+		return (await this.db.now()) - now;
 	}
 
 	/**
