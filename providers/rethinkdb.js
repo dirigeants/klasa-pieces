@@ -15,6 +15,14 @@ module.exports = class extends Provider {
 	}
 
 	/**
+	 * Pings the Rethinkdb server.
+	 * @returns {number}
+	 */
+	async ping() {
+		return `${new Date() - await this.db.now()}ms`;
+	}
+
+	/**
 	 * Checks if the table exists.
 	 * @param {string} table the name of the table you want to check.
 	 * @returns {Promise<boolean>}
