@@ -19,7 +19,7 @@ module.exports = class extends Provider {
 	 * @returns {number}
 	 */
 	async ping() {
-		return this.db.now().then(ping => Date.now() - ping)
+		return this.db.now().then(ping => Date.now() - ping);
 	}
 
 	/**
