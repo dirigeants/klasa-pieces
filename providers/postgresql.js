@@ -140,7 +140,7 @@ module.exports = class extends SQLProvider {
 
 	/**
 	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id    The value of the id
+	 * @param {string} id The value of the id
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {

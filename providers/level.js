@@ -32,28 +32,28 @@ module.exports = class extends Provider {
 	/* Table methods */
 
 	/**
-     * Checks if a directory exists.
-     * @param {string} table The name of the table you want to check.
-     * @returns {Promise<boolean>}
-     */
+	 * Checks if a directory exists.
+	 * @param {string} table The name of the table you want to check.
+	 * @returns {Promise<boolean>}
+	 */
 	hasTable(table) {
 		return this.tables.has(table);
 	}
 
 	/**
-     * Creates a new directory.
-     * @param {string} table The name for the new directory.
-     * @returns {Promise<void>}
-     */
+	 * Creates a new directory.
+	 * @param {string} table The name for the new directory.
+	 * @returns {Promise<void>}
+	 */
 	createTable(table) {
 		return this.tables.set(table, new Level(resolve(this.baseDir, table)));
 	}
 
 	/**
-     * Recursively deletes a directory.
-     * @param {string} table The directory's name to delete.
-     * @returns {Promise<void>}
-     */
+	 * Recursively deletes a directory.
+	 * @param {string} table The directory's name to delete.
+	 * @returns {Promise<void>}
+	 */
 	deleteTable(table) {
 		if (this.tables.has(table)) return this.tables.get(table).destroy();
 		return Promise.resolve();
@@ -62,10 +62,10 @@ module.exports = class extends Provider {
 	/* Document methods */
 
 	/**
-     * Get all documents from a directory.
-     * @param {string} table The name of the directory to fetch from.
-     * @returns {Promise<Object[]>}
-     */
+	 * Get all documents from a directory.
+	 * @param {string} table The name of the directory to fetch from.
+	 * @returns {Promise<Object[]>}
+	 */
 	getAll(table) {
 		const db = this.tables.get(table);
 		if (!db) return Promise.reject(new Error(`The table ${table} does not exist.`));
@@ -94,11 +94,11 @@ module.exports = class extends Provider {
 	}
 
 	/**
-     * Get a document from a directory.
-     * @param {string} table The name of the directory.
-     * @param {string} document The document name.
-     * @returns {Promise<?Object>}
-     */
+	 * Get a document from a directory.
+	 * @param {string} table The name of the directory.
+	 * @param {string} document The document name.
+	 * @returns {Promise<?Object>}
+	 */
 	get(table, document) {
 		return this.tables.get(table).get(document)
 			.then(JSON.parse)
@@ -106,11 +106,11 @@ module.exports = class extends Provider {
 	}
 
 	/**
-     * Check if the document exists.
-     * @param {string} table The name of the directory.
-     * @param {string} document The document name.
-     * @returns {Promise<boolean>}
-     */
+	 * Check if the document exists.
+	 * @param {string} table The name of the directory.
+	 * @param {string} document The document name.
+	 * @returns {Promise<boolean>}
+	 */
 	has(table, document) {
 		return this.tables.get(table).has(document).then(Boolean);
 	}
@@ -139,45 +139,45 @@ module.exports = class extends Provider {
 	}
 
 	/**
-     * Insert a new document into a directory.
-     * @param {string} table The name of the directory.
-     * @param {string} document The document name.
-     * @param {Object} [data={}] The object with all properties you want to insert into the document.
-     * @returns {Promise<void>}
-     */
+	 * Insert a new document into a directory.
+	 * @param {string} table The name of the directory.
+	 * @param {string} document The document name.
+	 * @param {Object} [data={}] The object with all properties you want to insert into the document.
+	 * @returns {Promise<void>}
+	 */
 	create(table, document, data = {}) {
 		return this.tables.get(table).put(document, JSON.stringify(mergeObjects(this.parseUpdateInput(data), { id: document })));
 	}
 
 	/**
-     * Update a document from a directory.
-     * @param {string} table The name of the directory.
-     * @param {string} document The document name.
-     * @param {Object} data The object with all the properties you want to update.
-     * @returns {Promise<void>}
-     */
+	 * Update a document from a directory.
+	 * @param {string} table The name of the directory.
+	 * @param {string} document The document name.
+	 * @param {Object} data The object with all the properties you want to update.
+	 * @returns {Promise<void>}
+	 */
 	async update(table, document, data) {
 		const existent = await this.get(table, document) || { id: document };
 		return this.create(table, document, mergeObjects(existent, this.parseUpdateInput(data)));
 	}
 
 	/**
-     * Replace all the data from a document.
-     * @param {string} table The name of the directory.
-     * @param {string} document The document name.
-     * @param {Object} data The new data for the document.
-     * @returns {Promise<void>}
-     */
+	 * Replace all the data from a document.
+	 * @param {string} table The name of the directory.
+	 * @param {string} document The document name.
+	 * @param {Object} data The new data for the document.
+	 * @returns {Promise<void>}
+	 */
 	replace(table, document, data) {
 		return this.create(table, document, data);
 	}
 
 	/**
-     * Delete a document from the table.
-     * @param {string} table The name of the directory.
-     * @param {string} document The document name.
-     * @returns {Promise<void>}
-     */
+	 * Delete a document from the table.
+	 * @param {string} table The name of the directory.
+	 * @param {string} document The document name.
+	 * @returns {Promise<void>}
+	 */
 	delete(table, document) {
 		return this.get(table, document)
 			.then(db => db.delete(document));

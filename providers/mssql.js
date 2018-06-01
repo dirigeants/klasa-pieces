@@ -55,7 +55,7 @@ module.exports = class extends SQLProvider {
 	hasTable(table) {
 		return this.run(`IF ( EXISTS (
 			SELECT *
-           	FROM  INFORMATION_SCHEMA.TABLES
+           	FROM INFORMATION_SCHEMA.TABLES
 			WHERE TABLE_NAME = @0
 		) )`, [table]);
 	}
@@ -100,7 +100,7 @@ module.exports = class extends SQLProvider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} [key] The key to filter the data from. Requires the value parameter
-	 * @param {*}    [value] The value to filter the data from. Requires the key parameter
+	 * @param {*} [value] The value to filter the data from. Requires the key parameter
 	 * @param {number} [limit] The maximum range. Must be higher than the limitMin parameter
 	 * @returns {Promise<Object[]>}
 	 */
@@ -125,7 +125,7 @@ module.exports = class extends SQLProvider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} key The key to filter the data from
-	 * @param {*}    [value] The value of the filtered key
+	 * @param {*} [value] The value of the filtered key
 	 * @returns {Promise<Object>}
 	 */
 	get(table, key, value) {
@@ -140,7 +140,7 @@ module.exports = class extends SQLProvider {
 
 	/**
 	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id    The value of the id
+	 * @param {string} id The value of the id
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
