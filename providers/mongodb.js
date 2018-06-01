@@ -43,11 +43,10 @@ module.exports = class extends Provider {
 	/**
 	 * Create a collection within a DB. Options may be specfied, refer to MongoDB docs.
 	 * @param {string} table Name of the Collection to crate
-	 * @param {Object} [options={}] Object containing various options for the created Collection
 	 * @returns {Promise<Collection>} Returns a promise containing the created Collection.
 	 */
-	createTable(table, options = {}) {
-		return this.db.createCollection(table, options);
+	createTable(table) {
+		return this.db.createCollection(table);
 	}
 
 	createCollection(...args) {
