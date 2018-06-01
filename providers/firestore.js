@@ -149,7 +149,9 @@ module.exports = class extends Provider {
 			await Promise.all(keys.map(doc => this.update(table, doc, { path: newValue })));
 		}
 
-		else throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
+		else {
+			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
+		}
 	}
 
 	/**
@@ -169,7 +171,9 @@ module.exports = class extends Provider {
 			await Promise.all(keys.map(doc => this.update(table, doc, { path: FieldValue.deleteValue() })));
 		}
 
-		else throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
+		else {
+			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`)
+		};
 	}
 
 };
