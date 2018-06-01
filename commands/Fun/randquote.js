@@ -15,8 +15,8 @@ module.exports = class extends Command {
 		let messageBank = await msg.channel.messages.fetch({ limit: 100 });
 
 		for (let i = 0; i < 6; i++) {
-			const FetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
-			messageBank = messageBank.concat(FetchedMessages);
+			const fetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
+			messageBank = messageBank.concat(fetchedMessages);
 		}
 
 		for (let i = 0; i < messageBank.size; i++) {
