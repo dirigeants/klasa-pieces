@@ -23,7 +23,7 @@ module.exports = class extends Command {
 		const embed = new MessageEmbed()
 			.setColor(6570406)
 			.setAuthor(`${twitchName} has been following ${channelName} for ${days} days.`, logo);
-		return msg.send({ embed });
+		return msg.sendEmbed({ embed });
 	}
 	differenceDays(first, second) {
 		return parseInt((second - first) / (1000 * 60 * 60 * 24));

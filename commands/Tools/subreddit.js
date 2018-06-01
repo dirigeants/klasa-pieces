@@ -30,7 +30,7 @@ module.exports = class extends Command {
 			.addField('Subscribers', subreddit.subscribers.toLocaleString(), true)
 			.addField('Users Active', subreddit.accounts_active.toLocaleString(), true);
 
-		return msg.send({ embed });
+		return msg.sendEmbed({ embed });
 	}
 
 };

@@ -27,7 +27,7 @@ module.exports = class extends Command {
 			const embed = new MessageEmbed()
 				.setDescription(message.content)
 				.setAuthor(message.author.username, message.author.avatarURL());
-			return msg.send({ embed });
+			return msg.sendEmbed({ embed });
 		}
 		return msg.send(`Couldn't find a quote.`);
 	}
