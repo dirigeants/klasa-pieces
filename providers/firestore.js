@@ -30,8 +30,8 @@ module.exports = class extends Provider {
 	}
 
 	/**
-	 * This method is a dummy method, as new tables/collections are automaiccaly created by firestore when needed.
-	 * @param {string} table Name od the collection to create.
+	 * This method is a dummy method, as new tables/collections are automatically created by firestore when needed.
+	 * @param {string} table Name of the collection to create.
 	 * @returns {Promise<Collection>}
 	 */
 	createTable(table) {
