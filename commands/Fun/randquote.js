@@ -12,15 +12,15 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		let MessageBank = await msg.channel.messages.fetch({ limit: 100 });
+		let messageBank = await msg.channel.messages.fetch({ limit: 100 });
 
 		for (let i = 0; i < 6; i++) {
-			const FetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: MessageBank.last().id });
-			MessageBank = MessageBank.concat(FetchedMessages);
+			const FetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
+			messageBank = messageBank.concat(FetchedMessages);
 		}
 
-		for (let i = 0; i < MessageBank.size; i++) {
-			const message = MessageBank.random();
+		for (let i = 0; i < messageBank.size; i++) {
+			const message = messageBank.random();
 			if (message.author.bot) continue;
 			if (message.content.replace(/\W/g, '').replace(/[0-9]/g, '').length < 20) continue;
 

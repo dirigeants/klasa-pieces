@@ -11,14 +11,14 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		let MessageBank = await msg.channel.messages.fetch({ limit: 100 });
+		let messageBank = await msg.channel.messages.fetch({ limit: 100 });
 		const MarkovBank = [];
 		for (let i = 0; i < 20; i++) {
-			const FetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: MessageBank.last().id });
-			MessageBank = MessageBank.concat(FetchedMessages);
+			const FetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
+			messageBank = messageBank.concat(FetchedMessages);
 		}
 
-		for (const message of MessageBank.values()) {
+		for (const message of messageBank.values()) {
 			if (!message.content) continue;
 			MarkovBank.push(message.content);
 		}

@@ -16,14 +16,14 @@ module.exports = class extends Command {
 	async run(msg) {
 		const FinalImage = new Canvas(2000, 2000);
 		const ctx = FinalImage.getContext('2d');
-		let MessageBank = await msg.channel.messages.fetch({ limit: 100 });
+		let messageBank = await msg.channel.messages.fetch({ limit: 100 });
 		const wordBank = {};
 		for (let i = 0; i < 20; i++) {
-			const FetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: MessageBank.last().id });
-			MessageBank = MessageBank.concat(FetchedMessages);
+			const FetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
+			messageBank = messageBank.concat(FetchedMessages);
 		}
 
-		for (const message of MessageBank.values()) {
+		for (const message of messageBank.values()) {
 			if (!message.content) continue;
 			if (message.content.length <= 2) continue;
 			message.content.split('.').join(' ').split(' ').forEach(word => {
