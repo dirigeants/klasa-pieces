@@ -5,24 +5,30 @@
  * ###################################
  */
 
-const { SQLProvider, Type } = require('klasa');
+const { SQLProvider, QueryBuilder, Type, Timestamp } = require('klasa');
 const { resolve } = require('path');
 const db = require('sqlite');
 const fs = require('fs-nextra');
+
+const TIMEPARSERS = {
+	DATE: new Timestamp('YYYY-MM-DD'),
+	DATETIME: new Timestamp('YYYY-MM-DD hh:mm:ss')
+};
 
 module.exports = class extends SQLProvider {
 
 	constructor(...args) {
 		super(...args);
 		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'sqlite');
-		this.CONSTANTS = {
-			String: 'TEXT',
-			Integer: 'INTEGER',
-			Float: 'INTEGER',
-			AutoID: 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
-			Timestamp: 'DATETIME',
-			AutoTS: 'DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL'
-		};
+		this.qb = new QueryBuilder({
+			null: 'NULL',
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			float: 'DOUBLE PRECISION',
+			boolean: { type: 'TINYINT', resolver: (input) => input ? '1' : '0' },
+			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) }
+		});
 	}
 
 	async init() {

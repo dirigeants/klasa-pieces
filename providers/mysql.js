@@ -19,17 +19,14 @@ module.exports = class extends SQLProvider {
 		super(...args);
 		this.qb = new QueryBuilder({
 			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'` },
-			boolean: { type: 'BIT(1)', resolver: (input) => input ? 1 : 0 },
+			boolean: { type: 'BIT(1)', resolver: (input) => input ? '1' : '0' },
 			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
 			float: 'DOUBLE PRECISION',
 			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
 			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'` },
 			null: 'NULL',
 			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
-			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
-			array: type => type,
-			arrayResolver: (values) => `'${sanitizeString(JSON.stringify(values))}'`,
-			formatDatatype: (name, datatype, def = null) => `\`${name}\` ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) }
 		});
 		this.db = null;
 	}
