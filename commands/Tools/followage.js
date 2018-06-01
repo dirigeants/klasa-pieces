@@ -1,7 +1,11 @@
 const { Command } = require('klasa');
 const snekfetch = require('snekfetch');
 const { MessageEmbed } = require('discord.js');
-const twitchClientID = 'https://dev.twitch.tv/';
+
+/**
+ * https://dev.twitch.tv/docs/v5/guides/authentication/
+ */
+const clientID = 'CLIENT_ID_HERE';
 
 module.exports = class extends Command {
 
@@ -16,7 +20,8 @@ module.exports = class extends Command {
 
 	async run(msg, [twitchName, channelName]) {
 		const [days, logo] = await snekfetch
-			.get(`https://api.twitch.tv/kraken/users/${twitchName}/follows/channels/${channelName}?client_id=${twitchClientID}`)
+			.get(`https://api.twitch.tv/kraken/users/${twitchName}/follows/channels/${channelName}`)
+			.query('client_id', clientID)
 			.then(res => [this.differenceDays(new Date(res.body.created_at), new Date()), res.body.channel.logo])
 			.catch(() => msg.send(`${twitchName} isn't following ${channelName}, or it is banned, or doesn't exist at all.`));
 
