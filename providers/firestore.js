@@ -143,8 +143,7 @@ module.exports = class extends Provider {
 
 		if (typeof path === 'object' && typeof newValue === 'undefined') {
 			await Promise.all(keys.map(doc => this.update(table, doc, path)));
-		} else
-		if (typeof path === 'string' && typeof newValue !== 'undefined') {
+		} else if (typeof path === 'string' && typeof newValue !== 'undefined') {
 			await Promise.all(keys.map(doc => this.update(table, doc, { path: newValue })));
 		} else {
 			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
