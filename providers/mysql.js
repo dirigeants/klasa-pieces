@@ -1,14 +1,17 @@
-const { Provider, util: { mergeDefault } } = require('klasa');
+const { SQLProvider, util: { mergeDefault } } = require('klasa');
+
+/**
+ * NOTE: You need to install mysql2
+ * https://www.npmjs.com/package/mysql2
+ *
+ * The library has a folder called promise, which we're accessing
+ */
 const mysql = require('mysql2/promise');
 
-module.exports = class MySQL extends Provider {
+module.exports = class extends SQLProvider {
 
 	constructor(...args) {
-		super(...args, {
-			enabled: true,
-			sql: true,
-			description: 'Allows you to use MySQL functionality throught Klasa'
-		});
+		super(...args);
 		this.TYPES = DATATYPES;
 		this.db = null;
 	}
@@ -41,7 +44,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		requestType('MySQL#hasTable', 'table', 'string', table);
 		return this.run(`SHOW TABLES LIKE '${table}';`)
 			.then(result => !!result)
 			.catch(() => false);
@@ -53,9 +55,17 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	createTable(table, rows) {
-		requestType('MySQL#createTable', 'table', 'string', table);
-		requestType('MySQL#createTable', 'rows', 'string', rows.map(([k, v]) => `${k} ${v}`).join(', '));
-		return this.runAll(`CREATE TABLE ${sanitizeKeyName(table)} (${rows});`);
+		if (rows) return this.runAll(`CREATE TABLE ${sanitizeKeyName(table)} (${rows});`);
+
+		const gateway = this.client.gateways[table];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
+
+		const schemaValues = [...gateway.schema.values(true)];
+		return this.run(`
+			CREATE TABLE ${sanitizeKeyName(table)} (
+				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+			)`
+		);
 	}
 
 	/**
@@ -63,7 +73,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	deleteTable(table) {
-		requestType('MySQL#deleteTable', 'table', 'string', table);
 		return this.exec(`DROP TABLE ${sanitizeKeyName(table)};`);
 	}
 
@@ -72,7 +81,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<number>}
 	 */
 	countRows(table) {
-		requestType('MySQL#deleteTable', 'table', 'string', table);
 		return this.run(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`)
 			.then(result => result['COUNT(*)']);
 	}
@@ -88,13 +96,13 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	getAll(table, key, value, limitMin, limitMax) {
-		requestType('MySQL#getAll', 'table', 'string', table);
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-			requestType('MySQL#getAll', 'key', 'string', key);
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeInput(value)} ${parseRange(limitMin, limitMax)};`);
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeInput(value)} ${parseRange(limitMin, limitMax)};`)
+				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 
-		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`);
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`)
+			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
 	/**
@@ -102,7 +110,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	getKeys(table) {
-		requestType('MySQL#getKeys', 'table', 'string', table);
 		return this.runAll(`SELECT id FROM ${sanitizeKeyName(table)};`)
 			.then(rows => rows.map(row => row.id));
 	}
@@ -114,17 +121,13 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	get(table, key, value) {
-		requestType('MySQL#get', 'table', 'string', table);
-
 		// If a key is given (id), swap it and search by id - value
 		if (typeof value === 'undefined') {
 			value = key;
 			key = 'id';
 		}
-		requestType('MySQL#get', 'key', 'string', key);
-		requestValue('MySQL#get', 'value', value);
 		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeInput(value)} LIMIT 1;`)
-			.catch(throwError);
+			.then(result => this.parseEntry(table, result));
 	}
 
 	/**
@@ -133,10 +136,8 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
-		requestType('MySQL#has', 'table', 'string', table);
-		requestType('MySQL#has', 'id', 'string', id);
 		return this.run(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeString(id)} LIMIT 1;`)
-			.then(row => !!row);
+			.then(Boolean);
 	}
 
 	/**
@@ -144,8 +145,8 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		requestType('MySQL#getRandom', 'table', 'string', table);
-		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RAND() LIMIT 1;`);
+		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RAND() LIMIT 1;`)
+			.then(result => this.parseEntry(table, result));
 	}
 
 	/**
@@ -157,26 +158,22 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	async getSorted(table, key, order = 'DESC', limitMin, limitMax) {
-		requestType('MySQL#getSorted', 'table', 'string', table);
-		requestType('MySQL#getSorted', 'key', 'string', key);
 		if (order !== 'DESC' && order !== 'ASC') {
 			throw new TypeError(`MySQL#getSorted 'order' parameter expects either 'DESC' or 'ASC'. Got: ${order}`);
 		}
 
-		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`);
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`)
+			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
 	/**
 	 * @param {string} table The name of the table to insert the new data
 	 * @param {string} id The id of the new row to insert
-	 * @param {(string|string[]|{})} [param1] The first parameter to validate.
-	 * @param {*} [param2] The second parameter to validate.
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
 	 * @returns {Promise<any[]>}
 	 */
-	insert(table, id, param1, param2) {
-		requestType('MySQL#insert', 'table', 'string', table);
-		requestType('MySQL#insert', 'id', 'string', id);
-		const [keys, values] = acceptArbitraryInput(param1, param2);
+	create(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
 
 		// Push the id to the inserts.
 		keys.push('id');
@@ -185,30 +182,26 @@ module.exports = class MySQL extends Provider {
 	}
 
 	/**
-	 * @param {...*} args The arguments
-	 * @alias MySQL#insert
-	 * @returns {Promise<any[]>}
-	 */
-	create(...args) {
-		return this.insert(...args);
-	}
-
-	/**
 	 * @param {string} table The name of the table to update the data from
 	 * @param {string} id The id of the row to update
-	 * @param {(string|string[]|{})} param1 The first parameter to validate.
-	 * @param {*} [param2] The second parameter to validate.
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
 	 * @returns {Promise<any[]>}
 	 */
-	update(table, id, param1, param2) {
-		requestType('MySQL#update', 'table', 'string', table);
-		requestType('MySQL#update', 'id', 'string', id);
-
-		const [keys, values] = acceptArbitraryInput(param1, param2);
+	update(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
 		const update = new Array(keys.length);
 		for (let i = 0; i < keys.length; i++) update[i] = `${sanitizeKeyName(keys[i])} = ${sanitizeInput(values[i])}`;
 
 		return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${update.join(', ')} WHERE id = ${sanitizeString(id)};`);
+	}
+
+	/**
+	 * @param {...*} args The arguments
+	 * @alias MSSQL#update
+	 * @returns {Promise<any[]>}
+	 */
+	replace(...args) {
+		return this.update(...args);
 	}
 
 	/**
@@ -219,10 +212,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	incrementValue(table, id, key, amount = 1) {
-		requestType('MySQL#incrementValue', 'table', 'string', table);
-		requestType('MySQL#incrementValue', 'id', 'string', id);
-		requestType('MySQL#incrementValue', 'key', 'string', key);
-		requestType('MySQL#incrementValue', 'amount', 'number', amount);
 		if (amount < 0 || isNaN(amount) || Number.isInteger(amount) === false || Number.isSafeInteger(amount) === false) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
 		}
@@ -238,10 +227,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	decrementValue(table, id, key, amount = 1) {
-		requestType('MySQL#decrementValue', 'table', 'string', table);
-		requestType('MySQL#decrementValue', 'id', 'string', id);
-		requestType('MySQL#decrementValue', 'key', 'string', key);
-		requestType('MySQL#decrementValue', 'amount', 'number', amount);
 		if (amount < 0 || isNaN(amount) || Number.isInteger(amount) === false || Number.isSafeInteger(amount) === false) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
 		}
@@ -255,7 +240,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	delete(table, id) {
-		requestType('MySQL#delete', 'table', 'string', table);
 		return this.exec(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeString(id)};`);
 	}
 
@@ -267,7 +251,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	addColumn(table, key, datatype) {
-		requestType('MySQL#addColumn', 'table', 'string', table);
 		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${sanitizeKeyName(key)} ${datatype};`);
 		if (typeof datatype === 'undefined' && Array.isArray(key)) {
 			return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ${key.map(([column, type]) =>
@@ -283,7 +266,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	removeColumn(table, key) {
-		requestType('MySQL#removeColumn', 'table', 'string', table);
 		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(key)};`);
 		if (Array.isArray(key)) return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP ${key.map(sanitizeKeyName).join(', ')};`);
 		throw new TypeError('Invalid usage of MySQL#removeColumn. Expected a string or string[].');
@@ -297,7 +279,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	updateColumn(table, key, datatype) {
-		requestType('MySQL#updateColumn', 'table', 'string', table);
 		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(key)} ${datatype};`);
 	}
 
@@ -336,60 +317,6 @@ module.exports = class MySQL extends Provider {
 };
 
 /**
- * Accept any kind of input from two parameters.
- * @param {(string|string[]|{})} param1 The first parameter to validate.
- * @param {*} [param2] The second parameter to validate.
- * @returns {[[], []]}
- * @private
- */
-function acceptArbitraryInput(param1, param2) {
-	if (typeof param1 === 'undefined' && typeof param2 === 'undefined') return [[], []];
-	if (typeof param1 === 'string' && typeof param2 !== 'undefined') return [[param1], [param2]];
-	if (Array.isArray(param1) && Array.isArray(param2)) {
-		if (param1.length !== param2.length) throw new TypeError(`The array lengths do not match: ${param1.length}-${param2.length}`);
-		if (param1.some(value => typeof value !== 'string')) throw new TypeError(`The array of keys must be an array of strings, but found a value that does not match.`);
-		return [param1, param2];
-	}
-	if (isObject(param1) && typeof param2 === 'undefined') {
-		const entries = [[], []];
-		getEntriesFromObject(param1, entries, '');
-		return entries;
-	}
-	throw new TypeError('Invalid input. Expected a key type of string and a value, tuple of arrays, or an object and undefined.');
-}
-
-/**
- * Get all entries from an object.
- * @param {Object} object The object to "flatify".
- * @param {[string[], any[]]} param1 The tuple of keys and values to check.
- * @param {string} path The current path.
- * @private
- */
-function getEntriesFromObject(object, [keys, values], path) {
-	const objectKeys = Object.keys(object);
-	for (let i = 0; i < objectKeys.length; i++) {
-		const key = objectKeys[i];
-		const value = object[key];
-		if (isObject(value)) {
-			getEntriesFromObject(value, [keys, values], path.length > 0 ? `${path}.${key}` : key);
-		} else {
-			keys.push(path.length > 0 ? `${path}.${key}` : key);
-			values.push(value);
-		}
-	}
-}
-
-/**
- * Check if a value is an object.
- * @param {*} object The object to validate.
- * @returns {boolean}
- * @private
- */
-function isObject(object) {
-	return Object.prototype.toString.call(object) === '[object Object]';
-}
-
-/**
  * @param {number} [min] The minimum value
  * @param {number} [max] The maximum value
  * @returns {string}
@@ -416,29 +343,6 @@ function parseRange(min, max) {
 	}
 
 	return `LIMIT ${min}${typeof max === 'number' ? `,${max}` : ''}`;
-}
-
-/**
- * @param {string} method The name of the method
- * @param {string} parameter The parameter name
- * @param {string} type The expected primitive type of the parameter
- * @param {*} value The value to test
- * @private
- */
-function requestType(method, parameter, type, value) {
-	const currentType = typeof value;
-	if (currentType !== type) throw new TypeError(`${method} '${parameter}' parameter expects type of ${type}. Got: ${currentType}`);
-}
-
-/**
- * @param {string} method The name of the method
- * @param {string} parameter The parameter name
- * @param {*} value The value to test if undefined
- * @private
- */
-function requestValue(method, parameter, value) {
-	const currentType = typeof value;
-	if (currentType === 'undefined') throw new TypeError(`${method} '${parameter}' parameter expects a value. Got: undefined`);
 }
 
 /**

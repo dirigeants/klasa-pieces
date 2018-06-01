@@ -1,4 +1,4 @@
-const { Provider } = require('klasa');
+const { Provider, util: { mergeObjects } } = require('klasa');
 const { resolve } = require('path');
 const fs = require('fs-nextra');
 const Level = require('native-level-promise');
@@ -7,10 +7,7 @@ const Collection = require('djs-collection');
 module.exports = class extends Provider {
 
 	constructor(...args) {
-		super(...args, {
-			name: 'level',
-			description: 'Allows you to use LevelDB functionality throught Klasa'
-		});
+		super(...args);
 		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'level');
 		this.tables = new Collection();
 	}
@@ -27,8 +24,8 @@ module.exports = class extends Provider {
 	 * @private
 	 */
 	async init() {
-		await fs.ensureDir(this.baseDir).catch(err => this.client.emit('log', err, 'error'));
-		const files = await fs.readdir(this.baseDir).catch(err => this.client.emit('log', err, 'error'));
+		await fs.ensureDir(this.baseDir);
+		const files = await fs.readdir(this.baseDir);
 		for (const file of files) this.createTable(file);
 	}
 
@@ -58,8 +55,8 @@ module.exports = class extends Provider {
      * @returns {Promise<void>}
      */
 	deleteTable(table) {
-		if (!this.hasTable(table)) return Promise.resolve();
-		return this.tables.get(table).destroy();
+		if (this.tables.has(table)) this.tables.get(table).destroy();
+		return Promise.resolve();
 	}
 
 	/* Document methods */
@@ -69,11 +66,15 @@ module.exports = class extends Provider {
      * @param {string} table The name of the directory to fetch from.
      * @returns {Promise<Object[]>}
      */
-	async getAll(table) {
-		const keys = await this.getKeys(table);
-		if (keys.length === 0) return [];
+	getAll(table) {
 		const db = this.tables.get(table);
-		return Promise.all(keys.map(key => db.get(key).then(JSON.parse)));
+		if (!db) return Promise.reject(new Error(`The table ${table} does not exist.`));
+		return new Promise((res) => {
+			const output = [];
+			db.createReadStream()
+				.on('data', (data) => output.push(JSON.parse(data.value)))
+				.on('end', res.bind(null, output));
+		});
 	}
 
 	/**
@@ -82,13 +83,13 @@ module.exports = class extends Provider {
 	 * @returns {Promise<string[]>}
 	 */
 	getKeys(table) {
+		const db = this.tables.get(table);
+		if (!db) return Promise.reject(new Error(`The table ${table} does not exist.`));
 		return new Promise((res) => {
-			const db = this.tables.get(table);
 			const output = [];
-			if (!db) res(output);
 			db.keyStream()
 				.on('data', key => output.push(key))
-				.on('end', () => res(output));
+				.on('end', res.bind(null, output));
 		});
 	}
 
@@ -99,7 +100,9 @@ module.exports = class extends Provider {
      * @returns {Promise<?Object>}
      */
 	get(table, document) {
-		return this.tables.get(table).get(document);
+		return this.tables.get(table).get(document)
+			.then(JSON.parse)
+			.catch(() => null);
 	}
 
 	/**
@@ -109,7 +112,7 @@ module.exports = class extends Provider {
      * @returns {Promise<boolean>}
      */
 	has(table, document) {
-		return Boolean(this.tables.get(table).has(document));
+		return this.tables.get(table).has(document).then(Boolean);
 	}
 
 	/**
@@ -143,15 +146,7 @@ module.exports = class extends Provider {
      * @returns {Promise<void>}
      */
 	create(table, document, data = {}) {
-		return this.tables.get(table).put(document, JSON.stringify(Object.assign(data, { id: document })));
-	}
-
-	set(...args) {
-		return this.create(...args);
-	}
-
-	insert(...args) {
-		return this.create(...args);
+		return this.tables.get(table).put(document, JSON.stringify(mergeObjects(this.parseUpdateInput(data), { id: document })));
 	}
 
 	/**
@@ -162,8 +157,8 @@ module.exports = class extends Provider {
      * @returns {Promise<void>}
      */
 	async update(table, document, data) {
-		const existent = await this.get(table, document);
-		return this.set(table, document, Object.assign(existent || { id: document }, data));
+		const existent = await this.get(table, document) || { id: document };
+		return this.create(table, document, mergeObjects(existent, this.parseUpdateInput(data)));
 	}
 
 	/**
@@ -174,7 +169,7 @@ module.exports = class extends Provider {
      * @returns {Promise<void>}
      */
 	replace(table, document, data) {
-		return this.set(table, document, data);
+		return this.create(table, document, data);
 	}
 
 	/**
