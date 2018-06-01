@@ -55,7 +55,7 @@ module.exports = class extends Provider {
      * @returns {Promise<void>}
      */
 	deleteTable(table) {
-		if (this.tables.has(table)) this.tables.get(table).destroy();
+		if (this.tables.has(table)) return this.tables.get(table).destroy();
 		return Promise.resolve();
 	}
 
