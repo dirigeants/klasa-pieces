@@ -1,4 +1,4 @@
-const { SQLProvider, util: { mergeDefault } } = require('klasa');
+const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault, isNumber, isObject } } = require('klasa');
 
 /**
  * NOTE: You need to install mysql2
@@ -8,11 +8,29 @@ const { SQLProvider, util: { mergeDefault } } = require('klasa');
  */
 const mysql = require('mysql2/promise');
 
+const TIMEPARSERS = {
+	DATE: new Timestamp('YYYY-MM-DD'),
+	DATETIME: new Timestamp('YYYY-MM-DD hh:mm:ss')
+};
+
 module.exports = class extends SQLProvider {
 
 	constructor(...args) {
 		super(...args);
-		this.TYPES = DATATYPES;
+		this.qb = new QueryBuilder({
+			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'` },
+			boolean: { type: 'BIT(1)', resolver: (input) => input ? 1 : 0 },
+			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			float: 'DOUBLE PRECISION',
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'` },
+			null: 'NULL',
+			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
+			array: type => type,
+			arrayResolver: (values) => `'${sanitizeString(JSON.stringify(values))}'`,
+			formatDatatype: (name, datatype, def = null) => `"${name}" ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
+		});
 		this.db = null;
 	}
 
@@ -289,8 +307,7 @@ module.exports = class extends SQLProvider {
 	 */
 	run(sql) {
 		return this.db.query(sql)
-			.then(([rows]) => rows[0])
-			.catch(throwError);
+			.then(([rows]) => rows[0]);
 	}
 
 	/**
@@ -300,8 +317,7 @@ module.exports = class extends SQLProvider {
 	 */
 	runAll(sql) {
 		return this.db.query(sql)
-			.then(([rows]) => rows)
-			.catch(throwError);
+			.then(([rows]) => rows);
 	}
 
 	/**
@@ -310,8 +326,7 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<Object[]>}
 	 */
 	exec(sql) {
-		return this.db.query(sql)
-			.catch(throwError);
+		return this.db.query(sql);
 	}
 
 };
@@ -351,11 +366,8 @@ function parseRange(min, max) {
  * @private
  */
 function sanitizeInteger(value) {
-	if (isNaN(value) || Number.isInteger(value) === false || Number.isSafeInteger(value) === false) {
-		throw new TypeError(`%MySQL.sanitizeNumber expects an integer, got ${value}`);
-	}
+	if (isNumber(value)) throw new TypeError(`%MySQL.sanitizeNumber expects an integer, got ${value}`);
 	if (value < 0) { throw new TypeError(`%MySQL.sanitizeNumber expects a positive integer, got ${value}`); }
-
 	return String(value);
 }
 
@@ -365,9 +377,7 @@ function sanitizeInteger(value) {
  * @private
  */
 function sanitizeString(value) {
-	if (value.length === 0) { throw new TypeError('%MySQL.sanitizeString expects a string with a length bigger than 0.'); }
-
-	return `'${value.replace(/'/g, "''")}'`;
+	return `'${String(value).replace(/'/g, "''")}'`;
 }
 
 /**
@@ -378,7 +388,6 @@ function sanitizeString(value) {
 function sanitizeKeyName(value) {
 	if (typeof value !== 'string') { throw new TypeError(`%MySQL.sanitizeString expects a string, got: ${typeof value}`); }
 	if (/`/.test(value)) { throw new TypeError(`Invalid input (${value}).`); }
-
 	return `\`${value}\``;
 }
 
@@ -389,10 +398,8 @@ function sanitizeKeyName(value) {
  */
 function sanitizeObject(value) {
 	if (value === null) return 'NULL';
-	if (Array.isArray(value)) return sanitizeString(JSON.stringify(value));
-	const type = Array.prototype.toString.call(value);
-	if (type === '[object Object]') return sanitizeString(JSON.stringify(value));
-	throw new TypeError(`%MySQL.sanitizeObject expects NULL, an array, or an object. Got: ${type}`);
+	if (Array.isArray(value) || isObject(value)) return sanitizeString(JSON.stringify(value));
+	throw new TypeError(`%MySQL.sanitizeObject expects NULL, an array, or an object. Got: ${new Type(value)}`);
 }
 
 /**
@@ -411,48 +418,11 @@ function sanitizeBoolean(value) {
  * @private
  */
 function sanitizeInput(value) {
-	const type = typeof value;
-	switch (type) {
+	switch (typeof value) {
 		case 'string': return sanitizeString(value);
 		case 'number': return sanitizeInteger(value);
 		case 'object': return sanitizeObject(value);
 		case 'boolean': return sanitizeBoolean(value);
-		default: throw new TypeError(`%MySQL.sanitizeInput expects type of string, number, or object. Got: ${type}`);
+		default: throw new TypeError(`%MySQL.sanitizeInput expects type of string, number, or object. Got: ${new Type(value)}`);
 	}
 }
-
-// In several V8 versions, Promise errors do not bubble up, this workaround
-// forces errors to do so.
-const throwError = (err) => { throw err; };
-
-const DATATYPES = {
-	DECIMAL: 'DECIMAL',
-	TINYINT: 'TINY',
-	SMALLINT: 'SHORT',
-	INT: 'LONG',
-	FLOAT: 'FLOAT',
-	DOUBLE: 'DOUBLE',
-	NULL: 'NULL',
-	TIMESTAMP: 'TIMESTAMP',
-	BIGINT: 'LONGLONG',
-	MEDIUMINT: 'INT24',
-	DATE: 'DATE',
-	TIME: 'TIME',
-	DATETIME: 'DATETIME',
-	YEAR: 'YEAR',
-	NEWDATE: 'NEWDATE',
-	VARCHAR: 'VARCHAR',
-	BIT: 'BIT',
-	BOOLEAN: 'BIT(1)',
-	JSON: 'JSON',
-	NEWDECIMAL: 'NEWDECIMAL',
-	ENUM: 'ENUM',
-	SET: 'SET',
-	TINYBLOB: 'TINY_BLOB',
-	MEDIUMBLOB: 'MEDIUM_BLOB',
-	LONGBLOB: 'LONG_BLOB',
-	BLOB: 'BLOB',
-	TEXT: 'TEXT',
-	STRING: 'STRING',
-	GEOMETRY: 'GEOMETRY'
-};
