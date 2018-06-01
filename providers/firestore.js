@@ -1,3 +1,19 @@
+/*
+1. Go to https://firebase.google.com/
+2. Login/Signup
+3. Go to Console
+4. Create new project
+5. Go to the database section
+6. Select Firestore. NOTE- Don't select Real time database
+7. Then in the LHS of the page, finda settings icon next to Project Overview, select Project settings.
+8. Go to service accounts
+9. Click Generate new private key, which will download a json file.
+10. Copy the databaseURL from the same page.
+11. Import the json, where ever you are initializing the client.
+12. Pass this to the constructor, providers: { default: 'firestore', firestore: { credentials: variable_name_for_json, databaseURL: 'databaseURL from the service account page.'}}
+13. Download the `firebase-admin` module.
+*/
+
 const { Provider } = require('klasa');
 const firebase = require('firebase-admin');
 const { FieldValue } = firebase;
@@ -165,18 +181,3 @@ module.exports = class extends Provider {
 
 };
 
-/*
-1. Go to https://firebase.google.com/
-2. Login/Signup
-3. Go to Console
-4. Create new project
-5. Go to the database section
-6. Select Firestore. NOTE- Don't select Real time database
-7. Then in the LHS of the page, finda settings icon next to Project Overview, select Project settings.
-8. Go to service accounts
-9. Click Generate new private key, which will download a json file.
-10. Copy the databaseURL from the same page.
-11. Import the json, where ever you are initializing the client.
-12. Pass this to the constructor, providers: { default: 'firestore', firestore: { credentials: variable_name_for_json, databaseURL: 'databaseURL from the service account page.'}}
-13. Download the `firebase-admin` module.
-*/
