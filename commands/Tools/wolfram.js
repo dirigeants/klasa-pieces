@@ -14,7 +14,11 @@ module.exports = class extends Command {
 
 	async run(msg, [query]) {
 		const { pods } = await snekfetch
-			.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(query)}&primary=true&appid=${wolframAppID}&output=json`)
+			.get('http://api.wolframalpha.com/v2/query')
+			.query('input', query)
+			.query('primary', true)
+			.query('appid', wolframAppID)
+			.query('output', 'json')
 			.then(res => JSON.parse(res.text).queryresult)
 			.catch(() => msg.send('There was an error. Please try again.'));
 
