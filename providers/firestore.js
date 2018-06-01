@@ -1,17 +1,17 @@
 /*
-1. Go to https://firebase.google.com/
-2. Login/Signup
-3. Go to Console
-4. Create new project
-5. Go to the database section
-6. Select Firestore. NOTE- Don't select Real time database
-7. Then in the LHS of the page, finda settings icon next to Project Overview, select Project settings.
-8. Go to service accounts
-9. Click Generate new private key, which will download a json file.
-10. Copy the databaseURL from the same page.
-11. Import the json, where ever you are initializing the client.
-12. Pass this to the constructor, providers: { default: 'firestore', firestore: { credentials: variable_name_for_json, databaseURL: 'databaseURL from the service account page.'}}
-13. Download the `firebase-admin` module.
+	1. Go to https://firebase.google.com/
+	2. Login/Signup
+	3. Go to Console
+	4. Create new project
+	5. Go to the database section
+	6. Select Firestore. NOTE- Don't select Real time database
+	7. Then in the LHS of the page, finda settings icon next to Project Overview, select Project settings.
+	8. Go to service accounts
+	9. Click Generate new private key, which will download a json file.
+	10. Copy the databaseURL from the same page.
+	11. Import the json, where ever you are initializing the client.
+	12. Pass this to the constructor, providers: { default: 'firestore', firestore: { credentials: variable_name_for_json, databaseURL: 'databaseURL from the service account page.'}}
+	13. Download the `firebase-admin` module.
 */
 
 const { Provider } = require('klasa');
@@ -97,8 +97,8 @@ module.exports = class extends Provider {
 	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc the object you want to insert in the table.
 	 * @returns {Promise<DocumentObject>}
 	 */
-	async create(table, id, doc = {}) {
-		return await this.db.collection(table).doc(id).set(this.parseUpdateInput(doc));
+	create(table, id, doc = {}) {
+		return this.db.collection(table).doc(id).set(this.parseUpdateInput(doc));
 	}
 
 	/**
@@ -108,8 +108,8 @@ module.exports = class extends Provider {
 	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc the object you want to insert in the table.
 	 * @returns {Promise<WriteResult>}
 	 */
-	async update(table, id, doc) {
-		return await this.db.collection(table).doc(id).set(this.parseUpdateInput(doc), { merge: true });
+	update(table, id, doc) {
+		return this.db.collection(table).doc(id).update(this.parseUpdateInput(doc));
 	}
 
 	/**
@@ -145,11 +145,11 @@ module.exports = class extends Provider {
 			await Promise.all(keys.map(doc => this.update(table, doc, path)));
 		}
 
-		if (typeof path === 'string' && typeof newValue !== 'undefined') {
+		else if (typeof path === 'string' && typeof newValue !== 'undefined') {
 			await Promise.all(keys.map(doc => this.update(table, doc, { path: newValue })));
 		}
 
-		throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
+		else throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
 	}
 
 	/**
@@ -165,18 +165,11 @@ module.exports = class extends Provider {
 			await Promise.all(keys.map(doc => this.update(table, doc, path)));
 		}
 
-		if (typeof path === 'string' && typeof newValue !== 'undefined') {
+		else if (typeof path === 'string' && typeof newValue !== 'undefined') {
 			await Promise.all(keys.map(doc => this.update(table, doc, { path: FieldValue.deleteValue() })));
 		}
 
-		throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
-	}
-	set(...args) {
-		return this.create(...args);
-	}
-
-	insert(...args) {
-		return this.create(...args);
+		else throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
 	}
 
 };
