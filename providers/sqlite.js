@@ -56,8 +56,16 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<Object>}
 	 */
 	createTable(table, rows) {
-		const query = rows.map(row => `${sanitizeKeyName(row[0])} ${row[1]}`).join(', ');
-		return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${query});`);
+		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
+		const gateway = this.client.gateways[table];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
+
+		const schemaValues = [...gateway.schema.values(true)];
+		return this.run(`
+			CREATE TABLE ${sanitizeKeyName(table)} (
+				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+			)`
+		);
 	}
 
 	/**
@@ -182,22 +190,29 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<boolean>}
 	 */
 	async removeColumn(table, key) {
-		const columns = await this.getColumns(table);
-		const newSchema = [];
-		const newColumns = [];
-		for (let i = 0; i < columns.length; i++) {
-			if (columns[i][0] === key) continue;
-			newSchema.push(`\`${columns[i][0]}\` ${columns[i][1]}`);
-			newColumns.push(columns[i][0]);
-		}
-		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
+		const gateway = this.client.gateways[gateway];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
+
+		const sanitizedTable = sanitizeKeyName(table),
+			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
+
+		const allPieces = [...gateway.schema.values(true)];
+		const index = allPieces.findIndex(piece => key === piece.path);
+		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+
+		const filteredPieces = allPieces.slice();
+		filteredPieces.splice(index, 1);
+
+		const filteredPiecesNames = filteredPieces.map(piece => sanitizeKeyName(piece.path)).join(', ');
+
+		await this.createTable(sanitizedCloneTable, filteredPieces.map(this.qb.parse.bind(this.qb)));
 		await this.exec([
-			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')}\`)`,
-			`	SELECT \`${newColumns.join('`, `')}\``,
-			`	FROM \`${table}\``
+			`INSERT INTO ${sanitizedCloneTable} (${filteredPiecesNames})`,
+			`	SELECT ${filteredPiecesNames}`,
+			`	FROM ${sanitizedTable}`
 		].join('\n'));
-		await this.exec(`DROP TABLE \`${table}\``);
-		await this.exec(`ALTER TABLE \`${table}_temp\` RENAME TO \`${table}\``);
+		await this.exec(`DROP TABLE ${sanitizedTable}`);
+		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable}`);
 		return true;
 	}
 
@@ -209,22 +224,28 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<boolean>}
 	 */
 	async updateColumn(table, key, datatype) {
-		const columns = await this.getColumns(table);
-		const newSchema = [];
-		const newColumns = [];
-		for (let i = 0; i < columns.length; i++) {
-			if (columns[i][0] === key) columns[i][1] = datatype;
-			newSchema.push(`\`${columns[i][0]}\` ${columns[i][1]}`);
-			newColumns.push(columns[i][0]);
-		}
-		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
+		const gateway = this.client.gateways[gateway];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
+
+		const sanitizedTable = sanitizeKeyName(table),
+			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
+
+		const allPieces = [...gateway.schema.values(true)];
+		const index = allPieces.findIndex(piece => key === piece.path);
+		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+
+		const allPiecesNames = allPieces.map(piece => sanitizeKeyName(piece.path)).join(', ');
+		const parsedDatatypes = allPieces.map(this.qb.parse.bind(this.qb));
+		parsedDatatypes[index] = `${sanitizeKeyName(key)} ${datatype}`;
+
+		await this.createTable(sanitizedCloneTable, parsedDatatypes);
 		await this.exec([
-			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')}\`)`,
-			`	SELECT \`${newColumns.join('`, `')}\``,
-			`	FROM \`${table}\``
+			`INSERT INTO ${sanitizedCloneTable} (${allPiecesNames})`,
+			`	SELECT ${allPiecesNames}`,
+			`	FROM ${sanitizedTable}`
 		].join('\n'));
-		await this.exec(`DROP TABLE \`${table}\``);
-		await this.exec(`ALTER TABLE \`${table}_temp\` RENAME TO \`${table}\``);
+		await this.exec(`DROP TABLE ${sanitizedTable}`);
+		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable}`);
 		return true;
 	}
 
