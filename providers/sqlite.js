@@ -1,10 +1,3 @@
-/**
- * ###################################
- * #             OUTDATED            #
- * # THIS PROVIDER IS NOT UP-TO-DATE #
- * ###################################
- */
-
 const { SQLProvider, QueryBuilder, Type, Timestamp } = require('klasa');
 const { resolve } = require('path');
 const db = require('sqlite');
