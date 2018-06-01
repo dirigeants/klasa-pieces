@@ -141,19 +141,12 @@ module.exports = class extends Provider {
 	async updateValue(table, path, newValue) {
 		const keys = await this.getKeys(table);
 
-		if (typeof path === 'object' && typeof newValue === 'undefined') 
-		{
+		if (typeof path === 'object' && typeof newValue === 'undefined') {
 			await Promise.all(keys.map(doc => this.update(table, doc, path)));
-		}
-
-		else 
-		if (typeof path === 'string' && typeof newValue !== 'undefined') 
-		{
+		} else
+		if (typeof path === 'string' && typeof newValue !== 'undefined') {
 			await Promise.all(keys.map(doc => this.update(table, doc, { path: newValue })));
-		}
-
-		else 
-		{
+		} else {
 			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
 		}
 	}
@@ -166,19 +159,12 @@ module.exports = class extends Provider {
 	 */
 	async removeValue(table, path) {
 		const keys = await this.getKeys(table);
-		if (typeof path === 'object' && typeof newValue === 'undefined') 
-		{
+		if (typeof path === 'object' && typeof newValue === 'undefined') {
 			for (const key of Object.keys(path)) path[key] = FieldValue.deleteValue();
 			await Promise.all(keys.map(doc => this.update(table, doc, path)));
-		}
-
-		else if (typeof path === 'string' && typeof newValue !== 'undefined') 
-		{
+		} else if (typeof path === 'string' && typeof newValue !== 'undefined') {
 			await Promise.all(keys.map(doc => this.update(table, doc, { path: FieldValue.deleteValue() })));
-		}
-
-		else 
-		{
+		} else {
 			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
 		}
 	}
