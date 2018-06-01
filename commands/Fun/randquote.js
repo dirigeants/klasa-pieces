@@ -29,7 +29,7 @@ module.exports = class extends Command {
 				.setAuthor(message.author.username, message.author.avatarURL());
 			return msg.sendEmbed({ embed });
 		}
-		return msg.send(`Couldn't find a quote.`);
+		return msg.sendMessage(`Couldn't find a quote.`);
 	}
 
 };

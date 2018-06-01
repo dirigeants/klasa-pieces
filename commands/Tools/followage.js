@@ -23,7 +23,7 @@ module.exports = class extends Command {
 			.get(`https://api.twitch.tv/kraken/users/${twitchName}/follows/channels/${channelName}`)
 			.query('client_id', clientID)
 			.then(res => [this.differenceDays(new Date(res.body.created_at), new Date()), res.body.channel.logo])
-			.catch(() => msg.send(`${twitchName} isn't following ${channelName}, or it is banned, or doesn't exist at all.`));
+			.catch(() => msg.sendMessage(`${twitchName} isn't following ${channelName}, or it is banned, or doesn't exist at all.`));
 
 		const embed = new MessageEmbed()
 			.setColor(6570406)

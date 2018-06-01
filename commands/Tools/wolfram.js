@@ -20,11 +20,11 @@ module.exports = class extends Command {
 			.query('appid', wolframAppID)
 			.query('output', 'json')
 			.then(res => JSON.parse(res.text).queryresult)
-			.catch(() => msg.send('There was an error. Please try again.'));
+			.catch(() => msg.sendMessage('There was an error. Please try again.'));
 
 		if (!pods || pods.error) throw "Couldn't find an answer to that question!";
 
-		return msg.send(`
+		return msg.sendMessage(`
 **Input Interpretation:** ${pods[0].subpods[0].plaintext}
 **Result:** ${pods[1].subpods[0].plaintext.substring(0, 1500)}
 `);

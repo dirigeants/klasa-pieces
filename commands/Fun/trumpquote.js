@@ -14,8 +14,8 @@ module.exports = class extends Command {
 		const { value } = await snekfetch
 			.get(`https://api.tronalddump.io/random/quote`)
 			.then(res => JSON.parse(res.body))
-			.catch(() => msg.send('There was an error. Please try again.'));
-		return msg.send(value);
+			.catch(() => msg.sendMessage('There was an error. Please try again.'));
+		return msg.sendMessage(value);
 	}
 
 };

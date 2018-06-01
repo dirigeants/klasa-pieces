@@ -14,7 +14,7 @@ module.exports = class extends Command {
 
 	async run(msg, [code]) {
 		const { body } = await post('https://hastebin.com/documents').send(code);
-		return msg.send(`https://hastebin.com/${body.key}`);
+		return msg.sendMessage(`https://hastebin.com/${body.key}`);
 	}
 
 };

@@ -54,7 +54,7 @@ module.exports = class extends Command {
 				ctx.rotate(-rotation);
 			}
 			const buffer = FinalImage.toBuffer();
-			return msg.send(new MessageAttachment(buffer, this.randFileName()));
+			return msg.sendMessage(new MessageAttachment(buffer, this.randFileName()));
 		};
 
 

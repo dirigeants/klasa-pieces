@@ -35,7 +35,7 @@ module.exports = class extends Command {
 			.addField('Adult Content', movie.adult ? 'Yep' : 'Nope', true)
 			.addField('Release Date', movie.release_date);
 
-		return msg.send(embed);
+		return msg.sendEmbed(embed);
 	}
 
 };
