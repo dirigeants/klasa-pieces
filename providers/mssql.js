@@ -5,13 +5,28 @@
  * #####################################
  */
 
-const { SQLProvider, util: { mergeDefault, isNumber } } = require('klasa');
+const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault, isNumber } } = require('klasa');
 const mssql = require('mssql');
+
+const TIMEPARSERS = {
+	DATE: new Timestamp('YYYY-MM-DD'),
+	DATETIME: new Timestamp('YYYY-MM-DD hh:mm:ss')
+};
 
 module.exports = class extends SQLProvider {
 
 	constructor(...args) {
 		super(...args);
+		this.qb = new QueryBuilder({
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			float: 'REAL',
+			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
+			array: type => type,
+			arrayResolver: (values) => `'${sanitizeString(JSON.stringify(values))}'`,
+			formatDatatype: (name, datatype, def = null) => `\`${name}\` ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
+		});
 		this.pool = null;
 	}
 
@@ -170,7 +185,7 @@ module.exports = class extends SQLProvider {
 		values.push(id);
 		return this.run(`INSERT INTO ${sanitizeKeyName(table)}
 			(${keys.map(sanitizeKeyName).join(', ')})
-			VALUES (${makeVariables(keys.length)});`, values);
+			VALUES (${Array.from({ length: keys.length }, (__, i) => `@${i}`).join(', ')});`, values);
 	}
 
 	/**
@@ -257,11 +272,13 @@ module.exports = class extends SQLProvider {
 			const request = new mssql.Request();
 			for (let i = 0; i < inputs.length; i++) request.input(String(i), inputs[i]);
 			for (let i = 0; i < outputs.length; i++) request.input(outputs[i]);
-			return request.query(sql);
+			return request.query(sql)
+				.then(result => Promise.resolve(result))
+				.catch(error => Promise.reject(error));
 		}
 		return new mssql.Request().query(sql)
-			.then(result => result)
-			.catch(error => { throw error; });
+			.then(result => Promise.resolve(result))
+			.catch(error => Promise.reject(error));
 	}
 
 };
@@ -272,10 +289,6 @@ module.exports = class extends SQLProvider {
  * @private
  */
 function sanitizeString(value) {
-	if (value.length === 0) {
-		throw new TypeError('%MSSQL.sanitizeString expects a string with a length bigger than 0.');
-	}
-
 	return `'${value.replace(/'/g, "''")}'`;
 }
 
@@ -285,9 +298,8 @@ function sanitizeString(value) {
  * @private
  */
 function sanitizeKeyName(value) {
-	if (typeof value !== 'string') { throw new TypeError(`%MSSQL.sanitizeString expects a string, got: ${typeof value}`); }
-	if (/`/.test(value)) { throw new TypeError(`Invalid input (${value}).`); }
-
+	if (typeof value !== 'string') throw new TypeError(`%MSSQL.sanitizeString expects a string, got: ${new Type(value)}`);
+	if (/`/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	return value;
 }
 
@@ -299,8 +311,4 @@ function sanitizeKeyName(value) {
  */
 function parseRange(number, all = true) {
 	return isNumber(number) ? `TOP ${number}` : all ? 'ALL' : '';
-}
-
-function makeVariables(number) {
-	return new Array(number).fill().map((__, index) => `@${index}`).join(', ');
 }

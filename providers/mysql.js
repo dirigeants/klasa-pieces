@@ -29,7 +29,7 @@ module.exports = class extends SQLProvider {
 			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
 			array: type => type,
 			arrayResolver: (values) => `'${sanitizeString(JSON.stringify(values))}'`,
-			formatDatatype: (name, datatype, def = null) => `"${name}" ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
+			formatDatatype: (name, datatype, def = null) => `\`${name}\` ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
 		});
 		this.db = null;
 	}
