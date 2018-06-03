@@ -1,6 +1,6 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
 const { MessageEmbed } = require('discord.js');
+const snekfetch = require('snekfetch');
 
 /**
  * https://dev.twitch.tv/docs/v5/guides/authentication/
@@ -31,7 +31,7 @@ module.exports = class extends Command {
 	}
 
 	differenceDays(first, second) {
-		return parseInt((second - first) / (1000 * 60 * 60 * 24));
+		return (second - first) / (1000 * 60 * 60 * 24);
 	}
 
 };

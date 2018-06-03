@@ -20,8 +20,7 @@ module.exports = class extends Command {
 
 		const markovBank = [];
 		for (const message of messageBank.values()) {
-			if (!message.content) continue;
-			markovBank.push(message.content);
+			if (message.content) markovBank.push(message.content);
 		}
 
 		const quotes = new MarkovChain(markovBank.join(' '));
@@ -31,7 +30,7 @@ module.exports = class extends Command {
 
 	useUpperCase(wordList) {
 		const tmpList = Object.keys(wordList).filter((word) => word[0] >= 'A' && word[0] <= 'Z');
-		return tmpList[~~(Math.random() * tmpList.length)];
+		return tmpList[Math.floor(Math.random() * tmpList.length)];
 	}
 
 };

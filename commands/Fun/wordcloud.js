@@ -23,7 +23,6 @@ module.exports = class extends Command {
 		}
 
 		for (const message of messageBank.values()) {
-			if (!message.content) continue;
 			if (message.content.length <= 2) continue;
 			message.content.split('.').join(' ').split(' ').forEach(word => {
 				const cleanWord = word.replace(/\W+/g, '').substring(0, 20);

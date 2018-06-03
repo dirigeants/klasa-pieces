@@ -21,11 +21,11 @@ module.exports = class extends Command {
 		for (let i = 0; i < messageBank.size; i++) {
 			const message = messageBank.random();
 			if (message.author.bot) continue;
-			if (message.content.replace(/\W/g, '').replace(/[0-9]/g, '').length < 20) continue;
+			if (message.content.replace(/[\W0-9]*/g, '').length < 20) continue;
 
 			const embed = new MessageEmbed()
 				.setDescription(message.content)
-				.setAuthor(message.author.username, message.author.avatarURL());
+				.setAuthor(message.author.username, message.author.displayAvatarURL());
 			return msg.sendEmbed(embed);
 		}
 		return msg.sendMessage(`Couldn't find a quote.`);
