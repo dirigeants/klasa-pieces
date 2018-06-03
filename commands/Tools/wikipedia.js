@@ -6,7 +6,6 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			cooldown: 3,
 			aliases: ['wiki'],
 			description: 'Finds a Wikipedia Article by title.',
 			usage: '<query:str>'

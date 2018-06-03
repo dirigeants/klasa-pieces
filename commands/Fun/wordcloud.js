@@ -8,7 +8,6 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			description: 'Generate a wordcloud from the messages in a chat.',
-			cooldown: 3,
 			requiredPermissions: ['ATTACH_FILES']
 		});
 	}
@@ -54,7 +53,7 @@ module.exports = class extends Command {
 				ctx.rotate(-rotation);
 			}
 			const buffer = FinalImage.toBuffer();
-			return msg.sendMessage(new MessageAttachment(buffer, this.randFileName()));
+			return msg.sendMessage(new MessageAttachment(buffer, 'image.jpg'));
 		};
 
 

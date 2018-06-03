@@ -6,7 +6,6 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			description: 'Returns a random message from someone in the channel.',
-			cooldown: 10,
 			requiredPermissions: ['READ_MESSAGE_HISTORY']
 		});
 	}

@@ -6,9 +6,8 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			cooldown: 10,
 			description: 'Query Wolfram Alpha with any mathematical question.',
-			usage: '<query:str{1}>'
+			usage: '<query:str>'
 		});
 	}
 

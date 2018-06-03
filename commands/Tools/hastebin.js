@@ -6,8 +6,7 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['hb'],
-			cooldown: 10,
-			description: 'Upload code or text to pastebin.',
+			description: 'Upload code or text to hastebin.',
 			usage: '<code:str>'
 		});
 	}

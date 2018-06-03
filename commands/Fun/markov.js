@@ -6,7 +6,6 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			description: 'Generate a markov chain from the text chat.',
-			cooldown: 10,
 			requiredPermissions: ['READ_MESSAGE_HISTORY']
 		});
 	}

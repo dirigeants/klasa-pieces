@@ -5,7 +5,6 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			cooldown: 2,
 			description: 'Returns a random reddit post on a given subreddit.',
 			usage: '<subreddit:str>'
 		});
