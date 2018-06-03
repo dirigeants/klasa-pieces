@@ -1,4 +1,4 @@
-const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault, isNumber, isObject } } = require('klasa');
+const { SQLProvider, QueryBuilder, Schema, Timestamp, Type, util: { mergeDefault, isNumber, isObject } } = require('klasa');
 
 /**
  * NOTE: You need to install mysql2
@@ -26,7 +26,12 @@ module.exports = class extends SQLProvider {
 			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'` },
 			null: 'NULL',
 			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
-			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) }
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
+			array: () => 'ARRAY',
+			arrayResolver: (values) => values.length ? `'${JSON.stringify(values)}'` : "'[]'",
+			formatDatatype: (name, datatype, def = null) => datatype === 'ARRAY' ?
+				`${sanitizeKeyName(name)} TEXT` :
+				`${sanitizeKeyName(name)} ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
 		});
 		this.db = null;
 	}
@@ -78,7 +83,8 @@ module.exports = class extends SQLProvider {
 		const schemaValues = [...gateway.schema.values(true)];
 		return this.run(`
 			CREATE TABLE ${sanitizeKeyName(table)} (
-				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+				id VARCHAR(18) NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''},
+				PRIMARY KEY(id)
 			)`
 		);
 	}
@@ -191,8 +197,10 @@ module.exports = class extends SQLProvider {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
 		// Push the id to the inserts.
-		keys.push('id');
-		values.push(id);
+		if (!keys.includes('id')) {
+			keys.push('id');
+			values.push(id);
+		}
 		return this.exec(`INSERT INTO ${sanitizeKeyName(table)} (${keys.map(sanitizeKeyName).join(', ')}) VALUES (${values.map(sanitizeInput).join(', ')});`);
 	}
 
@@ -227,7 +235,7 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<any[]>}
 	 */
 	incrementValue(table, id, key, amount = 1) {
-		if (amount < 0 || isNaN(amount) || Number.isInteger(amount) === false || Number.isSafeInteger(amount) === false) {
+		if (amount < 0 || !isNumber(amount)) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
 		}
 
@@ -242,7 +250,7 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<any[]>}
 	 */
 	decrementValue(table, id, key, amount = 1) {
-		if (amount < 0 || isNaN(amount) || Number.isInteger(amount) === false || Number.isSafeInteger(amount) === false) {
+		if (amount < 0 || !isNumber(amount)) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
 		}
 
@@ -260,18 +268,15 @@ module.exports = class extends SQLProvider {
 
 	/**
 	 * Add a new column to a table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {(string|Array<string[]>)} key The key to add.
-	 * @param {string} [datatype] The datatype for the new key.
-	 * @returns {Promise<any[]>}
+	 * @param {string} table The table to update
+	 * @param {(SchemaFolder | SchemaPiece)} piece The SchemaFolder or SchemaPiece added to the schema
+	 * @returns {Promise<*>}
 	 */
-	addColumn(table, key, datatype) {
-		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${sanitizeKeyName(key)} ${datatype};`);
-		if (typeof datatype === 'undefined' && Array.isArray(key)) {
-			return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ${key.map(([column, type]) =>
-				`ADD COLUMN ${sanitizeKeyName(column)} ${type}`).join(', ')};`);
-		}
-		throw new TypeError('Invalid usage of MySQL#addColumn. Expected a string and string or string[][] and undefined.');
+	addColumn(table, piece) {
+		if (!(piece instanceof Schema)) throw new TypeError('Invalid usage of PostgreSQL#addColumn. Expected a SchemaPiece or SchemaFolder instance.');
+		return this.exec(piece.type !== 'Folder' ?
+			`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${this.qb.parse(piece)};` :
+			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);
 	}
 
 	/**
@@ -287,14 +292,14 @@ module.exports = class extends SQLProvider {
 	}
 
 	/**
-	 * Edit the key's datatype from the table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The name of the column to update.
-	 * @param {string} datatype The new datatype for the column.
-	 * @returns {Promise<any[]>}
+	 * Alters the datatype from a column.
+	 * @param {string} table The table to update
+	 * @param {SchemaPiece} piece The modified SchemaPiece
+	 * @returns {Promise<*>}
 	 */
-	updateColumn(table, key, datatype) {
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(key)} ${datatype};`);
+	updateColumn(table, piece) {
+		const [column, ...datatype] = this.qb.parse(piece).split(' ');
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(column)} TYPE ${datatype};`);
 	}
 
 	/**
@@ -337,18 +342,20 @@ module.exports = class extends SQLProvider {
 function parseRange(min, max) {
 	// Min value validation
 	if (typeof min === 'undefined') return '';
-	if (isNaN(min) || Number.isInteger(min) === false || Number.isSafeInteger(min) === false) {
+	if (!isNumber(min)) {
 		throw new TypeError(`%MySQL.parseRange 'min' parameter expects an integer or undefined, got ${min}`);
 	}
+
 	if (min < 0) {
 		throw new TypeError(`%MySQL.parseRange 'min' parameter expects to be equal or greater than zero, got ${min}`);
 	}
 
 	// Max value validation
 	if (typeof max !== 'undefined') {
-		if (typeof max !== 'number' || isNaN(max) || Number.isInteger(max) === false || Number.isSafeInteger(max) === false) {
+		if (!isNumber(max)) {
 			throw new TypeError(`%MySQL.parseRange 'max' parameter expects an integer or undefined, got ${max}`);
 		}
+
 		if (max <= min) {
 			throw new TypeError(`%MySQL.parseRange 'max' parameter expects ${max} to be greater than ${min}. Got: ${max} <= ${min}`);
 		}
@@ -363,8 +370,8 @@ function parseRange(min, max) {
  * @private
  */
 function sanitizeInteger(value) {
-	if (isNumber(value)) throw new TypeError(`%MySQL.sanitizeNumber expects an integer, got ${value}`);
-	if (value < 0) { throw new TypeError(`%MySQL.sanitizeNumber expects a positive integer, got ${value}`); }
+	if (!isNumber(value)) throw new TypeError(`%MySQL.sanitizeNumber expects an integer, got ${value}`);
+	if (value < 0) throw new TypeError(`%MySQL.sanitizeNumber expects a positive integer, got ${value}`);
 	return String(value);
 }
 
@@ -383,8 +390,8 @@ function sanitizeString(value) {
  * @private
  */
 function sanitizeKeyName(value) {
-	if (typeof value !== 'string') { throw new TypeError(`%MySQL.sanitizeString expects a string, got: ${typeof value}`); }
-	if (/`/.test(value)) { throw new TypeError(`Invalid input (${value}).`); }
+	if (typeof value !== 'string') throw new TypeError(`%MySQL.sanitizeString expects a string, got: ${new Type(value)}`);
+	if (/`/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	return `\`${value}\``;
 }
 
