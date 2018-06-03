@@ -18,17 +18,17 @@ module.exports = class extends SQLProvider {
 	constructor(...args) {
 		super(...args);
 		this.qb = new QueryBuilder({
-			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'` },
+			any: { type: 'JSON', resolver: (input) => sanitizeObject(input) },
 			boolean: { type: 'BIT(1)', resolver: (input) => input ? '1' : '0' },
 			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
 			float: 'DOUBLE PRECISION',
 			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
-			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'` },
+			json: { type: 'JSON', resolver: (input) => sanitizeObject(input) },
 			null: 'NULL',
 			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
 			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
 			array: () => 'ARRAY',
-			arrayResolver: (values) => values.length ? `'${JSON.stringify(values)}'` : "'[]'",
+			arrayResolver: (values) => values.length ? sanitizeObject(values) : "'[]'",
 			formatDatatype: (name, datatype, def = null) => datatype === 'ARRAY' ?
 				`${sanitizeKeyName(name)} TEXT` :
 				`${sanitizeKeyName(name)} ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
