@@ -42,7 +42,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.collection(table).get().then(col => !!col.size);
+		return this.db.collection(table).get().then(col => Boolean(col.size));
 	}
 
 	/**
