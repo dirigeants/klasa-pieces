@@ -19,7 +19,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.run(`MATCH (n:${table}) RETURN n`).then(data => !!data.records.length);
+		return this.db.run(`MATCH (n:${table}) RETURN n`).then(data => Boolean(data.records.length));
 	}
 
 	/**
@@ -28,7 +28,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<*>} Returns a promise containing the created Collection.
 	 */
 	createTable(table) {
-		return this.db.run(`CREATE (n:${table}) RETURN n`).then(data => data.records.map(node => console.log(node._fields[0].identity.low))[0]);
+		return this.db.run(`CREATE (n:${table}) RETURN n`).then(data => data.records.map(node => node._fields[0].identity.low))[0];
 	}
 
 	/**
@@ -75,7 +75,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
-		return this.db.run(`MATCH (n:${table} {id: {id} }) RETURN n`, { id }).then(data => !!data.records.length);
+		return this.db.run(`MATCH (n:${table} {id: {id} }) RETURN n`, { id }).then(data => Boolean(data.records.length));
 	}
 
 	/**
