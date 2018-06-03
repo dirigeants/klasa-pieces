@@ -24,6 +24,7 @@ module.exports = class extends Command {
 			.catch(() => { throw 'Unable to find account. Did you spell it correctly?'; });
 
 		const creationDate = this.timestamp.display(body.created_at);
+
 		const embed = new MessageEmbed()
 			.setColor(6570406)
 			.setThumbnail(body.logo)
