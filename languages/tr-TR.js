@@ -15,7 +15,7 @@ module.exports = class extends Language {
 			SETTING_GATEWAY_KEY_NOEXT: (key) => `${key} veri şemasında bulunamadı.`,
 			SETTING_GATEWAY_INVALID_TYPE: 'parametrenin add veya remove olması gerekiyor.',
 			RESOLVER_INVALID_PIECE: (name, piece) => `${name} herhangi bir ${piece} olması gerekiyor.`,
-			RESOLVER_INVALID_MSG: (name) => `${name} geçerli bir mesaj idsi olması gerekiyor`,
+			RESOLVER_INVALID_MESSAGE: (name) => `${name} geçerli bir mesaj idsi olması gerekiyor`,
 			RESOLVER_INVALID_USER: (name) => `${name} geçerli bir mention veya kullanıcı idsi olması gerekiyor.`,
 			RESOLVER_INVALID_MEMBER: (name) => `${name} geçerli bir mention veya kullanıcı idsi olması gerekiyor.`,
 			RESOLVER_INVALID_CHANNEL: (name) => `${name} geçerli bir kanal etiketi veya kanal idsi olması gerekiyor.`,

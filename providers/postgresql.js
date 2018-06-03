@@ -1,7 +1,7 @@
 const { SQLProvider, Type, Schema, QueryBuilder, util: { mergeDefault, isNumber } } = require('klasa');
 const { Pool } = require('pg');
 
-module.exports = class PostgreSQL extends SQLProvider {
+module.exports = class extends SQLProvider {
 
 	constructor(...args) {
 		super(...args);
@@ -140,7 +140,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 
 	/**
 	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id    The value of the id
+	 * @param {string} id The value of the id
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
@@ -253,7 +253,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 
 	/**
 	 * Add a new column to a table's schema.
-	 * @param {string} table The table to check against
+	 * @param {string} table The table to update
 	 * @param {(SchemaFolder | SchemaPiece)} piece The SchemaFolder or SchemaPiece added to the schema
 	 * @returns {Promise<*>}
 	 */
@@ -266,7 +266,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 
 	/**
 	 * Remove a column from a table's schema.
-	 * @param {string} table The table to check against
+	 * @param {string} table The table to update
 	 * @param {(string|string[])} columns The column names to remove
 	 * @returns {Promise<*>}
 	 */
@@ -278,7 +278,7 @@ module.exports = class PostgreSQL extends SQLProvider {
 
 	/**
 	 * Alters the datatype from a column.
-	 * @param {string} table The table to check against
+	 * @param {string} table The table to update
 	 * @param {SchemaPiece} piece The modified SchemaPiece
 	 * @returns {Promise<*>}
 	 */

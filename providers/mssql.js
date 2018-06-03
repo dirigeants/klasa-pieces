@@ -5,22 +5,33 @@
  * #####################################
  */
 
-const { Provider, util } = require('klasa');
+const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault, isNumber } } = require('klasa');
 const mssql = require('mssql');
 
-module.exports = class extends Provider {
+const TIMEPARSERS = {
+	DATE: new Timestamp('YYYY-MM-DD'),
+	DATETIME: new Timestamp('YYYY-MM-DD hh:mm:ss')
+};
+
+module.exports = class extends SQLProvider {
 
 	constructor(...args) {
-		super(...args, {
-			enabled: true,
-			sql: true,
-			description: 'Allows you to use MSSQL functionality throught Klasa'
+		super(...args);
+		this.qb = new QueryBuilder({
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			float: 'REAL',
+			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
+			array: type => type,
+			arrayResolver: (values) => `'${sanitizeString(JSON.stringify(values))}'`,
+			formatDatatype: (name, datatype, def = null) => `\`${name}\` ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
 		});
 		this.pool = null;
 	}
 
 	async init() {
-		const connection = util.mergeDefault({
+		const connection = mergeDefault({
 			host: 'localhost',
 			db: 'klasa',
 			user: 'database-user',
@@ -59,7 +70,7 @@ module.exports = class extends Provider {
 	hasTable(table) {
 		return this.run(`IF ( EXISTS (
 			SELECT *
-           	FROM  INFORMATION_SCHEMA.TABLES
+           	FROM INFORMATION_SCHEMA.TABLES
 			WHERE TABLE_NAME = @0
 		) )`, [table]);
 	}
@@ -70,7 +81,17 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	createTable(table, rows) {
-		return this.run(`CREATE TABLE @0 ( ${rows.map(([k, v]) => `${k} ${v}`).join(', ')} );`, [table]);
+		if (rows) return this.run(`CREATE TABLE @0 ( ${rows.map(([k, v]) => `${k} ${v}`).join(', ')} );`, [table]);
+
+		const gateway = this.client.gateways[table];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
+
+		const schemaValues = [...gateway.schema.values(true)];
+		return this.run(`
+			CREATE TABLE @0 (
+				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+			)`, [table]
+		);
 	}
 
 	/**
@@ -94,16 +115,18 @@ module.exports = class extends Provider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} [key] The key to filter the data from. Requires the value parameter
-	 * @param {*}    [value] The value to filter the data from. Requires the key parameter
+	 * @param {*} [value] The value to filter the data from. Requires the key parameter
 	 * @param {number} [limit] The maximum range. Must be higher than the limitMin parameter
 	 * @returns {Promise<Object[]>}
 	 */
 	getAll(table, key, value, limit) {
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-			return this.run(`SELECT ${parseRange(limit)} * FROM @0 WHERE @1 = @2;`, [table, key, value]);
+			return this.run(`SELECT ${parseRange(limit)} * FROM @0 WHERE @1 = @2;`, [table, key, value])
+				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 
-		return this.run(`SELECT ${parseRange(limit)} * FROM @0;`, [table]);
+		return this.run(`SELECT ${parseRange(limit)} * FROM @0;`, [table])
+			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
 	/**
@@ -117,7 +140,7 @@ module.exports = class extends Provider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} key The key to filter the data from
-	 * @param {*}    [value] The value of the filtered key
+	 * @param {*} [value] The value of the filtered key
 	 * @returns {Promise<Object>}
 	 */
 	get(table, key, value) {
@@ -126,12 +149,13 @@ module.exports = class extends Provider {
 			value = key;
 			key = 'id';
 		}
-		return this.run('SELECT TOP 1 * FROM @0 WHERE @1 = @2;', [table, key, value]);
+		return this.run('SELECT TOP 1 * FROM @0 WHERE @1 = @2;', [table, key, value])
+			.then(result => this.parseEntry(table, result));
 	}
 
 	/**
 	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id    The value of the id
+	 * @param {string} id The value of the id
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
@@ -143,47 +167,35 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		return this.run('SELECT TOP 1 * FROM @0 ORDER BY NEWID();', [table]);
+		return this.run('SELECT TOP 1 * FROM @0 ORDER BY NEWID();', [table])
+			.then(result => this.parseEntry(table, result));
 	}
 
-	create(table, id, param1, param2) {
-		const [keys, values] = acceptArbitraryInput(param1, param2);
+	/**
+	 * @param {string} table The name of the table to insert the new data
+	 * @param {string} id The id of the new row to insert
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
+	 * @returns {Promise<any[]>}
+	 */
+	create(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
 
 		// Push the id to the inserts.
 		keys.push('id');
 		values.push(id);
 		return this.run(`INSERT INTO ${sanitizeKeyName(table)}
 			(${keys.map(sanitizeKeyName).join(', ')})
-			VALUES (${makeVariables(keys.length)});`, values);
-	}
-
-	/**
-	 * @param {...*} args The arguments
-	 * @alias MSSQL#insert
-	 * @returns {Promise<any[]>}
-	 */
-	set(...args) {
-		return this.create(...args);
-	}
-
-	/**
-	 * @param {...*} args The arguments
-	 * @alias MSSQL#insert
-	 * @returns {Promise<any[]>}
-	 */
-	insert(...args) {
-		return this.create(...args);
+			VALUES (${Array.from({ length: keys.length }, (__, i) => `@${i}`).join(', ')});`, values);
 	}
 
 	/**
 	 * @param {string} table The name of the table to update the data from
 	 * @param {string} id The id of the row to update
-	 * @param {(string|string[]|{})} param1 The first parameter to validate.
-	 * @param {*} [param2] The second parameter to validate.
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
 	 * @returns {Promise<any[]>}
 	 */
-	update(table, id, param1, param2) {
-		const [keys, values] = acceptArbitraryInput(param1, param2);
+	update(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
 		return this.run(`
 			UPDATE ${sanitizeKeyName(table)}
 			SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = @${i}`)}
@@ -213,18 +225,14 @@ module.exports = class extends Provider {
 
 	/**
 	 * Add a new column to a table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {(string|Array<string[]>)} key The key to add.
-	 * @param {string} [datatype] The datatype for the new key.
-	 * @returns {Promise<any[]>}
+	 * @param {string} table The table to check against
+	 * @param {(SchemaFolder | SchemaPiece)} piece The SchemaFolder or SchemaPiece added to the schema
+	 * @returns {Promise<*>}
 	 */
-	addColumn(table, key, datatype) {
-		if (typeof key === 'string') return this.run(`ALTER TABLE @0 ADD @1 @2;`, [table, key, datatype]);
-		if (typeof datatype === 'undefined' && Array.isArray(key)) {
-			return this.run(`ALTER TABLE @0 ${key.map(([column, type]) =>
-				`ADD ${sanitizeKeyName(column)} ${type}`).join(', ')};`, [table]);
-		}
-		throw new TypeError('Invalid usage of MSSQL#addColumn. Expected a string and string or string[][] and undefined.');
+	addColumn(table, piece) {
+		return this.run(piece.type !== 'Folder' ?
+			`ALTER TABLE ${sanitizeKeyName(table)} ADD ${this.qb.parse(piece)};` :
+			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD ${this.qb.parse(subpiece)}`).join(', ')}`);
 	}
 
 	/**
@@ -234,30 +242,22 @@ module.exports = class extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	removeColumn(table, key) {
-		if (typeof key === 'string') {
-			return this.run(`
-				ALTER TABLE @0
-				DROP COLUMN @1;`, [table, key]);
-		}
-		if (Array.isArray(key)) {
-			return this.run(`
-				ALTER TABLE @0
-				DROP ${key.map(sanitizeKeyName).join(', ')};`, [table]);
-		}
+		if (typeof key === 'string') return this.run(`ALTER TABLE @0 DROP COLUMN @1;`, [table, key]);
+		if (Array.isArray(key)) return this.run(`ALTER TABLE @0 DROP ${key.map(sanitizeKeyName).join(', ')};`, [table]);
 		throw new TypeError('Invalid usage of MSSQL#removeColumn. Expected a string or string[].');
 	}
 
 	/**
 	 * Edit the key's datatype from the table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The name of the column to update.
-	 * @param {string} datatype The new datatype for the column.
+	 * @param {string} table The table to update
+	 * @param {SchemaPiece} piece The modified SchemaPiece
 	 * @returns {Promise<any[]>}
 	 */
-	updateColumn(table, key, datatype) {
+	updateColumn(table, piece) {
+		const [column, ...datatype] = this.qb.parse(piece).split(' ');
 		return this.run(`
 			ALTER TABLE @0
-			ALTER COLUMN @1 @2;`, [table, key, datatype]);
+			ALTER COLUMN @1 @2;`, [table, column, datatype]);
 	}
 
 	/**
@@ -272,58 +272,16 @@ module.exports = class extends Provider {
 			const request = new mssql.Request();
 			for (let i = 0; i < inputs.length; i++) request.input(String(i), inputs[i]);
 			for (let i = 0; i < outputs.length; i++) request.input(outputs[i]);
-			return request.query(sql);
+			return request.query(sql)
+				.then(result => Promise.resolve(result))
+				.catch(error => Promise.reject(error));
 		}
 		return new mssql.Request().query(sql)
-			.then(result => result)
-			.catch(error => { throw error; });
+			.then(result => Promise.resolve(result))
+			.catch(error => Promise.reject(error));
 	}
 
 };
-
-/**
- * Accept any kind of input from two parameters.
- * @param {(string|string[]|{})} param1 The first parameter to validate.
- * @param {*} [param2] The second parameter to validate.
- * @returns {[[], []]}
- * @private
- */
-function acceptArbitraryInput(param1, param2) {
-	if (typeof param1 === 'undefined' && typeof param2 === 'undefined') return [[], []];
-	if (typeof param1 === 'string' && typeof param2 !== 'undefined') return [[param1], [param2]];
-	if (Array.isArray(param1) && Array.isArray(param2)) {
-		if (param1.length !== param2.length) throw new TypeError(`The array lengths do not match: ${param1.length}-${param2.length}`);
-		if (param1.some(value => typeof value !== 'string')) throw new TypeError(`The array of keys must be an array of strings, but found a value that does not match.`);
-		return [param1, param2];
-	}
-	if (util.isObject(param1) && typeof param2 === 'undefined') {
-		const entries = [[], []];
-		getEntriesFromObject(param1, entries, '');
-		return entries;
-	}
-	throw new TypeError('Invalid input. Expected a key type of string and a value, tuple of arrays, or an object and undefined.');
-}
-
-/**
- * Get all entries from an object.
- * @param {Object} object The object to "flatify".
- * @param {[string[], any[]]} param1 The tuple of keys and values to check.
- * @param {string} path The current path.
- * @private
- */
-function getEntriesFromObject(object, [keys, values], path) {
-	const objectKeys = Object.keys(object);
-	for (let i = 0; i < objectKeys.length; i++) {
-		const key = objectKeys[i];
-		const value = object[key];
-		if (util.isObject(value)) {
-			getEntriesFromObject(value, [keys, values], path.length > 0 ? `${path}.${key}` : key);
-		} else {
-			keys.push(path.length > 0 ? `${path}.${key}` : key);
-			values.push(value);
-		}
-	}
-}
 
 /**
  * @param {string} value The string to sanitize
@@ -331,10 +289,6 @@ function getEntriesFromObject(object, [keys, values], path) {
  * @private
  */
 function sanitizeString(value) {
-	if (value.length === 0) {
-		throw new TypeError('%MSSQL.sanitizeString expects a string with a length bigger than 0.');
-	}
-
 	return `'${value.replace(/'/g, "''")}'`;
 }
 
@@ -344,9 +298,8 @@ function sanitizeString(value) {
  * @private
  */
 function sanitizeKeyName(value) {
-	if (typeof value !== 'string') { throw new TypeError(`%MSSQL.sanitizeString expects a string, got: ${typeof value}`); }
-	if (/`/.test(value)) { throw new TypeError(`Invalid input (${value}).`); }
-
+	if (typeof value !== 'string') throw new TypeError(`%MSSQL.sanitizeString expects a string, got: ${new Type(value)}`);
+	if (/`/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	return value;
 }
 
@@ -357,9 +310,5 @@ function sanitizeKeyName(value) {
  * @private
  */
 function parseRange(number, all = true) {
-	return util.isNumber(number) ? `TOP ${number}` : all ? 'ALL' : '';
-}
-
-function makeVariables(number) {
-	return new Array(number).fill().map((__, index) => `@${index}`).join(', ');
+	return isNumber(number) ? `TOP ${number}` : all ? 'ALL' : '';
 }

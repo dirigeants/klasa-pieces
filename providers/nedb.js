@@ -1,4 +1,4 @@
-const { Provider } = require('klasa');
+const { Provider, util: { mergeObjects, isObject } } = require('klasa');
 const { Collection } = require('discord.js');
 const { resolve } = require('path');
 const fs = require('fs-nextra');
@@ -9,13 +9,13 @@ require('tsubaki').promisifyAll(Datastore.prototype);
 module.exports = class extends Provider {
 
 	constructor(...args) {
-		super(...args, { description: 'Allows you to use NeDB functionality throught Klasa' });
+		super(...args);
 		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'nedb');
 		this.dataStores = new Collection();
 	}
 
 	init() {
-		return fs.ensureDir(this.baseDir).catch(err => this.client.emit('log', err, 'error'));
+		return fs.ensureDir(this.baseDir);
 	}
 
 	/* Table methods */
@@ -77,8 +77,12 @@ module.exports = class extends Provider {
 	 */
 	async get(table, query) {
 		const data = await this.dataStores.get(table).findOneAsync(resolveQuery(query));
-		delete data._id;
-		return data;
+		if (data) {
+			delete data._id;
+			return data;
+		}
+
+		return null;
 	}
 
 	/**
@@ -88,7 +92,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, query) {
-		return this.get(table, query).then(result => !!result);
+		return this.get(table, query).then(Boolean);
 	}
 
 	/**
@@ -99,15 +103,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	create(table, query, doc) {
-		return this.dataStores.get(table).insertAsync(Object.assign(doc, resolveQuery(query)));
-	}
-
-	set(...args) {
-		return this.create(...args);
-	}
-
-	insert(...args) {
-		return this.create(...args);
+		return this.dataStores.get(table).insertAsync(mergeObjects(this.parseUpdateInput(doc), resolveQuery(query)));
 	}
 
 	/**
@@ -119,7 +115,7 @@ module.exports = class extends Provider {
 	 */
 	async update(table, query, doc) {
 		const res = await this.get(table, query);
-		return this.replace(table, query, Object.assign(res, doc));
+		return this.replace(table, query, mergeObjects(res, this.parseUpdateInput(doc)));
 	}
 
 	/**
@@ -130,7 +126,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	async replace(table, query, doc) {
-		await this.dataStores.get(table).updateAsync(resolveQuery(query), doc);
+		await this.dataStores.get(table).updateAsync(resolveQuery(query), this.parseUpdateInput(doc));
 		await this.dataStores.get(table).persistence.compactDatafile();
 		return true;
 	}
@@ -167,4 +163,4 @@ module.exports = class extends Provider {
 
 };
 
-const resolveQuery = query => query instanceof Object ? query : { id: query };
+const resolveQuery = query => isObject(query) ? query : { id: query };
