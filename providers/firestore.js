@@ -61,9 +61,10 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Array>}
 	0 */
 	async getAll(table, filter = []) {
-		return await this.db.collection(table).get()
-			.then(snaps => snaps.docs.map(snap => this.packData(snap.data(), snap.id))
-				.filter(snapshots => filter.length ? filter.includes(snapshots.id) : true));
+		const data =  await this.db.collection(table).get()
+			.then(snaps => snaps.docs.map(snap => this.packData(snap.data(), snap.id)));
+		
+		return filter.length ? data.filter(nodes => filter.includes(nodes.id)) : data;
 	}
 	/**
 	 * Returns all the Keys/Docs of a collection/tanle.
