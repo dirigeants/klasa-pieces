@@ -60,10 +60,10 @@ module.exports = class extends Provider {
 	 * @param {array} filter An optional array, to filter out the data.
 	 * @returns {Promise<Array>}
 	0 */
-	getAll(table, filter = []) {
-		return this.db.collection(table).get()
+	async getAll(table, filter = []) {
+		return await this.db.collection(table).get()
 			.then(snaps => snaps.docs.map(snap => this.packData(snap.data(), snap.id))
-				.filter(snapshots => filter.length ? filter.includes(snapshots.uuid) : true));
+				.filter(snapshots => filter.length ? filter.includes(snapshots.id) : true));
 	}
 	/**
 	 * Returns all the Keys/Docs of a collection/tanle.
@@ -174,7 +174,7 @@ module.exports = class extends Provider {
 	packData(data, id) {
 		return {
 			...data,
-			uuid: id
+			id
 		};
 	}
 
