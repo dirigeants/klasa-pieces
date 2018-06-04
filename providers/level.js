@@ -74,11 +74,7 @@ module.exports = class extends Provider {
 			db.createValueStream()
 				.on('data', data => {
 					data = JSON.parse(data);
-					if (filter.length) {
-						if (filter.includes(data.id)) {
-							output.push(data);
-						}
-					} else {
+					if (filter.length ? filter.includes(data.id) : true) {
 						output.push(data);
 					}
 				})
