@@ -104,10 +104,6 @@ module.exports = class extends Provider {
 		Object.keys(path).map(key => delete entry[key]);
 		await this.updatebyID(table, id, entry);
 	}
-<<<<<<< HEAD
 
 };
-=======
->>>>>>> SGv2.2.0
 
-};
