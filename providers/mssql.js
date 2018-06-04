@@ -5,7 +5,7 @@
  * #####################################
  */
 
-const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault, isNumber } } = require('klasa');
+const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault } } = require('klasa');
 const mssql = require('mssql');
 
 const TIMEPARSERS = {
@@ -114,24 +114,15 @@ module.exports = class extends SQLProvider {
 
 	/**
 	 * @param {string} table The name of the table to get the data from
-	 * @param {string} [key] The key to filter the data from. Requires the value parameter
-	 * @param {*} [value] The value to filter the data from. Requires the key parameter
-	 * @param {number} [limit] The maximum range. Must be higher than the limitMin parameter
 	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
 	 * @returns {Promise<Object[]>}
 	 */
-	getAll(table, key, value, limit, entries = []) {
-		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-			return this.run(`SELECT ${parseRange(limit)} * FROM @0 WHERE @1 = @2;`, [table, key, value])
-				.then(results => results.map(output => this.parseEntry(table, output)));
-		}
-
+	getAll(table, entries = []) {
 		if (entries.length) {
-			return this.run(`SELECT ${parseRange(limit)} * FROM @0 WHERE id IN (@1);`, [table, entries.join(',')])
+			return this.run(`SELECT * FROM @0 WHERE id IN (@1);`, [table, entries.join(',')])
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
-
-		return this.run(`SELECT ${parseRange(limit)} * FROM @0;`, [table])
+		return this.run(`SELECT * FROM @0;`, [table])
 			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
@@ -307,14 +298,4 @@ function sanitizeKeyName(value) {
 	if (typeof value !== 'string') throw new TypeError(`%MSSQL.sanitizeString expects a string, got: ${new Type(value)}`);
 	if (/`/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	return value;
-}
-
-/**
- * @param {number} [number] The limit number.
- * @param {boolean} [all] If it should show all.
- * @returns {string}
- * @private
- */
-function parseRange(number, all = true) {
-	return isNumber(number) ? `TOP ${number}` : all ? 'ALL' : '';
 }

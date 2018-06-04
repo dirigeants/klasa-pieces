@@ -75,19 +75,13 @@ module.exports = class extends SQLProvider {
 	/**
 	 * Get all documents from a table.
 	 * @param {string} table The name of the table to fetch from.
-	 * @param {Object} options key and value.
 	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
 	 * @returns {Promise<Object[]>}
 	 */
-	getAll(table, options = {}, entries = []) {
-		if (typeof options.key !== 'undefined' && typeof options.value !== 'undefined') {
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(options.key)} = ${sanitizeValue(options.value)}`);
-		}
-
+	getAll(table, entries = []) {
 		if (entries.length) {
 			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ${entries.join(',')}`);
 		}
-
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)}`);
 	}
 
