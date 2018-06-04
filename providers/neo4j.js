@@ -72,9 +72,8 @@ module.exports = class extends Provider {
 	}
 
 	async getAll(table, filter = []) {
-		const result = await this.db.run(`MATCH (n:${table}) RETURN n`)
+		return await this.db.run(`MATCH (n:${table}) ${filter.length ? `WHERE n.id IN ${filter}` : ''}RETURN n`)
 			.then(data => data.records.map(node => node._fields[0].properties));
-		return filter.length ? result.filter(nodes => filter.includes(nodes.id)) : result;
 	}
 
 	async replace(table, id, doc) {
@@ -99,6 +98,6 @@ module.exports = class extends Provider {
 		Object.keys(path).map(key => delete entry[key]);
 		await this.updatebyID(table, id, entry);
 	}
-	
+
 };
 
