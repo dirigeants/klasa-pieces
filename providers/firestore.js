@@ -57,10 +57,11 @@ module.exports = class extends Provider {
 	/**
 	 * Returns all the documents of a collection
 	 * @param {string} table Name of the collection, for which all values is to be returned
+	 * @param {array} filter An optional array, to filter out the data.
 	 * @returns {Promise<Array>}
 	 */
-	getAll(table) {
-		return this.db.collection(table).get().then(snaps => snaps.docs.map(snap => snap.data()));
+	getAll(table, filter = []) {
+		return this.db.collection(table).get().filter(...filter).then(snaps => snaps.docs.map(snap => snap.data()));
 	}
 	/**
 	 * Returns all the Keys/Docs of a collection/tanle.
