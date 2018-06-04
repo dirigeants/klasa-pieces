@@ -408,7 +408,7 @@ function sanitizeObject(value) {
  * @private
  */
 function sanitizeBoolean(value) {
-	return Number(value) ? 1 : 0;
+	return value ? 1 : 0;
 }
 
 /**
