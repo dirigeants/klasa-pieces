@@ -126,7 +126,7 @@ module.exports = class extends SQLProvider {
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 
-		if (entries.length > 0) {
+		if (entries.length) {
 			return this.run(`SELECT ${parseRange(limit)} * FROM @0 WHERE id IN (@1);`, [table, entries.join(',')])
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}

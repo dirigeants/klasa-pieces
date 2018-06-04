@@ -110,7 +110,7 @@ module.exports = class extends SQLProvider {
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 
-		if (entries.length > 0) {
+		if (entries.length) {
 			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN (${entries.join(',')}) ${parseRange(limitMin, limitMax)};`)
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
