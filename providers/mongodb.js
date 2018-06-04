@@ -49,10 +49,6 @@ module.exports = class extends Provider {
 		return this.db.createCollection(table);
 	}
 
-	createCollection(...args) {
-		return this.createTable(...args);
-	}
-
 	/**
 	 * Drops a collection within a DB.
 	 * @param {string} table Name of the collection to drop.
@@ -60,10 +56,6 @@ module.exports = class extends Provider {
 	 */
 	deleteTable(table) {
 		return this.db.dropCollection(table);
-	}
-
-	dropCollection(table) {
-		return this.deleteTable(table);
 	}
 
 	/* Document methods */
@@ -113,42 +105,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		return this.getKeys(table).then(results => this.get(table, results[Math.floor(Math.random() * results.length)].id));
-	}
-
-	/**
-	 * Update or insert a new value to all entries.
-	 * @param {string} table The name of the table.
-	 * @param {string} path The object to remove or a path to update.
-	 * @param {*} newValue The new value for the key.
-	 * @returns {Promise<Object>}
-	 * @example
-	 * // Editing a single value
-	 * // You can edit a single value in a very similar way to Gateway#updateOne.
-	 * updateValue('339942739275677727', 'channels.modlogs', '340713281972862976');
-	 *
-	 * // However, you can also update it by passing an object.
-	 * updateValue('339942739275677727', { channels: { modlogs: '340713281972862976' } });
-	 *
-	 * // Editing multiple values
-	 * // As MongoDB#update can also work very similar to Gateway#updateMany, it also accepts an entire object with multiple values.
-	 * updateValue('339942739275677727', { prefix: 'k!', roles: { administrator: '339959033937264641' } });
-	 */
-	async updateValue(table, path, newValue) {
-		// { channels: { modlog: '340713281972862976' } } | undefined
-		if (typeof path === 'object' && typeof newValue === 'undefined') {
-			return this.db.collection(table).update({}, { $set: path }, { multi: true });
-		}
-		// 'channels.modlog' | '340713281972862976'
-		if (typeof path === 'string' && typeof newValue !== 'undefined') {
-			const route = path.split('.');
-			const object = {};
-			let ref = object;
-			for (let i = 0; i < route.length - 1; i++) ref = ref[route[i]] = {};
-			ref[route[route.length - 1]] = newValue;
-			return this.db.collection(table).update({}, { $set: object }, { multi: true });
-		}
-		throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
+		return this.db.collection(table).aggregate({ $sample: { size: 1 } });
 	}
 
 	/**
