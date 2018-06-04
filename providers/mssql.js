@@ -119,7 +119,7 @@ module.exports = class extends SQLProvider {
 	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
-			return this.run(`SELECT * FROM @0 WHERE id IN (@1);`, [table, sanitizeEntries(entries)])
+			return this.run(`SELECT * FROM @0 WHERE id IN (@1);`, [table, `'${entries.join("', '")}'`])
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 		return this.run(`SELECT * FROM @0;`, [table])
@@ -298,14 +298,4 @@ function sanitizeKeyName(value) {
 	if (typeof value !== 'string') throw new TypeError(`%MSSQL.sanitizeString expects a string, got: ${new Type(value)}`);
 	if (/`/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	return value;
-}
-
-/**
-	 *
-	 * @param {array} value The array of entries you want to filter
-	 * @returns {string}
-	 * @private
-	 */
-function sanitizeEntries(value) {
-	return `'${value.join("', '")}'`;
 }
