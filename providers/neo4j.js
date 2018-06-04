@@ -77,14 +77,11 @@ module.exports = class extends Provider {
 		return string.join(', ');
 	}
 
-<<<<<<< HEAD
 	async getAll(table, filter = []) {
 		return await this.db.run(`MATCH (n:${table}) ${filter.length ? `WHERE n.id IN ${filter}` : ''}RETURN n`)
 			.then(data => data.records.map(node => node._fields[0].properties));
 	}
 
-=======
->>>>>>> SGv2.2.0
 	async replace(table, id, doc) {
 		const { data } = await this.get(table, id);
 		const object = this.constructFlatObject(mergeObjects(data, this.parseUpdateInput(doc)));
