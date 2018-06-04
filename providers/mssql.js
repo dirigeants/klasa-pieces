@@ -117,11 +117,17 @@ module.exports = class extends SQLProvider {
 	 * @param {string} [key] The key to filter the data from. Requires the value parameter
 	 * @param {*} [value] The value to filter the data from. Requires the key parameter
 	 * @param {number} [limit] The maximum range. Must be higher than the limitMin parameter
+	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
 	 * @returns {Promise<Object[]>}
 	 */
-	getAll(table, key, value, limit) {
+	getAll(table, key, value, limit, entries = []) {
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
 			return this.run(`SELECT ${parseRange(limit)} * FROM @0 WHERE @1 = @2;`, [table, key, value])
+				.then(results => results.map(output => this.parseEntry(table, output)));
+		}
+
+		if (entries.length > 0) {
+			return this.run(`SELECT ${parseRange(limit)} * FROM @0 WHERE id IN (@1);`, [table, entries.join(',')])
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 
