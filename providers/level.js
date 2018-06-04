@@ -66,7 +66,7 @@ module.exports = class extends Provider {
 			const output = [];
 			const stream = db.keyStream()
 				.on('data', key => output.push(key))
-				.on('end', () => {
+				.once('end', () => {
 					stream.removeAllListeners();
 					res(output);
 				});
