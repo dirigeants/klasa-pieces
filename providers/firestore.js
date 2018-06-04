@@ -42,7 +42,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		return this.db.collection(table).get().then(col => !!col.size);
+		return this.db.collection(table).get().then(col => Boolean(col.size));
 	}
 
 	/**
@@ -57,10 +57,13 @@ module.exports = class extends Provider {
 	/**
 	 * Returns all the documents of a collection
 	 * @param {string} table Name of the collection, for which all values is to be returned
+	 * @param {array} filter An optional array, to filter out the data.
 	 * @returns {Promise<Array>}
-	 */
-	getAll(table) {
-		return this.db.collection(table).get().then(snaps => snaps.docs.map(snap => snap.data()));
+	0 */
+	getAll(table, filter = []) {
+		return this.db.collection(table).get()
+			.then(snaps => snaps.docs.map(snap => this.packData(snap.data(), snap.id))
+				.filter(snapshots => filter.length ? filter.includes(snapshots.uuid) : true));
 	}
 	/**
 	 * Returns all the Keys/Docs of a collection/tanle.
@@ -77,7 +80,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Any>}
 	 */
 	get(table, id) {
-		return this.db.collection(table).doc(id).get();
+		return this.db.collection(table).doc(id).get().then(snap => this.packData(snap.data(), snap.id));
 	}
 
 	/**
@@ -166,6 +169,13 @@ module.exports = class extends Provider {
 		} else {
 			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
 		}
+	}
+
+	packData(data, id) {
+		return {
+			...data,
+			uuid: id
+		};
 	}
 
 };
