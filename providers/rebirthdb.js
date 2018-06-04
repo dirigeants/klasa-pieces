@@ -52,7 +52,7 @@ module.exports = class extends Provider {
 
 	getKeys(table, entries = []) {
 		if (entries.length) return this.db.table(table).getAll(...entries)('id').run();
-		return this.db.table(table).run();
+		return this.db.table(table)('id').run();
 	}
 
 	get(table, id) {
