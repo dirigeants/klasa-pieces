@@ -25,7 +25,15 @@ module.exports = class extends Provider {
 		super(...args);
 		this.db = null;
 	}
+	async init() {
+		await firebase.initializeApp({
+			credential: firebase.credential.cert(this.client.options.providers.firestore.credentials),
+			databaseURL: this.client.options.providers.firestore.databaseURL
+		});
 
+		this.db = firebase.firestore();
+	}
+	
 	hasTable(table) {
 		return this.db.collection(table).get().then(col => Boolean(col.size));
 	}
@@ -80,14 +88,6 @@ module.exports = class extends Provider {
 		} else {
 			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
 		}
-	}
-	async init() {
-		await firebase.initializeApp({
-			credential: firebase.credential.cert(this.client.options.providers.firestore.credentials),
-			databaseURL: this.client.options.providers.firestore.databaseURL
-		});
-
-		this.db = firebase.firestore();
 	}
 
 	packData(data, id) {
