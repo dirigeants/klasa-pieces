@@ -47,12 +47,15 @@ module.exports = class extends Provider {
 		if (!db) return Promise.reject(new Error(`The table ${table} does not exist.`));
 		return new Promise((res) => {
 			const output = [];
-			db.createReadStream()
+			const stream = db.createReadStream()
 				.on('data', filter.length ? (data) => {
 					data = JSON.parse(data);
 					if (filter.includes(data.id)) output.push(data);
 				} : (data) => output.push(JSON.parse(data.value)))
-				.once('end', res.bind(null, output));
+				.once('end', () => {
+					stream.removeAllListeners();
+					res(output);
+				});
 		});
 	}
 
@@ -61,9 +64,12 @@ module.exports = class extends Provider {
 		if (!db) return Promise.reject(new Error(`The table ${table} does not exist.`));
 		return new Promise((res) => {
 			const output = [];
-			db.keyStream()
+			const stream = db.keyStream()
 				.on('data', key => output.push(key))
-				.on('end', res.bind(null, output));
+				.once('end', () => {
+					stream.removeAllListeners();
+					res(output);
+				});
 		});
 	}
 
