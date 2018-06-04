@@ -115,7 +115,7 @@ module.exports = class extends SQLProvider {
 	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN (${entries.join(',')});`)
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN (${sanitizeEntries(entries)});`)
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`)
@@ -425,4 +425,14 @@ function sanitizeInput(value) {
 		case 'boolean': return sanitizeBoolean(value);
 		default: throw new TypeError(`%MySQL.sanitizeInput expects type of string, number, or object. Got: ${new Type(value)}`);
 	}
+}
+
+/**
+	 *
+	 * @param {array} value The array of entries you want to filter
+	 * @returns {string}
+	 * @private
+	 */
+function sanitizeEntries(value) {
+	return `'${value.join("', '")}'`;
 }
