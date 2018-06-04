@@ -63,8 +63,10 @@ module.exports = class extends Provider {
 	 * @param {string} table The name of the table to get all entries from.
 	 * @returns {Promise<Object[]>}
 	 */
-	async getAll(table) {
-		const entries = await this.dataStores.get(table).findAsync({});
+	async getAll(table, filter = []) {
+		let entries;
+		if (filter.length) entries = await this.dataStores.get(table).findAsync({ id: { $in: filter } });
+		else entries = await this.dataStores.get(table).findAsync({});
 		for (const entry of entries) delete entry._id;
 		return entries;
 	}
