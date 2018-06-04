@@ -80,7 +80,7 @@ module.exports = class extends SQLProvider {
 	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN (${`'${entries.join("', '")}'`})`);
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}')`);
 		}
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)}`);
 	}

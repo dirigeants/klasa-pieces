@@ -115,7 +115,7 @@ module.exports = class extends SQLProvider {
 	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN (${`'${entries.join("', '")}'`});`)
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}');`)
 				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`)
@@ -408,7 +408,7 @@ function sanitizeObject(value) {
  * @private
  */
 function sanitizeBoolean(value) {
-	return value ? 1 : 0;
+	return Number(value) ? 1 : 0;
 }
 
 /**
