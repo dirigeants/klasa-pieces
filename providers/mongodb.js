@@ -16,7 +16,12 @@ module.exports = class extends Provider {
 			db: 'klasa',
 			options: {}
 		}, this.client.options.providers.mongodb);
-		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, { ...connection.options, auth: { user: connection.user, password: connection.password } });
+		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, mergeObjects(connection.options, {
+			auth: {
+				user: connection.user,
+				password: connection.password
+			}
+		}));
 		this.db = mongoClient.db(connection.db);
 	}
 
@@ -107,7 +112,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		return this.getAll(table).then(results => results[Math.floor(Math.random() * results.length)]);
+		return this.getKeys(table).then(results => this.get(table, results[Math.floor(Math.random() * results.length)].id));
 	}
 
 	/**
@@ -172,19 +177,11 @@ module.exports = class extends Provider {
 	 * Inserts a Document into a Collection using a user provided object.
 	 * @param {string} table Name of the Collection
 	 * @param {(string|Object)} id ID of the document
-	 * @param {Object} [doc={}] Document Object to insert
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc Document Object to insert
 	 * @returns {Promise}
 	 */
 	create(table, id, doc = {}) {
-		return this.db.collection(table).insertOne({ doc, ...resolveQuery(id) });
-	}
-
-	set(...args) {
-		return this.create(...args);
-	}
-
-	insert(...args) {
-		return this.create(...args);
+		return this.db.collection(table).insertOne(mergeObjects(this.parseUpdateInput(doc), resolveQuery(id)));
 	}
 
 	/**
@@ -201,23 +198,22 @@ module.exports = class extends Provider {
 	 * Updates a Document using MongoDB Update Operators. *
 	 * @param {string} table Name of the Collection
 	 * @param {Object} id The Filter used to select the document to update
-	 * @param {Object} [doc={}] The update operations to be applied to the document
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc The update operations to be applied to the document
 	 * @returns {Promise<void>}
 	 */
-	async update(table, id, doc = {}) {
-		const old = await this.get(table, id);
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: mergeObjects(old || { id }, doc) });
+	update(table, id, doc) {
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: this.parseUpdateInput(doc) });
 	}
 
 	/**
 	 * Replaces a Document with a new Document specified by the user *
 	 * @param {string} table Name of the Collection
 	 * @param {Object} id The Filter used to select the document to update
-	 * @param {Object} [doc={}] The Document that replaces the matching document
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc The Document that replaces the matching document
 	 * @returns {Promise<void>}
 	 */
-	replace(table, id, doc = {}) {
-		return this.db.collection(table).replaceOne(resolveQuery(id), doc);
+	replace(table, id, doc) {
+		return this.db.collection(table).replaceOne(resolveQuery(id), this.parseUpdateInput(doc));
 	}
 
 };

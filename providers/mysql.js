@@ -1,15 +1,38 @@
-const { Provider, util: { mergeDefault } } = require('klasa');
+const { SQLProvider, QueryBuilder, Schema, Timestamp, Type, util: { mergeDefault, isNumber, isObject } } = require('klasa');
+
+/**
+ * NOTE: You need to install mysql2
+ * https://www.npmjs.com/package/mysql2
+ *
+ * The library has a folder called promise, which we're accessing
+ */
 const mysql = require('mysql2/promise');
 
-module.exports = class MySQL extends Provider {
+const TIMEPARSERS = {
+	DATE: new Timestamp('YYYY-MM-DD'),
+	DATETIME: new Timestamp('YYYY-MM-DD hh:mm:ss')
+};
+
+module.exports = class extends SQLProvider {
 
 	constructor(...args) {
-		super(...args, {
-			enabled: true,
-			sql: true,
-			description: 'Allows you to use MySQL functionality throught Klasa'
+		super(...args);
+		this.qb = new QueryBuilder({
+			any: { type: 'JSON', resolver: (input) => sanitizeObject(input) },
+			boolean: { type: 'BIT(1)', resolver: (input) => input ? '1' : '0' },
+			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			float: 'DOUBLE PRECISION',
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			json: { type: 'JSON', resolver: (input) => sanitizeObject(input) },
+			null: 'NULL',
+			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
+			array: () => 'ARRAY',
+			arrayResolver: (values) => values.length ? sanitizeObject(values) : "'[]'",
+			formatDatatype: (name, datatype, def = null) => datatype === 'ARRAY' ?
+				`${sanitizeKeyName(name)} TEXT` :
+				`${sanitizeKeyName(name)} ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
 		});
-		this.TYPES = DATATYPES;
 		this.db = null;
 	}
 
@@ -41,7 +64,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	hasTable(table) {
-		requestType('MySQL#hasTable', 'table', 'string', table);
 		return this.run(`SHOW TABLES LIKE '${table}';`)
 			.then(result => !!result)
 			.catch(() => false);
@@ -53,9 +75,18 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	createTable(table, rows) {
-		requestType('MySQL#createTable', 'table', 'string', table);
-		requestType('MySQL#createTable', 'rows', 'string', rows.map(([k, v]) => `${k} ${v}`).join(', '));
-		return this.runAll(`CREATE TABLE ${sanitizeKeyName(table)} (${rows});`);
+		if (rows) return this.runAll(`CREATE TABLE ${sanitizeKeyName(table)} (${rows});`);
+
+		const gateway = this.client.gateways[table];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
+
+		const schemaValues = [...gateway.schema.values(true)];
+		return this.run(`
+			CREATE TABLE ${sanitizeKeyName(table)} (
+				id VARCHAR(18) NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''},
+				PRIMARY KEY(id)
+			)`
+		);
 	}
 
 	/**
@@ -63,7 +94,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	deleteTable(table) {
-		requestType('MySQL#deleteTable', 'table', 'string', table);
 		return this.exec(`DROP TABLE ${sanitizeKeyName(table)};`);
 	}
 
@@ -72,7 +102,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<number>}
 	 */
 	countRows(table) {
-		requestType('MySQL#deleteTable', 'table', 'string', table);
 		return this.run(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`)
 			.then(result => result['COUNT(*)']);
 	}
@@ -82,19 +111,19 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} [key] The key to filter the data from. Requires the value parameter
-	 * @param {*}    [value] The value to filter the data from. Requires the key parameter
+	 * @param {*} [value] The value to filter the data from. Requires the key parameter
 	 * @param {number} [limitMin] The minimum range. Must be higher than zero
 	 * @param {number} [limitMax] The maximum range. Must be higher than the limitMin parameter
 	 * @returns {Promise<Object[]>}
 	 */
 	getAll(table, key, value, limitMin, limitMax) {
-		requestType('MySQL#getAll', 'table', 'string', table);
 		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-			requestType('MySQL#getAll', 'key', 'string', key);
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeInput(value)} ${parseRange(limitMin, limitMax)};`);
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeInput(value)} ${parseRange(limitMin, limitMax)};`)
+				.then(results => results.map(output => this.parseEntry(table, output)));
 		}
 
-		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`);
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ${parseRange(limitMin, limitMax)};`)
+			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
 	/**
@@ -102,7 +131,6 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	getKeys(table) {
-		requestType('MySQL#getKeys', 'table', 'string', table);
 		return this.runAll(`SELECT id FROM ${sanitizeKeyName(table)};`)
 			.then(rows => rows.map(row => row.id));
 	}
@@ -110,33 +138,27 @@ module.exports = class MySQL extends Provider {
 	/**
 	 * @param {string} table The name of the table to get the data from
 	 * @param {string} key The key to filter the data from
-	 * @param {*}    [value] The value of the filtered key
+	 * @param {*} [value] The value of the filtered key
 	 * @returns {Promise<Object>}
 	 */
 	get(table, key, value) {
-		requestType('MySQL#get', 'table', 'string', table);
-
 		// If a key is given (id), swap it and search by id - value
 		if (typeof value === 'undefined') {
 			value = key;
 			key = 'id';
 		}
-		requestType('MySQL#get', 'key', 'string', key);
-		requestValue('MySQL#get', 'value', value);
 		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeInput(value)} LIMIT 1;`)
-			.catch(throwError);
+			.then(result => this.parseEntry(table, result));
 	}
 
 	/**
 	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id    The value of the id
+	 * @param {string} id The value of the id
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, id) {
-		requestType('MySQL#has', 'table', 'string', table);
-		requestType('MySQL#has', 'id', 'string', id);
 		return this.run(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeString(id)} LIMIT 1;`)
-			.then(row => !!row);
+			.then(Boolean);
 	}
 
 	/**
@@ -144,8 +166,8 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		requestType('MySQL#getRandom', 'table', 'string', table);
-		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RAND() LIMIT 1;`);
+		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RAND() LIMIT 1;`)
+			.then(result => this.parseEntry(table, result));
 	}
 
 	/**
@@ -157,58 +179,52 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	async getSorted(table, key, order = 'DESC', limitMin, limitMax) {
-		requestType('MySQL#getSorted', 'table', 'string', table);
-		requestType('MySQL#getSorted', 'key', 'string', key);
 		if (order !== 'DESC' && order !== 'ASC') {
 			throw new TypeError(`MySQL#getSorted 'order' parameter expects either 'DESC' or 'ASC'. Got: ${order}`);
 		}
 
-		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`);
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`)
+			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
 	/**
 	 * @param {string} table The name of the table to insert the new data
 	 * @param {string} id The id of the new row to insert
-	 * @param {(string|string[]|{})} [param1] The first parameter to validate.
-	 * @param {*} [param2] The second parameter to validate.
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
 	 * @returns {Promise<any[]>}
 	 */
-	insert(table, id, param1, param2) {
-		requestType('MySQL#insert', 'table', 'string', table);
-		requestType('MySQL#insert', 'id', 'string', id);
-		const [keys, values] = acceptArbitraryInput(param1, param2);
+	create(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
 
 		// Push the id to the inserts.
-		keys.push('id');
-		values.push(id);
+		if (!keys.includes('id')) {
+			keys.push('id');
+			values.push(id);
+		}
 		return this.exec(`INSERT INTO ${sanitizeKeyName(table)} (${keys.map(sanitizeKeyName).join(', ')}) VALUES (${values.map(sanitizeInput).join(', ')});`);
-	}
-
-	/**
-	 * @param {...*} args The arguments
-	 * @alias MySQL#insert
-	 * @returns {Promise<any[]>}
-	 */
-	create(...args) {
-		return this.insert(...args);
 	}
 
 	/**
 	 * @param {string} table The name of the table to update the data from
 	 * @param {string} id The id of the row to update
-	 * @param {(string|string[]|{})} param1 The first parameter to validate.
-	 * @param {*} [param2] The second parameter to validate.
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
 	 * @returns {Promise<any[]>}
 	 */
-	update(table, id, param1, param2) {
-		requestType('MySQL#update', 'table', 'string', table);
-		requestType('MySQL#update', 'id', 'string', id);
-
-		const [keys, values] = acceptArbitraryInput(param1, param2);
+	update(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
 		const update = new Array(keys.length);
 		for (let i = 0; i < keys.length; i++) update[i] = `${sanitizeKeyName(keys[i])} = ${sanitizeInput(values[i])}`;
 
 		return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${update.join(', ')} WHERE id = ${sanitizeString(id)};`);
+	}
+
+	/**
+	 * @param {...*} args The arguments
+	 * @alias MSSQL#update
+	 * @returns {Promise<any[]>}
+	 */
+	replace(...args) {
+		return this.update(...args);
 	}
 
 	/**
@@ -219,11 +235,7 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	incrementValue(table, id, key, amount = 1) {
-		requestType('MySQL#incrementValue', 'table', 'string', table);
-		requestType('MySQL#incrementValue', 'id', 'string', id);
-		requestType('MySQL#incrementValue', 'key', 'string', key);
-		requestType('MySQL#incrementValue', 'amount', 'number', amount);
-		if (amount < 0 || isNaN(amount) || Number.isInteger(amount) === false || Number.isSafeInteger(amount) === false) {
+		if (amount < 0 || !isNumber(amount)) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
 		}
 
@@ -238,11 +250,7 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	decrementValue(table, id, key, amount = 1) {
-		requestType('MySQL#decrementValue', 'table', 'string', table);
-		requestType('MySQL#decrementValue', 'id', 'string', id);
-		requestType('MySQL#decrementValue', 'key', 'string', key);
-		requestType('MySQL#decrementValue', 'amount', 'number', amount);
-		if (amount < 0 || isNaN(amount) || Number.isInteger(amount) === false || Number.isSafeInteger(amount) === false) {
+		if (amount < 0 || !isNumber(amount)) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
 		}
 
@@ -255,25 +263,20 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	delete(table, id) {
-		requestType('MySQL#delete', 'table', 'string', table);
 		return this.exec(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeString(id)};`);
 	}
 
 	/**
 	 * Add a new column to a table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {(string|Array<string[]>)} key The key to add.
-	 * @param {string} [datatype] The datatype for the new key.
-	 * @returns {Promise<any[]>}
+	 * @param {string} table The table to update
+	 * @param {(SchemaFolder | SchemaPiece)} piece The SchemaFolder or SchemaPiece added to the schema
+	 * @returns {Promise<*>}
 	 */
-	addColumn(table, key, datatype) {
-		requestType('MySQL#addColumn', 'table', 'string', table);
-		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${sanitizeKeyName(key)} ${datatype};`);
-		if (typeof datatype === 'undefined' && Array.isArray(key)) {
-			return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ${key.map(([column, type]) =>
-				`ADD COLUMN ${sanitizeKeyName(column)} ${type}`).join(', ')};`);
-		}
-		throw new TypeError('Invalid usage of MySQL#addColumn. Expected a string and string or string[][] and undefined.');
+	addColumn(table, piece) {
+		if (!(piece instanceof Schema)) throw new TypeError('Invalid usage of PostgreSQL#addColumn. Expected a SchemaPiece or SchemaFolder instance.');
+		return this.exec(piece.type !== 'Folder' ?
+			`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${this.qb.parse(piece)};` :
+			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);
 	}
 
 	/**
@@ -283,22 +286,20 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<any[]>}
 	 */
 	removeColumn(table, key) {
-		requestType('MySQL#removeColumn', 'table', 'string', table);
 		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(key)};`);
 		if (Array.isArray(key)) return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP ${key.map(sanitizeKeyName).join(', ')};`);
 		throw new TypeError('Invalid usage of MySQL#removeColumn. Expected a string or string[].');
 	}
 
 	/**
-	 * Edit the key's datatype from the table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The name of the column to update.
-	 * @param {string} datatype The new datatype for the column.
-	 * @returns {Promise<any[]>}
+	 * Alters the datatype from a column.
+	 * @param {string} table The table to update
+	 * @param {SchemaPiece} piece The modified SchemaPiece
+	 * @returns {Promise<*>}
 	 */
-	updateColumn(table, key, datatype) {
-		requestType('MySQL#updateColumn', 'table', 'string', table);
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(key)} ${datatype};`);
+	updateColumn(table, piece) {
+		const [column, ...datatype] = this.qb.parse(piece).split(' ');
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(column)} TYPE ${datatype};`);
 	}
 
 	/**
@@ -308,8 +309,7 @@ module.exports = class MySQL extends Provider {
 	 */
 	run(sql) {
 		return this.db.query(sql)
-			.then(([rows]) => rows[0])
-			.catch(throwError);
+			.then(([rows]) => rows[0]);
 	}
 
 	/**
@@ -319,8 +319,7 @@ module.exports = class MySQL extends Provider {
 	 */
 	runAll(sql) {
 		return this.db.query(sql)
-			.then(([rows]) => rows)
-			.catch(throwError);
+			.then(([rows]) => rows);
 	}
 
 	/**
@@ -329,65 +328,10 @@ module.exports = class MySQL extends Provider {
 	 * @returns {Promise<Object[]>}
 	 */
 	exec(sql) {
-		return this.db.query(sql)
-			.catch(throwError);
+		return this.db.query(sql);
 	}
 
 };
-
-/**
- * Accept any kind of input from two parameters.
- * @param {(string|string[]|{})} param1 The first parameter to validate.
- * @param {*} [param2] The second parameter to validate.
- * @returns {[[], []]}
- * @private
- */
-function acceptArbitraryInput(param1, param2) {
-	if (typeof param1 === 'undefined' && typeof param2 === 'undefined') return [[], []];
-	if (typeof param1 === 'string' && typeof param2 !== 'undefined') return [[param1], [param2]];
-	if (Array.isArray(param1) && Array.isArray(param2)) {
-		if (param1.length !== param2.length) throw new TypeError(`The array lengths do not match: ${param1.length}-${param2.length}`);
-		if (param1.some(value => typeof value !== 'string')) throw new TypeError(`The array of keys must be an array of strings, but found a value that does not match.`);
-		return [param1, param2];
-	}
-	if (isObject(param1) && typeof param2 === 'undefined') {
-		const entries = [[], []];
-		getEntriesFromObject(param1, entries, '');
-		return entries;
-	}
-	throw new TypeError('Invalid input. Expected a key type of string and a value, tuple of arrays, or an object and undefined.');
-}
-
-/**
- * Get all entries from an object.
- * @param {Object} object The object to "flatify".
- * @param {[string[], any[]]} param1 The tuple of keys and values to check.
- * @param {string} path The current path.
- * @private
- */
-function getEntriesFromObject(object, [keys, values], path) {
-	const objectKeys = Object.keys(object);
-	for (let i = 0; i < objectKeys.length; i++) {
-		const key = objectKeys[i];
-		const value = object[key];
-		if (isObject(value)) {
-			getEntriesFromObject(value, [keys, values], path.length > 0 ? `${path}.${key}` : key);
-		} else {
-			keys.push(path.length > 0 ? `${path}.${key}` : key);
-			values.push(value);
-		}
-	}
-}
-
-/**
- * Check if a value is an object.
- * @param {*} object The object to validate.
- * @returns {boolean}
- * @private
- */
-function isObject(object) {
-	return Object.prototype.toString.call(object) === '[object Object]';
-}
 
 /**
  * @param {number} [min] The minimum value
@@ -398,18 +342,20 @@ function isObject(object) {
 function parseRange(min, max) {
 	// Min value validation
 	if (typeof min === 'undefined') return '';
-	if (isNaN(min) || Number.isInteger(min) === false || Number.isSafeInteger(min) === false) {
+	if (!isNumber(min)) {
 		throw new TypeError(`%MySQL.parseRange 'min' parameter expects an integer or undefined, got ${min}`);
 	}
+
 	if (min < 0) {
 		throw new TypeError(`%MySQL.parseRange 'min' parameter expects to be equal or greater than zero, got ${min}`);
 	}
 
 	// Max value validation
 	if (typeof max !== 'undefined') {
-		if (typeof max !== 'number' || isNaN(max) || Number.isInteger(max) === false || Number.isSafeInteger(max) === false) {
+		if (!isNumber(max)) {
 			throw new TypeError(`%MySQL.parseRange 'max' parameter expects an integer or undefined, got ${max}`);
 		}
+
 		if (max <= min) {
 			throw new TypeError(`%MySQL.parseRange 'max' parameter expects ${max} to be greater than ${min}. Got: ${max} <= ${min}`);
 		}
@@ -419,39 +365,13 @@ function parseRange(min, max) {
 }
 
 /**
- * @param {string} method The name of the method
- * @param {string} parameter The parameter name
- * @param {string} type The expected primitive type of the parameter
- * @param {*} value The value to test
- * @private
- */
-function requestType(method, parameter, type, value) {
-	const currentType = typeof value;
-	if (currentType !== type) throw new TypeError(`${method} '${parameter}' parameter expects type of ${type}. Got: ${currentType}`);
-}
-
-/**
- * @param {string} method The name of the method
- * @param {string} parameter The parameter name
- * @param {*} value The value to test if undefined
- * @private
- */
-function requestValue(method, parameter, value) {
-	const currentType = typeof value;
-	if (currentType === 'undefined') throw new TypeError(`${method} '${parameter}' parameter expects a value. Got: undefined`);
-}
-
-/**
  * @param {number} value The number to sanitize
  * @returns {string}
  * @private
  */
 function sanitizeInteger(value) {
-	if (isNaN(value) || Number.isInteger(value) === false || Number.isSafeInteger(value) === false) {
-		throw new TypeError(`%MySQL.sanitizeNumber expects an integer, got ${value}`);
-	}
-	if (value < 0) { throw new TypeError(`%MySQL.sanitizeNumber expects a positive integer, got ${value}`); }
-
+	if (!isNumber(value)) throw new TypeError(`%MySQL.sanitizeNumber expects an integer, got ${value}`);
+	if (value < 0) throw new TypeError(`%MySQL.sanitizeNumber expects a positive integer, got ${value}`);
 	return String(value);
 }
 
@@ -461,9 +381,7 @@ function sanitizeInteger(value) {
  * @private
  */
 function sanitizeString(value) {
-	if (value.length === 0) { throw new TypeError('%MySQL.sanitizeString expects a string with a length bigger than 0.'); }
-
-	return `'${value.replace(/'/g, "''")}'`;
+	return `'${String(value).replace(/'/g, "''")}'`;
 }
 
 /**
@@ -472,9 +390,8 @@ function sanitizeString(value) {
  * @private
  */
 function sanitizeKeyName(value) {
-	if (typeof value !== 'string') { throw new TypeError(`%MySQL.sanitizeString expects a string, got: ${typeof value}`); }
-	if (/`/.test(value)) { throw new TypeError(`Invalid input (${value}).`); }
-
+	if (typeof value !== 'string') throw new TypeError(`%MySQL.sanitizeString expects a string, got: ${new Type(value)}`);
+	if (/`/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	return `\`${value}\``;
 }
 
@@ -485,10 +402,8 @@ function sanitizeKeyName(value) {
  */
 function sanitizeObject(value) {
 	if (value === null) return 'NULL';
-	if (Array.isArray(value)) return sanitizeString(JSON.stringify(value));
-	const type = Array.prototype.toString.call(value);
-	if (type === '[object Object]') return sanitizeString(JSON.stringify(value));
-	throw new TypeError(`%MySQL.sanitizeObject expects NULL, an array, or an object. Got: ${type}`);
+	if (Array.isArray(value) || isObject(value)) return sanitizeString(JSON.stringify(value));
+	throw new TypeError(`%MySQL.sanitizeObject expects NULL, an array, or an object. Got: ${new Type(value)}`);
 }
 
 /**
@@ -507,48 +422,11 @@ function sanitizeBoolean(value) {
  * @private
  */
 function sanitizeInput(value) {
-	const type = typeof value;
-	switch (type) {
+	switch (typeof value) {
 		case 'string': return sanitizeString(value);
 		case 'number': return sanitizeInteger(value);
 		case 'object': return sanitizeObject(value);
 		case 'boolean': return sanitizeBoolean(value);
-		default: throw new TypeError(`%MySQL.sanitizeInput expects type of string, number, or object. Got: ${type}`);
+		default: throw new TypeError(`%MySQL.sanitizeInput expects type of string, number, or object. Got: ${new Type(value)}`);
 	}
 }
-
-// In several V8 versions, Promise errors do not bubble up, this workaround
-// forces errors to do so.
-const throwError = (err) => { throw err; };
-
-const DATATYPES = {
-	DECIMAL: 'DECIMAL',
-	TINYINT: 'TINY',
-	SMALLINT: 'SHORT',
-	INT: 'LONG',
-	FLOAT: 'FLOAT',
-	DOUBLE: 'DOUBLE',
-	NULL: 'NULL',
-	TIMESTAMP: 'TIMESTAMP',
-	BIGINT: 'LONGLONG',
-	MEDIUMINT: 'INT24',
-	DATE: 'DATE',
-	TIME: 'TIME',
-	DATETIME: 'DATETIME',
-	YEAR: 'YEAR',
-	NEWDATE: 'NEWDATE',
-	VARCHAR: 'VARCHAR',
-	BIT: 'BIT',
-	BOOLEAN: 'BIT(1)',
-	JSON: 'JSON',
-	NEWDECIMAL: 'NEWDECIMAL',
-	ENUM: 'ENUM',
-	SET: 'SET',
-	TINYBLOB: 'TINY_BLOB',
-	MEDIUMBLOB: 'MEDIUM_BLOB',
-	LONGBLOB: 'LONG_BLOB',
-	BLOB: 'BLOB',
-	TEXT: 'TEXT',
-	STRING: 'STRING',
-	GEOMETRY: 'GEOMETRY'
-};
