@@ -75,21 +75,7 @@ module.exports = class extends Provider {
 	}
 
 	async delete(table, id) {
-		return this.db.table(table).get(id).delete();
-	}
-
-	async updateValue(table, path, value) {
-		// { channels: { modlog: '340713281972862976' } } | undefined
-		if (isObject(path) && typeof value === 'undefined') {
-			return this.db.table(table).update(path).run();
-		}
-
-		// 'channels.modlog' | '340713281972862976'
-		if (typeof path === 'string' && typeof value !== 'undefined') {
-			return this.db.table(table).update(makeObject(path, value)).run();
-		}
-
-		throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${new Type(path)} and ${new Type(value)}`);
+		return this.db.table(table).get(id).delete().run();
 	}
 
 	async removeValue(table, path) {

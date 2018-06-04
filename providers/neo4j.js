@@ -30,6 +30,12 @@ module.exports = class extends Provider {
 	deleteTable(table) {
 		return this.db.run(`MATCH (n:${table}) DELETE n`);
 	}
+  
+	async getAll(table, filter = []) {
+		const result = await this.db.run(`MATCH (n:${table}) RETURN n`)
+			.then(data => data.records.map(node => node._fields[0].properties));
+		return filter.length ? result.filter(nodes => filter.includes(nodes.id)) : result;
+	}
 
 	getKeys(table) {
 		return this.db.run(`MATCH (n:${table}) RETURN n`).then(data => data.records.map(node => node._fields[0].identity.low));
@@ -71,12 +77,6 @@ module.exports = class extends Provider {
 		return string.join(', ');
 	}
 
-	async getAll(table, filter = []) {
-		const result = await this.db.run(`MATCH (n:${table}) RETURN n`)
-			.then(data => data.records.map(node => node._fields[0].properties));
-		return filter.length ? result.filter(nodes => filter.includes(nodes.id)) : result;
-	}
-
 	async replace(table, id, doc) {
 		const { data } = await this.get(table, id);
 		const object = this.constructFlatObject(mergeObjects(data, this.parseUpdateInput(doc)));
@@ -99,6 +99,5 @@ module.exports = class extends Provider {
 		Object.keys(path).map(key => delete entry[key]);
 		await this.updatebyID(table, id, entry);
 	}
-	
-};
 
+};
