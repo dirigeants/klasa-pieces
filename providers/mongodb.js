@@ -73,7 +73,8 @@ module.exports = class extends Provider {
 	 * @param {string} table Name of the Collection
 	 * @returns {Promise<Array>}
 	 */
-	getAll(table) {
+	getAll(table, filter = []) {
+		if (filter.length) return this.db.collection(table).find({ id: { $in: filter } }, { _id: 0 }).toArray();
 		return this.db.collection(table).find({}, { _id: 0 }).toArray();
 	}
 

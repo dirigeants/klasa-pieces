@@ -1,8 +1,8 @@
 const { Provider, util: { mergeObjects } } = require('klasa');
+const { Collection } = require('discord.js');
 const { resolve } = require('path');
 const fs = require('fs-nextra');
 const Level = require('native-level-promise');
-const Collection = require('djs-collection');
 
 module.exports = class extends Provider {
 
@@ -66,14 +66,23 @@ module.exports = class extends Provider {
 	 * @param {string} table The name of the directory to fetch from.
 	 * @returns {Promise<Object[]>}
 	 */
-	getAll(table) {
+	getAll(table, filter = []) {
 		const db = this.tables.get(table);
 		if (!db) return Promise.reject(new Error(`The table ${table} does not exist.`));
 		return new Promise((res) => {
 			const output = [];
-			db.createReadStream()
-				.on('data', (data) => output.push(JSON.parse(data.value)))
-				.on('end', res.bind(null, output));
+			db.createValueStream()
+				.on('data', data => {
+					data = JSON.parse(data);
+					if (filter.length) {
+						if (filter.includes(data.id)) {
+							output.push(data);
+						}
+					} else {
+						output.push(data);
+					}
+				})
+				.once('end', res.bind(null, output));
 		});
 	}
 
