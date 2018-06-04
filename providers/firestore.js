@@ -69,18 +69,6 @@ module.exports = class extends Provider {
 		return filter.length ? data.filter(nodes => filter.includes(nodes.id)) : data;
 	}
 
-	async updateValue(table, path, newValue) {
-		const keys = await this.getKeys(table);
-
-		if (typeof path === 'object' && typeof newValue === 'undefined') {
-			await Promise.all(keys.map(doc => this.update(table, doc, path)));
-		} else if (typeof path === 'string' && typeof newValue !== 'undefined') {
-			await Promise.all(keys.map(doc => this.update(table, doc, { path: newValue })));
-		} else {
-			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
-		}
-	}
-
 	async removeValue(table, path) {
 		const keys = await this.getKeys(table);
 
