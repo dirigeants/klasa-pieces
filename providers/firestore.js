@@ -33,7 +33,7 @@ module.exports = class extends Provider {
 
 		this.db = firebase.firestore();
 	}
-	
+
 	hasTable(table) {
 		return this.db.collection(table).get().then(col => Boolean(col.size));
 	}
