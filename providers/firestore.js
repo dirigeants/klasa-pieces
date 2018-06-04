@@ -61,9 +61,9 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Array>}
 	0 */
 	async getAll(table, filter = []) {
-		const data =  await this.db.collection(table).get()
+		const data = await this.db.collection(table).get()
 			.then(snaps => snaps.docs.map(snap => this.packData(snap.data(), snap.id)));
-		
+
 		return filter.length ? data.filter(nodes => filter.includes(nodes.id)) : data;
 	}
 	/**
