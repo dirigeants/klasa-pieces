@@ -280,7 +280,7 @@ module.exports = class extends SQLProvider {
 	 */
 	updateColumn(table, piece) {
 		const [column, ...datatype] = this.qb.parse(piece).split(' ');
-		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER ${sanitizeKeyName(column)} TYPE ${datatype};`);
+		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER ${column} TYPE ${datatype};`);
 	}
 
 	/**
