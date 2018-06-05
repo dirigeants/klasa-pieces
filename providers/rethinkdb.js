@@ -1,4 +1,4 @@
-const { Provider, Type, util: { mergeDefault, isObject, makeObject } } = require('klasa');
+const { Provider, Type, util: { mergeDefault, isObject, makeObject, chunk } } = require('klasa');
 const rethink = require('rethinkdbdash');
 
 module.exports = class extends Provider {
@@ -41,12 +41,22 @@ module.exports = class extends Provider {
 	/* Document methods */
 
 	async getAll(table, entries = []) {
-		if (entries.length) return this.db.table(table).getAll(...entries).run();
+		if (entries.length) {
+			const chunks = chunk(entries, 50000);
+			const output = [];
+			for (const myChunk of chunks) output.push(...await this.db.table(table).getAll(...myChunk).run());
+			return output;
+		}
 		return this.db.table(table).run();
 	}
 
 	async getKeys(table, entries = []) {
-		if (entries.length) return this.db.table(table).getAll(...entries)('id').run();
+		if (entries.length) {
+			const chunks = chunk(entries, 50000);
+			const output = [];
+			for (const myChunk of chunks) output.push(...await this.db.table(table).getAll(...myChunk)('id').run());
+			return output;
+		}
 		return this.db.table(table)('id').run();
 	}
 
