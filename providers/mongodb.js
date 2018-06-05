@@ -16,7 +16,12 @@ module.exports = class extends Provider {
 			db: 'klasa',
 			options: {}
 		}, this.client.options.providers.mongodb);
-		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, { ...connection.options, auth: { user: connection.user, password: connection.password } });
+		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, mergeObjects(connection.options, {
+			auth: {
+				user: connection.user,
+				password: connection.password
+			}
+		}));
 		this.db = mongoClient.db(connection.db);
 	}
 
@@ -44,10 +49,6 @@ module.exports = class extends Provider {
 		return this.db.createCollection(table);
 	}
 
-	createCollection(...args) {
-		return this.createTable(...args);
-	}
-
 	/**
 	 * Drops a collection within a DB.
 	 * @param {string} table Name of the collection to drop.
@@ -57,10 +58,6 @@ module.exports = class extends Provider {
 		return this.db.dropCollection(table);
 	}
 
-	dropCollection(table) {
-		return this.deleteTable(table);
-	}
-
 	/* Document methods */
 
 	/**
@@ -68,7 +65,8 @@ module.exports = class extends Provider {
 	 * @param {string} table Name of the Collection
 	 * @returns {Promise<Array>}
 	 */
-	getAll(table) {
+	getAll(table, filter = []) {
+		if (filter.length) return this.db.collection(table).find({ id: { $in: filter } }, { _id: 0 }).toArray();
 		return this.db.collection(table).find({}, { _id: 0 }).toArray();
 	}
 
@@ -107,42 +105,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		return this.getAll(table).then(results => results[Math.floor(Math.random() * results.length)]);
-	}
-
-	/**
-	 * Update or insert a new value to all entries.
-	 * @param {string} table The name of the table.
-	 * @param {string} path The object to remove or a path to update.
-	 * @param {*} newValue The new value for the key.
-	 * @returns {Promise<Object>}
-	 * @example
-	 * // Editing a single value
-	 * // You can edit a single value in a very similar way to Gateway#updateOne.
-	 * updateValue('339942739275677727', 'channels.modlogs', '340713281972862976');
-	 *
-	 * // However, you can also update it by passing an object.
-	 * updateValue('339942739275677727', { channels: { modlogs: '340713281972862976' } });
-	 *
-	 * // Editing multiple values
-	 * // As MongoDB#update can also work very similar to Gateway#updateMany, it also accepts an entire object with multiple values.
-	 * updateValue('339942739275677727', { prefix: 'k!', roles: { administrator: '339959033937264641' } });
-	 */
-	async updateValue(table, path, newValue) {
-		// { channels: { modlog: '340713281972862976' } } | undefined
-		if (typeof path === 'object' && typeof newValue === 'undefined') {
-			return this.db.collection(table).update({}, { $set: path }, { multi: true });
-		}
-		// 'channels.modlog' | '340713281972862976'
-		if (typeof path === 'string' && typeof newValue !== 'undefined') {
-			const route = path.split('.');
-			const object = {};
-			let ref = object;
-			for (let i = 0; i < route.length - 1; i++) ref = ref[route[i]] = {};
-			ref[route[route.length - 1]] = newValue;
-			return this.db.collection(table).update({}, { $set: object }, { multi: true });
-		}
-		throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
+		return this.db.collection(table).aggregate({ $sample: { size: 1 } });
 	}
 
 	/**
@@ -172,19 +135,11 @@ module.exports = class extends Provider {
 	 * Inserts a Document into a Collection using a user provided object.
 	 * @param {string} table Name of the Collection
 	 * @param {(string|Object)} id ID of the document
-	 * @param {Object} [doc={}] Document Object to insert
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc Document Object to insert
 	 * @returns {Promise}
 	 */
 	create(table, id, doc = {}) {
-		return this.db.collection(table).insertOne({ doc, ...resolveQuery(id) });
-	}
-
-	set(...args) {
-		return this.create(...args);
-	}
-
-	insert(...args) {
-		return this.create(...args);
+		return this.db.collection(table).insertOne(mergeObjects(this.parseUpdateInput(doc), resolveQuery(id)));
 	}
 
 	/**
@@ -201,23 +156,22 @@ module.exports = class extends Provider {
 	 * Updates a Document using MongoDB Update Operators. *
 	 * @param {string} table Name of the Collection
 	 * @param {Object} id The Filter used to select the document to update
-	 * @param {Object} [doc={}] The update operations to be applied to the document
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc The update operations to be applied to the document
 	 * @returns {Promise<void>}
 	 */
-	async update(table, id, doc = {}) {
-		const old = await this.get(table, id);
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: mergeObjects(old || { id }, doc) });
+	update(table, id, doc) {
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: this.parseUpdateInput(doc) });
 	}
 
 	/**
 	 * Replaces a Document with a new Document specified by the user *
 	 * @param {string} table Name of the Collection
 	 * @param {Object} id The Filter used to select the document to update
-	 * @param {Object} [doc={}] The Document that replaces the matching document
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc The Document that replaces the matching document
 	 * @returns {Promise<void>}
 	 */
-	replace(table, id, doc = {}) {
-		return this.db.collection(table).replaceOne(resolveQuery(id), doc);
+	replace(table, id, doc) {
+		return this.db.collection(table).replaceOne(resolveQuery(id), this.parseUpdateInput(doc));
 	}
 
 };

@@ -1,37 +1,33 @@
-/**
- * ###################################
- * #             OUTDATED            #
- * # THIS PROVIDER IS NOT UP-TO-DATE #
- * ###################################
- */
-
-const { Provider } = require('klasa');
+const { SQLProvider, QueryBuilder, Type, Timestamp } = require('klasa');
 const { resolve } = require('path');
 const db = require('sqlite');
 const fs = require('fs-nextra');
 
-module.exports = class extends Provider {
+const TIMEPARSERS = {
+	DATE: new Timestamp('YYYY-MM-DD'),
+	DATETIME: new Timestamp('YYYY-MM-DD hh:mm:ss')
+};
+
+module.exports = class extends SQLProvider {
 
 	constructor(...args) {
-		super(...args, {
-			description: 'Allows you use SQLite functionality throughout klasa.',
-			sql: true
-		});
+		super(...args);
 		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'sqlite');
-		this.CONSTANTS = {
-			String: 'TEXT',
-			Integer: 'INTEGER',
-			Float: 'INTEGER',
-			AutoID: 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
-			Timestamp: 'DATETIME',
-			AutoTS: 'DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL'
-		};
+		this.qb = new QueryBuilder({
+			null: 'NULL',
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			float: 'DOUBLE PRECISION',
+			boolean: { type: 'TINYINT', resolver: (input) => input ? '1' : '0' },
+			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
+			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) }
+		});
 	}
 
 	async init() {
-		await fs.ensureDir(this.baseDir).catch(throwError);
-		await fs.ensureFile(resolve(this.baseDir, 'db.sqlite')).catch(throwError);
-		return db.open(resolve(this.baseDir, 'db.sqlite')).catch(throwError);
+		await fs.ensureDir(this.baseDir);
+		await fs.ensureFile(resolve(this.baseDir, 'db.sqlite'));
+		return db.open(resolve(this.baseDir, 'db.sqlite'));
 	}
 
 	/* Table methods */
@@ -43,7 +39,7 @@ module.exports = class extends Provider {
 	 */
 	hasTable(table) {
 		return this.runGet(`SELECT name FROM sqlite_master WHERE type='table' AND name='${table}'`)
-			.then(row => !!row);
+			.then(Boolean);
 	}
 
 	/**
@@ -53,8 +49,16 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	createTable(table, rows) {
-		const query = rows.map(row => `'${row[0]}' ${row[1]}`).join(', ');
-		return this.run(`CREATE TABLE '${table}' (${query});`);
+		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
+		const gateway = this.client.gateways[table];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
+
+		const schemaValues = [...gateway.schema.values(true)];
+		return this.run(`
+			CREATE TABLE ${sanitizeKeyName(table)} (
+				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+			)`
+		);
 	}
 
 	/**
@@ -63,7 +67,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	deleteTable(table) {
-		return this.run(`DROP TABLE '${table}'`);
+		return this.run(`DROP TABLE ${sanitizeKeyName(table)}`);
 	}
 
 	/* Document methods */
@@ -71,13 +75,14 @@ module.exports = class extends Provider {
 	/**
 	 * Get all documents from a table.
 	 * @param {string} table The name of the table to fetch from.
-	 * @param {Object} options key and value.
+	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
 	 * @returns {Promise<Object[]>}
 	 */
-	getAll(table, options = {}) {
-		return this.runAll(options.key && options.value ?
-			`SELECT * FROM '${table}' WHERE ${options.key} = ${this.sanitize(options.value)}` :
-			`SELECT * FROM '${table}'`);
+	getAll(table, entries = []) {
+		if (entries.length) {
+			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}')`);
+		}
+		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)}`);
 	}
 
 	/**
@@ -89,8 +94,10 @@ module.exports = class extends Provider {
 	 */
 	get(table, key, value = null) {
 		return this.runGet(value === null ?
-			`SELECT * FROM ${table} WHERE id = ${this.sanitize(key)}` :
-			`SELECT * FROM ${table} WHERE ${key} = ${this.sanitize(value)}`).catch(() => null);
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)}` :
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeValue(value)}`)
+			.then(output => this.parseEntry(table, output))
+			.catch(() => null);
 	}
 
 	/**
@@ -100,7 +107,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	has(table, key) {
-		return this.runGet(`SELECT id FROM '${table}' WHERE id = ${this.sanitize(key)}`)
+		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(key)}`)
 			.then(() => true)
 			.catch(() => false);
 	}
@@ -111,45 +118,38 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	getRandom(table) {
-		return this.runGet(`SELECT * FROM '${table}' ORDER BY RANDOM() LIMIT 1`).catch(() => null);
+		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
+			.then(output => this.parseEntry(table, output))
+			.catch(() => null);
 	}
 
 	/**
-	 * Insert a new document into a table.
-	 * @param {string} table The name of the table.
-	 * @param {string} row The row id.
-	 * @param {Array<string[]>} inserts The object with all properties you want to insert into the document.
-	 * @returns {Promise<*>}
-	 */
-	create(table, row, inserts = []) {
-		if (Array.isArray(inserts) === false) throw new TypeError('SQLite#create only accepts string[][] as input for the inserts parameter.');
-
-		const keys = [];
-		const values = [];
-		for (let i = 0; i < inserts.length; i++) {
-			keys.push(inserts[i][0]);
-			values.push(inserts[i][1]);
-		}
-		return this.run(`INSERT INTO '${table}' ( ${keys.join(', ')} ) VALUES( ${values.join(', ')} )`);
-	}
-
-	set(...args) {
-		return this.create(...args);
-	}
-
-	insert(...args) {
-		return this.create(...args);
-	}
-
-	/**
-	 * Update a row from a table.
-	 * @param {string} table The name of the table.
-	 * @param {string} row The row id.
-	 * @param {Object} inserts The object with all the properties you want to update.
+	 * @param {string} table The name of the table to insert the new data
+	 * @param {string} id The id of the new row to insert
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
 	 * @returns {Promise<Object>}
 	 */
-	update(table, row, inserts) {
-		return this.run(`UPDATE '${table}' SET ${inserts} WHERE id = '${row}'`);
+	create(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
+
+		// Push the id to the inserts.
+		keys.push('id');
+		values.push(id);
+		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${values.map(sanitizeValue).join(', ')} )`);
+	}
+
+	/**
+	 * @param {string} table The name of the table to update the data from
+	 * @param {string} id The id of the row to update
+	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
+	 * @returns {Promise<Object>}
+	 */
+	update(table, id, data) {
+		const [keys, values] = this.parseUpdateInput(data, false);
+		return this.run(`
+			UPDATE ${sanitizeKeyName(table)}
+			SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = ${sanitizeValue(values[i])}`)}
+			WHERE id = ${sanitizeValue(id)}`);
 	}
 
 	replace(...args) {
@@ -163,7 +163,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	delete(table, row) {
-		return this.run(`DELETE FROM '${table}' WHERE id = '${row}'`);
+		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(row)}`);
 	}
 
 	/**
@@ -174,7 +174,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<*>}
 	 */
 	addColumn(table, key, datatype) {
-		return this.exec(`ALTER TABLE \`${table}\` ADD \`${key}\` ${datatype}`);
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(key)} ${datatype}`);
 	}
 
 	/**
@@ -184,22 +184,29 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	async removeColumn(table, key) {
-		const columns = await this.getColumns(table);
-		const newSchema = [];
-		const newColumns = [];
-		for (let i = 0; i < columns.length; i++) {
-			if (columns[i][0] === key) continue;
-			newSchema.push(`\`${columns[i][0]}\` ${columns[i][1]}`);
-			newColumns.push(columns[i][0]);
-		}
-		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
+		const gateway = this.client.gateways[gateway];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
+
+		const sanitizedTable = sanitizeKeyName(table),
+			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
+
+		const allPieces = [...gateway.schema.values(true)];
+		const index = allPieces.findIndex(piece => key === piece.path);
+		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+
+		const filteredPieces = allPieces.slice();
+		filteredPieces.splice(index, 1);
+
+		const filteredPiecesNames = filteredPieces.map(piece => sanitizeKeyName(piece.path)).join(', ');
+
+		await this.createTable(sanitizedCloneTable, filteredPieces.map(this.qb.parse.bind(this.qb)));
 		await this.exec([
-			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')}\`)`,
-			`	SELECT \`${newColumns.join('`, `')}\``,
-			`	FROM \`${table}\``
+			`INSERT INTO ${sanitizedCloneTable} (${filteredPiecesNames})`,
+			`	SELECT ${filteredPiecesNames}`,
+			`	FROM ${sanitizedTable}`
 		].join('\n'));
-		await this.exec(`DROP TABLE \`${table}\``);
-		await this.exec(`ALTER TABLE \`${table}_temp\` RENAME TO \`${table}\``);
+		await this.exec(`DROP TABLE ${sanitizedTable}`);
+		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable}`);
 		return true;
 	}
 
@@ -211,45 +218,29 @@ module.exports = class extends Provider {
 	 * @returns {Promise<boolean>}
 	 */
 	async updateColumn(table, key, datatype) {
-		const columns = await this.getColumns(table);
-		const newSchema = [];
-		const newColumns = [];
-		for (let i = 0; i < columns.length; i++) {
-			if (columns[i][0] === key) columns[i][1] = datatype;
-			newSchema.push(`\`${columns[i][0]}\` ${columns[i][1]}`);
-			newColumns.push(columns[i][0]);
-		}
-		await this.exec(`CREATE TABLE \`${table}_temp\` ( ${newSchema.join(',\n')} \n)`);
+		const gateway = this.client.gateways[gateway];
+		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
+
+		const sanitizedTable = sanitizeKeyName(table),
+			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
+
+		const allPieces = [...gateway.schema.values(true)];
+		const index = allPieces.findIndex(piece => key === piece.path);
+		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+
+		const allPiecesNames = allPieces.map(piece => sanitizeKeyName(piece.path)).join(', ');
+		const parsedDatatypes = allPieces.map(this.qb.parse.bind(this.qb));
+		parsedDatatypes[index] = `${sanitizeKeyName(key)} ${datatype}`;
+
+		await this.createTable(sanitizedCloneTable, parsedDatatypes);
 		await this.exec([
-			`INSERT INTO \`${table}_temp\` (\`${newColumns.join('`, `')}\`)`,
-			`	SELECT \`${newColumns.join('`, `')}\``,
-			`	FROM \`${table}\``
+			`INSERT INTO ${sanitizedCloneTable} (${allPiecesNames})`,
+			`	SELECT ${allPiecesNames}`,
+			`	FROM ${sanitizedTable}`
 		].join('\n'));
-		await this.exec(`DROP TABLE \`${table}\``);
-		await this.exec(`ALTER TABLE \`${table}_temp\` RENAME TO \`${table}\``);
+		await this.exec(`DROP TABLE ${sanitizedTable}`);
+		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable}`);
 		return true;
-	}
-
-	/**
-	 * Get an array of tuples containing all the keys and datatypes from a table.
-	 * @param {string} table The name of the table to edit.
-	 * @returns {Array<string[]>}
-	 */
-	async getColumns(table) {
-		const result = await this.runGet(`SELECT sql FROM sqlite_master WHERE tbl_name = '${table}' AND type = 'table'`);
-		const raw = /\(([^)]+)\)/.exec(result.sql);
-		if (raw === null) return [];
-		const columns = raw[1].split('\n');
-		const output = [];
-		for (let i = 0; i < columns.length; i++) {
-			const trimmed = columns[i].trim();
-			if (trimmed.length === 0) continue;
-			const prc = /`([^`]+)`\s*([^,]+)/.exec(trimmed);
-			if (prc === null) continue;
-			output.push([prc[1], prc[2]]);
-		}
-
-		return output;
 	}
 
 	/**
@@ -258,8 +249,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	runGet(sql) {
-		console.log(sql);
-		return db.get(sql).catch(throwError);
+		return db.get(sql);
 	}
 
 	/**
@@ -268,8 +258,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	runAll(sql) {
-		console.log(sql);
-		return db.all(sql).catch(throwError);
+		return db.all(sql);
 	}
 
 	/**
@@ -278,8 +267,7 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	run(sql) {
-		console.log(sql);
-		return db.run(sql).catch(throwError);
+		return db.run(sql);
 	}
 
 	/**
@@ -288,21 +276,29 @@ module.exports = class extends Provider {
 	 * @returns {Promise<Object>}
 	 */
 	exec(sql) {
-		console.log(sql);
-		return db.exec(sql).catch(throwError);
-	}
-
-	sanitize(value) {
-		const type = typeof value;
-		switch (type) {
-			case 'boolean':
-			case 'number': return value;
-			case 'string': return `'${value}'`;
-			case 'object': return value === null ? value : JSON.stringify(value);
-			default: return value;
-		}
+		return db.exec(sql);
 	}
 
 };
 
-const throwError = (err) => { throw err; };
+/**
+ * @param {string} value The string to sanitize as a key
+ * @returns {string}
+ * @private
+ */
+function sanitizeKeyName(value) {
+	if (typeof value !== 'string') throw new TypeError(`[SANITIZE_NAME] Expected a string, got: ${new Type(value)}`);
+	if (/`|"/.test(value)) throw new TypeError(`Invalid input (${value}).`);
+	if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') return value;
+	return `"${value}"`;
+}
+
+function sanitizeValue(value) {
+	switch (typeof value) {
+		case 'boolean':
+		case 'number': return value;
+		case 'string': return `'${value.replace(/'/, "''")}'`;
+		case 'object': return value === null ? value : JSON.stringify(value);
+		default: return sanitizeValue(String(value));
+	}
+}
