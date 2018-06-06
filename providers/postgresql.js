@@ -71,7 +71,7 @@ module.exports = class extends SQLProvider {
 		const schemaValues = [...gateway.schema.values(true)];
 		return this.run(`
 			CREATE TABLE ${sanitizeKeyName(table)} (
-				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+				${['id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE', ...schemaValues.map(this.qb.parse.bind(this.qb))].join(', ')}
 			)`
 		);
 	}
@@ -160,11 +160,7 @@ module.exports = class extends SQLProvider {
 	 * @param {number} [limitMax] The maximum range
 	 * @returns {Promise<Object[]>}
 	 */
-	async getSorted(table, key, order = 'DESC', limitMin, limitMax) {
-		if (order !== 'DESC' && order !== 'ASC') {
-			throw new TypeError(`PostgreSQL#getSorted 'order' parameter expects either 'DESC' or 'ASC'. Got: ${order}`);
-		}
-
+	getSorted(table, key, order = 'DESC', limitMin, limitMax) {
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`);
 	}
 
@@ -178,8 +174,10 @@ module.exports = class extends SQLProvider {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
 		// Push the id to the inserts.
-		keys.push('id');
-		values.push(id);
+		if (!keys.includes('id')) {
+			keys.push('id');
+			values.push(id);
+		}
 		return this.run(`
 			INSERT INTO ${sanitizeKeyName(table)} (${keys.map(sanitizeKeyName).join(', ')})
 			VALUES (${Array.from({ length: keys.length }, (__, i) => `$${i + 1}`).join(', ')});`, values);
@@ -216,10 +214,6 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<any[]>}
 	 */
 	incrementValue(table, id, key, amount = 1) {
-		if (amount < 0 || !isNumber(amount)) {
-			throw new TypeError(`PostgreSQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
-		}
-
 		return this.run(`UPDATE ${sanitizeKeyName(table)} SET $2 = $2 + $3 WHERE id = $1;`, [id, key, amount]);
 	}
 
@@ -231,10 +225,6 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<any[]>}
 	 */
 	decrementValue(table, id, key, amount = 1) {
-		if (amount < 0 || !isNumber(amount)) {
-			throw new TypeError(`PostgreSQL#decrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
-		}
-
 		return this.run(`UPDATE ${sanitizeKeyName(table)} SET $2 = GREATEST(0, $2 - $3) WHERE id = $1;`, [id, key, amount]);
 	}
 
@@ -257,7 +247,7 @@ module.exports = class extends SQLProvider {
 		if (!(piece instanceof Schema)) throw new TypeError('Invalid usage of PostgreSQL#addColumn. Expected a SchemaPiece or SchemaFolder instance.');
 		return this.run(piece.type !== 'Folder' ?
 			`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${this.qb.parse(piece)};` :
-			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')}`);
+			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);
 	}
 
 	/**
@@ -280,7 +270,7 @@ module.exports = class extends SQLProvider {
 	 */
 	updateColumn(table, piece) {
 		const [column, ...datatype] = this.qb.parse(piece).split(' ');
-		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER ${column} TYPE ${datatype};`);
+		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER ${column} TYPE ${datatype.join(' ')};`);
 	}
 
 	/**
