@@ -258,7 +258,7 @@ module.exports = class extends SQLProvider {
 	 */
 	removeColumn(table, columns) {
 		if (typeof columns === 'string') return this.run(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(columns)};`);
-		if (Array.isArray(columns)) return this.run(`ALTER TABLE ${sanitizeKeyName(table)} DROP ${columns.map(sanitizeKeyName).join(', ')};`);
+		if (Array.isArray(columns)) return this.run(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${columns.map(sanitizeKeyName).join(', ')};`);
 		throw new TypeError('Invalid usage of PostgreSQL#removeColumn. Expected a string or string[].');
 	}
 
@@ -269,8 +269,10 @@ module.exports = class extends SQLProvider {
 	 * @returns {Promise<*>}
 	 */
 	updateColumn(table, piece) {
-		const [column, ...datatype] = this.qb.parse(piece).split(' ');
-		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER ${column} TYPE ${datatype.join(' ')};`);
+		const [column, datatype] = this.qb.parse(piece).split(' ');
+		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER COLUMN ${column} TYPE ${datatype}${piece.default ?
+			`, ALTER COLUMN ${column} SET NOT NULL, ALTER COLUMN ${column} SET DEFAULT ${this.qb.parseValue(piece.default, piece)}` : ''
+		};`);
 	}
 
 	/**
