@@ -18,15 +18,9 @@ module.exports = class extends Command {
 		const ctx = FinalImage.getContext('2d');
 		const wordBank = {};
 
-		let messageBank;
-
-		for (let i = 0; i < messageLimitHundreds; i++) {
-			if (i === 0) {
-				messageBank = await msg.channel.messages.fetch({ limit: 100 });
-			} else {
-				const fetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
-				messageBank = messageBank.concat(fetchedMessages);
-			}
+		let messageBank = await msg.channel.messages.fetch({ limit: 100 });
+		for (let i = 1; i < messageLimitHundreds; i++) {
+			messageBank = messageBank.concat(await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id }));
 		}
 
 		for (const message of messageBank.values()) {
