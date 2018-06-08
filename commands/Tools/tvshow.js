@@ -34,7 +34,7 @@ module.exports = class extends Command {
 			.addField('Popularity', show.popularity, true)
 			.addField('First Air Date', show.first_air_date);
 
-		return msg.sendEmbed(embed);
+		return msg.send(embed);
 	}
 
 };

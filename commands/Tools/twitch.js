@@ -18,13 +18,11 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [twitchName]) {
-		const body = await snekfetch.get(`https://api.twitch.tv/kraken/channels/${twitchName}`)
-			.query('client_id', clientID)
+		const body = await snekfetch.get(`https://api.twitch.tv/kraken/channels/${twitchName}?client_id=${clientID}`)
 			.then(res => res.body)
 			.catch(() => { throw 'Unable to find account. Did you spell it correctly?'; });
 
 		const creationDate = this.timestamp.display(body.created_at);
-
 		const embed = new MessageEmbed()
 			.setColor(6570406)
 			.setThumbnail(body.logo)
