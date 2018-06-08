@@ -2,6 +2,7 @@ const { Command } = require('klasa');
 const { MessageAttachment } = require('discord.js');
 const cloud = require('d3-cloud');
 const { Canvas } = require('canvas');
+const messageLimitHundreds = 1;
 
 module.exports = class extends Command {
 
@@ -15,11 +16,17 @@ module.exports = class extends Command {
 	async run(msg) {
 		const FinalImage = new Canvas(2000, 2000);
 		const ctx = FinalImage.getContext('2d');
-		let messageBank = await msg.channel.messages.fetch({ limit: 100 });
 		const wordBank = {};
-		for (let i = 0; i < 20; i++) {
-			const fetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
-			messageBank = messageBank.concat(fetchedMessages);
+
+		let messageBank;
+
+		for (let i = 0; i < messageLimitHundreds; i++) {
+			if (i === 0) {
+				messageBank = await msg.channel.messages.fetch({ limit: 100 });
+			} else {
+				const fetchedMessages = await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id });
+				messageBank = messageBank.concat(fetchedMessages);
+			}
 		}
 
 		for (const message of messageBank.values()) {
@@ -38,6 +45,7 @@ module.exports = class extends Command {
 			if (word.length < 5) continue;
 			wordList.push({ text: word, size: 10 * wordBank[word] });
 		}
+
 		ctx.fillStyle = 'black';
 		ctx.fillRect(0, 0, 2000, 2000);
 		ctx.translate(1000, 1000);
@@ -45,7 +53,7 @@ module.exports = class extends Command {
 			for (let i = 0; i < words.length; i++) {
 				const word = words[i];
 				const rotation = word.rotate;
-				ctx.fillStyle = `#${(Math.random() * 0xFFFFFF << 0).toString(16)}`;
+				ctx.fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 				ctx.font = `${(word.size * 0.8) + 3}px Arial`;
 				ctx.rotate(rotation);
 				ctx.fillText(word.text, word.x, word.y);
