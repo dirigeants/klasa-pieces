@@ -63,10 +63,6 @@ module.exports = class extends SQLProvider {
 
 	/* Table methods */
 
-	/**
-	 * @param {string} table Check if a table exists
-	 * @returns {Promise<boolean>}
-	 */
 	hasTable(table) {
 		return this.run(`IF ( EXISTS (
 			SELECT *
@@ -75,11 +71,6 @@ module.exports = class extends SQLProvider {
 		) )`, [table]);
 	}
 
-	/**
-	 * @param {string} table The name of the table to create
-	 * @param {Array<Iterable>} rows The rows with their respective datatypes
-	 * @returns {Promise<Object[]>}
-	 */
 	createTable(table, rows) {
 		if (rows) return this.run(`CREATE TABLE @0 ( ${rows.map(([k, v]) => `${k} ${v}`).join(', ')} );`, [table]);
 
@@ -94,29 +85,16 @@ module.exports = class extends SQLProvider {
 		);
 	}
 
-	/**
-	 * @param {string} table The name of the table to drop
-	 * @returns {Promise<Object[]>}
-	 */
 	deleteTable(table) {
 		return this.run('IF OBJECT_ID(@0, \'U\') IS NOT NULL DROP TABLE @0;', [table]);
 	}
 
-	/**
-	 * @param {string} table The table with the rows to count
-	 * @returns {Promise<number>}
-	 */
 	countRows(table) {
 		return this.run(`SELECT COUNT(*) FROM @0;`, [table]);
 	}
 
 	/* Row methods */
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
-	 * @returns {Promise<Object[]>}
-	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
 			return this.run(`SELECT * FROM @0 WHERE id IN (@1);`, [table, `'${entries.join("', '")}'`])
@@ -126,20 +104,10 @@ module.exports = class extends SQLProvider {
 			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @returns {Promise<Object[]>}
-	 */
 	getKeys(table) {
 		return this.run(`SELECT id FROM @0;`, [table]);
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} key The key to filter the data from
-	 * @param {*} [value] The value of the filtered key
-	 * @returns {Promise<Object>}
-	 */
 	get(table, key, value) {
 		// If a key is given (id), swap it and search by id - value
 		if (typeof value === 'undefined') {
@@ -150,30 +118,15 @@ module.exports = class extends SQLProvider {
 			.then(result => this.parseEntry(table, result));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id The value of the id
-	 * @returns {Promise<boolean>}
-	 */
 	has(table, id) {
 		return this.run('IF ( EXISTS ( SELECT TOP 1 * FROM @0 WHERE id = @1 ) )', [table, id]);
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @returns {Promise<Object>}
-	 */
 	getRandom(table) {
 		return this.run('SELECT TOP 1 * FROM @0 ORDER BY NEWID();', [table])
 			.then(result => this.parseEntry(table, result));
 	}
 
-	/**
-	 * @param {string} table The name of the table to insert the new data
-	 * @param {string} id The id of the new row to insert
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<any[]>}
-	 */
 	create(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
@@ -185,12 +138,6 @@ module.exports = class extends SQLProvider {
 			VALUES (${Array.from({ length: keys.length }, (__, i) => `@${i}`).join(', ')});`, values);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<any[]>}
-	 */
 	update(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 		return this.run(`
@@ -199,20 +146,10 @@ module.exports = class extends SQLProvider {
 			WHERE id = ${sanitizeString(id)};`, values);
 	}
 
-	/**
-	 * @param {...*} args The arguments
-	 * @alias MSSQL#update
-	 * @returns {Promise<any[]>}
-	 */
 	replace(...args) {
 		return this.update(...args);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update
-	 * @param {string} id The id of the row to delete
-	 * @returns {Promise<any[]>}
-	 */
 	delete(table, id) {
 		return this.run(`
 			DELETE *
@@ -220,36 +157,18 @@ module.exports = class extends SQLProvider {
 			WHERE id = @1;`, [table, id]);
 	}
 
-	/**
-	 * Add a new column to a table's schema.
-	 * @param {string} table The table to check against
-	 * @param {(SchemaFolder | SchemaPiece)} piece The SchemaFolder or SchemaPiece added to the schema
-	 * @returns {Promise<*>}
-	 */
 	addColumn(table, piece) {
 		return this.run(piece.type !== 'Folder' ?
 			`ALTER TABLE ${sanitizeKeyName(table)} ADD ${this.qb.parse(piece)};` :
 			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD ${this.qb.parse(subpiece)}`).join(', ')}`);
 	}
 
-	/**
-	 * Remove a column from a table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {(string|string[])} key The key to remove.
-	 * @returns {Promise<any[]>}
-	 */
 	removeColumn(table, key) {
 		if (typeof key === 'string') return this.run(`ALTER TABLE @0 DROP COLUMN @1;`, [table, key]);
 		if (Array.isArray(key)) return this.run(`ALTER TABLE @0 DROP ${key.map(sanitizeKeyName).join(', ')};`, [table]);
 		throw new TypeError('Invalid usage of MSSQL#removeColumn. Expected a string or string[].');
 	}
 
-	/**
-	 * Edit the key's datatype from the table's schema.
-	 * @param {string} table The table to update
-	 * @param {SchemaPiece} piece The modified SchemaPiece
-	 * @returns {Promise<any[]>}
-	 */
 	updateColumn(table, piece) {
 		const [column, ...datatype] = this.qb.parse(piece).split(' ');
 		return this.run(`
@@ -257,13 +176,6 @@ module.exports = class extends SQLProvider {
 			ALTER COLUMN @1 @2;`, [table, column, datatype]);
 	}
 
-	/**
-	 * Get a row from an arbitrary SQL query.
-	 * @param {string} sql The query to execute.
-	 * @param {*[]} [inputs] The inputs to insert.
-	 * @param {*[]} [outputs] The outputs to insert.
-	 * @returns {Promise<Object>}
-	 */
 	run(sql, inputs, outputs) {
 		if (inputs.length > 0) {
 			const request = new mssql.Request();

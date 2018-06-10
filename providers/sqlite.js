@@ -32,22 +32,11 @@ module.exports = class extends SQLProvider {
 
 	/* Table methods */
 
-	/**
-	 * Checks if a table exists.
-	 * @param {string} table The name of the table you want to check.
-	 * @returns {Promise<boolean>}
-	 */
 	hasTable(table) {
 		return this.runGet(`SELECT name FROM sqlite_master WHERE type='table' AND name='${table}'`)
 			.then(Boolean);
 	}
 
-	/**
-	 * Creates a new table.
-	 * @param {string} table The name for the new table.
-	 * @param {Array<Iterable>} rows The rows for the table.
-	 * @returns {Promise<Object>}
-	 */
 	createTable(table, rows) {
 		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
 		const gateway = this.client.gateways[table];
@@ -61,23 +50,12 @@ module.exports = class extends SQLProvider {
 		);
 	}
 
-	/**
-	 * Drops a table.
-	 * @param {string} table The name of the table to drop.
-	 * @returns {Promise<Object>}
-	 */
 	deleteTable(table) {
 		return this.run(`DROP TABLE ${sanitizeKeyName(table)}`);
 	}
 
 	/* Document methods */
 
-	/**
-	 * Get all documents from a table.
-	 * @param {string} table The name of the table to fetch from.
-	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
-	 * @returns {Promise<Object[]>}
-	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
 			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}')`);
@@ -85,13 +63,6 @@ module.exports = class extends SQLProvider {
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)}`);
 	}
 
-	/**
-	 * Get a row from a table.
-	 * @param {string} table The name of the table.
-	 * @param {string} key The row id or the key to find by. If value is undefined, it'll search by 'id'.
-	 * @param {string} [value=null] The desired value to find.
-	 * @returns {Promise<?Object>}
-	 */
 	get(table, key, value = null) {
 		return this.runGet(value === null ?
 			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)}` :
@@ -100,35 +71,18 @@ module.exports = class extends SQLProvider {
 			.catch(() => null);
 	}
 
-	/**
-	 * Check if a row exists.
-	 * @param {string} table The name of the table
-	 * @param {string} key The value to search by 'id'.
-	 * @returns {Promise<boolean>}
-	 */
 	has(table, key) {
 		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(key)}`)
 			.then(() => true)
 			.catch(() => false);
 	}
 
-	/**
-	 * Get a random row from a table.
-	 * @param {string} table The name of the table.
-	 * @returns {Promise<Object>}
-	 */
 	getRandom(table) {
 		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
 			.then(output => this.parseEntry(table, output))
 			.catch(() => null);
 	}
 
-	/**
-	 * @param {string} table The name of the table to insert the new data
-	 * @param {string} id The id of the new row to insert
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<Object>}
-	 */
 	create(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
@@ -138,12 +92,6 @@ module.exports = class extends SQLProvider {
 		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${values.map(sanitizeValue).join(', ')} )`);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<Object>}
-	 */
 	update(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 		return this.run(`
@@ -156,33 +104,14 @@ module.exports = class extends SQLProvider {
 		return this.update(...args);
 	}
 
-	/**
-	 * Delete a document from the table.
-	 * @param {string} table The name of the table.
-	 * @param {string} row The row id.
-	 * @returns {Promise<Object>}
-	 */
 	delete(table, row) {
 		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(row)}`);
 	}
 
-	/**
-	 * Add a new column to a table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The key to add.
-	 * @param {string} datatype The datatype for the new key.
-	 * @returns {Promise<*>}
-	 */
 	addColumn(table, key, datatype) {
 		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(key)} ${datatype}`);
 	}
 
-	/**
-	 * Remove a column from a table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The key to remove.
-	 * @returns {Promise<boolean>}
-	 */
 	async removeColumn(table, key) {
 		const gateway = this.client.gateways[gateway];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
@@ -210,13 +139,6 @@ module.exports = class extends SQLProvider {
 		return true;
 	}
 
-	/**
-	 * Edit the key's datatype from the table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {string} key The name of the column to update.
-	 * @param {string} datatype The new datatype for the column.
-	 * @returns {Promise<boolean>}
-	 */
 	async updateColumn(table, key, datatype) {
 		const gateway = this.client.gateways[gateway];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
@@ -243,38 +165,22 @@ module.exports = class extends SQLProvider {
 		return true;
 	}
 
-	/**
-	 * Get a row from an arbitrary SQL query.
-	 * @param {string} sql The query to execute.
-	 * @returns {Promise<Object>}
-	 */
+	// Get a row from an arbitrary SQL query.
 	runGet(sql) {
 		return db.get(sql);
 	}
 
-	/**
-	 * Get all rows from an arbitrary SQL query.
-	 * @param {string} sql The query to execute.
-	 * @returns {Promise<Object>}
-	 */
+	// Get all rows from an arbitrary SQL query.
 	runAll(sql) {
 		return db.all(sql);
 	}
 
-	/**
-	 * Run arbitrary SQL query.
-	 * @param {string} sql The query to execute.
-	 * @returns {Promise<Object>}
-	 */
+	// Run arbitrary SQL query.
 	run(sql) {
 		return db.run(sql);
 	}
 
-	/**
-	 * Execute arbitrary SQL query.
-	 * @param {string} sql The query to execute.
-	 * @returns {Promise<Object>}
-	 */
+	// Execute arbitrary SQL query.
 	exec(sql) {
 		return db.exec(sql);
 	}

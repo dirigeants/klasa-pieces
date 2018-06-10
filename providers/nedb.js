@@ -20,21 +20,10 @@ module.exports = class extends Provider {
 
 	/* Table methods */
 
-	/**
-	 * Check if a table exists.
-	 * @param {string} table The name of the table you want to check.
-	 * @returns {boolean}
-	 */
 	hasTable(table) {
 		return this.dataStores.has(table);
 	}
 
-	/**
-	 * Create a new table.
-	 * @param {string} table The name for the new table.
-	 * @param {boolean} [persistent=true] Whether the DB should be persistent.
-	 * @returns {Promise<void>}
-	 */
 	createTable(table, persistent) {
 		if (this.dataStores.has(table)) return null;
 		const db = new Datastore(persistent ? { filename: resolve(this.baseDir, `${table}.db`), autoload: true } : {});
@@ -42,11 +31,6 @@ module.exports = class extends Provider {
 		return db;
 	}
 
-	/**
-	 * Delete a table.
-	 * @param {string} table The name of the table to delete.
-	 * @returns {Promise<boolean>}
-	 */
 	async deleteTable(table) {
 		if (this.dataStores.has(table)) {
 			await this.deleteAll(table);
@@ -58,11 +42,6 @@ module.exports = class extends Provider {
 
 	/* Document methods */
 
-	/**
-	 * Get all entries from a table.
-	 * @param {string} table The name of the table to get all entries from.
-	 * @returns {Promise<Object[]>}
-	 */
 	async getAll(table, filter = []) {
 		let entries;
 		if (filter.length) entries = await this.dataStores.get(table).findAsync({ id: { $in: filter } });
@@ -71,12 +50,6 @@ module.exports = class extends Provider {
 		return entries;
 	}
 
-	/**
-	 * Get a single entry from a table by a query.
-	 * @param {string} table The name of the table to get the entry from.
-	 * @param {string|Object} query The query object. If it is a string, it will search by 'id'.
-	 * @returns {Promise<Object>}
-	 */
 	async get(table, query) {
 		const data = await this.dataStores.get(table).findOneAsync(resolveQuery(query));
 		if (data) {
@@ -87,78 +60,33 @@ module.exports = class extends Provider {
 		return null;
 	}
 
-	/**
-	 * Check if a entry exists from a table by a query.
-	 * @param {string} table The name of the table to check the entry from.
-	 * @param {string|Object} query The query object. If it is a string, it will search by 'id'.
-	 * @returns {Promise<boolean>}
-	 */
 	has(table, query) {
 		return this.get(table, query).then(Boolean);
 	}
 
-	/**
-	 * Insert a new entry into a table.
-	 * @param {string} table The name of the table to insert the entry.
-	 * @param {string|Object} query The query object. If it is a string, it will be keyed by 'id'.
-	 * @param {Object} doc The data you want the entry to contain.
-	 * @returns {Promise<Object>}
-	 */
 	create(table, query, doc) {
 		return this.dataStores.get(table).insertAsync(mergeObjects(this.parseUpdateInput(doc), resolveQuery(query)));
 	}
 
-	/**
-	 * Update an entry from a table.
-	 * @param {string} table The name of the table to update the entry from.
-	 * @param {string|Object} query The query object. If it is a string, it will search by 'id'.
-	 * @param {Object} doc The data you want to update.
-	 * @returns {Promise<boolean>}
-	 */
 	async update(table, query, doc) {
 		const res = await this.get(table, query);
 		return this.replace(table, query, mergeObjects(res, this.parseUpdateInput(doc)));
 	}
 
-	/**
-	 * Replace an entry from a table.
-	 * @param {string} table The name of the table to update the entry from.
-	 * @param {string|Object} query The query object. If it is a string, it will search by 'id'.
-	 * @param {Object} doc The data you want to update.
-	 * @returns {Promise<boolean>}
-	 */
 	async replace(table, query, doc) {
 		await this.dataStores.get(table).updateAsync(resolveQuery(query), this.parseUpdateInput(doc));
 		await this.dataStores.get(table).persistence.compactDatafile();
 		return true;
 	}
 
-	/**
-	 * Delete a single or all entries from a table that matches the query.
-	 * @param {string} table The name of the table to delete the entry from.
-	 * @param {string|Object} query The query object. If it is a string, it will search by 'id'.
-	 * @param {boolean} [all=false] Option to delete all documents that match the query.
-	 * @returns {Promise<number>} Returns a Promise with the number of documents deleted.
-	 */
 	delete(table, query, all = false) {
 		return this.dataStores.get(table).removeAsync(resolveQuery(query), { multi: all });
 	}
 
-	/**
-	 * Delete all entries from a table.
-	 * @param {string} table The name of the table to delete the entries from.
-	 * @returns {Promise<number>} Returns a Promise with the number of documents deleted.
-	 */
 	deleteAll(table) {
 		return this.delete(table, {}, true);
 	}
 
-	/**
-	 * Count the amount of entries from a table based on the query.
-	 * @param {string} table The name of the table to count the entries from.
-	 * @param {string|Object} [query={}] The query object. If it is a string, it will search by 'id'.
-	 * @returns {Promise<number>} The amount of entries that matches the query.
-	 */
 	count(table, query = {}) {
 		return this.dataStores.get(table).countAsync(resolveQuery(query));
 	}

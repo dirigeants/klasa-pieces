@@ -48,21 +48,12 @@ module.exports = class extends SQLProvider {
 
 	/* Table methods */
 
-	/**
-	 * @param {string} table Check if a table exists
-	 * @returns {Promise<boolean>}
-	 */
 	hasTable(table) {
 		return this.runAll(`SELECT true FROM pg_tables WHERE tablename = '${table}';`)
 			.then(result => result.length !== 0 && result[0].bool === true)
 			.catch(() => false);
 	}
 
-	/**
-	 * @param {string} table The name of the table to create
-	 * @param {Array<Iterable>} [rows] The rows with their respective datatypes
-	 * @returns {Promise<Object[]>}
-	 */
 	createTable(table, rows) {
 		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
 		const gateway = this.client.gateways[table];
@@ -76,18 +67,10 @@ module.exports = class extends SQLProvider {
 		);
 	}
 
-	/**
-	 * @param {string} table The name of the table to drop
-	 * @returns {Promise<Object[]>}
-	 */
 	deleteTable(table) {
 		return this.run(`DROP TABLE IF EXISTS ${sanitizeKeyName(table)};`);
 	}
 
-	/**
-	 * @param {string} table The table with the rows to count
-	 * @returns {Promise<number>}
-	 */
 	countRows(table) {
 		return this.runOne(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`)
 			.then(result => Number(result.count));
@@ -95,11 +78,6 @@ module.exports = class extends SQLProvider {
 
 	/* Row methods */
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
-	 * @returns {Promise<Object[]>}
-	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
 			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}');`)
@@ -109,21 +87,11 @@ module.exports = class extends SQLProvider {
 			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @returns {Promise<Object[]>}
-	 */
 	getKeys(table) {
 		return this.runAll(`SELECT id FROM ${sanitizeKeyName(table)};`)
 			.then(rows => rows.map(row => row.id));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} key The key to filter the data from
-	 * @param {*} [value] The value of the filtered key
-	 * @returns {Promise<Object>}
-	 */
 	get(table, key, value) {
 		// If a key is given (id), swap it and search by id - value
 		if (typeof value === 'undefined') {
@@ -134,42 +102,19 @@ module.exports = class extends SQLProvider {
 			.then(output => this.parseEntry(table, output));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id The value of the id
-	 * @returns {Promise<boolean>}
-	 */
 	has(table, id) {
 		return this.runOne(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = $1 LIMIT 1;`, [id])
 			.then(result => Boolean(result));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @returns {Promise<Object>}
-	 */
 	getRandom(table) {
 		return this.runOne(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1;`);
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} key The key to sort by
-	 * @param {('ASC'|'DESC')} [order='DESC'] Whether the order should be ascendent or descendent
-	 * @param {number} [limitMin] The minimum range
-	 * @param {number} [limitMax] The maximum range
-	 * @returns {Promise<Object[]>}
-	 */
 	getSorted(table, key, order = 'DESC', limitMin, limitMax) {
 		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY ${sanitizeKeyName(key)} ${order} ${parseRange(limitMin, limitMax)};`);
 	}
 
-	/**
-	 * @param {string} table The name of the table to insert the new data
-	 * @param {string} id The id of the new row to insert
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<any[]>}
-	 */
 	create(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
@@ -183,12 +128,6 @@ module.exports = class extends SQLProvider {
 			VALUES (${Array.from({ length: keys.length }, (__, i) => `$${i + 1}`).join(', ')});`, values);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<any[]>}
-	 */
 	update(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 		return this.run(`
@@ -197,52 +136,22 @@ module.exports = class extends SQLProvider {
 			WHERE id = '${id.replace(/'/, "''")}';`, values);
 	}
 
-	/**
-	 * @param {...*} args The arguments
-	 * @alias PostgreSQL#update
-	 * @returns {Promise<any[]>}
-	 */
 	replace(...args) {
 		return this.update(...args);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {string} key The key to update
-	 * @param {number} [amount=1] The value to increase
-	 * @returns {Promise<any[]>}
-	 */
 	incrementValue(table, id, key, amount = 1) {
 		return this.run(`UPDATE ${sanitizeKeyName(table)} SET $2 = $2 + $3 WHERE id = $1;`, [id, key, amount]);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {string} key The key to update
-	 * @param {number} [amount=1] The value to decrease
-	 * @returns {Promise<any[]>}
-	 */
 	decrementValue(table, id, key, amount = 1) {
 		return this.run(`UPDATE ${sanitizeKeyName(table)} SET $2 = GREATEST(0, $2 - $3) WHERE id = $1;`, [id, key, amount]);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update
-	 * @param {string} id The id of the row to delete
-	 * @returns {Promise<any[]>}
-	 */
 	delete(table, id) {
 		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = $1;`, [id]);
 	}
 
-	/**
-	 * Add a new column to a table's schema.
-	 * @param {string} table The table to update
-	 * @param {(SchemaFolder | SchemaPiece)} piece The SchemaFolder or SchemaPiece added to the schema
-	 * @returns {Promise<*>}
-	 */
 	addColumn(table, piece) {
 		if (!(piece instanceof Schema)) throw new TypeError('Invalid usage of PostgreSQL#addColumn. Expected a SchemaPiece or SchemaFolder instance.');
 		return this.run(piece.type !== 'Folder' ?
@@ -250,24 +159,12 @@ module.exports = class extends SQLProvider {
 			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);
 	}
 
-	/**
-	 * Remove a column from a table's schema.
-	 * @param {string} table The table to update
-	 * @param {(string|string[])} columns The column names to remove
-	 * @returns {Promise<*>}
-	 */
 	removeColumn(table, columns) {
 		if (typeof columns === 'string') return this.run(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(columns)};`);
 		if (Array.isArray(columns)) return this.run(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${columns.map(sanitizeKeyName).join(', ')};`);
 		throw new TypeError('Invalid usage of PostgreSQL#removeColumn. Expected a string or string[].');
 	}
 
-	/**
-	 * Alters the datatype from a column.
-	 * @param {string} table The table to update
-	 * @param {SchemaPiece} piece The modified SchemaPiece
-	 * @returns {Promise<*>}
-	 */
 	updateColumn(table, piece) {
 		const [column, datatype] = this.qb.parse(piece).split(' ');
 		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER COLUMN ${column} TYPE ${datatype}${piece.default ?
@@ -275,31 +172,16 @@ module.exports = class extends SQLProvider {
 		};`);
 	}
 
-	/**
-	 * Get a row from an arbitrary SQL query.
-	 * @param {...any} sql The query to execute.
-	 * @returns {Promise<Object>}
-	 */
 	run(...sql) {
 		return this.db.query(...sql)
 			.then(result => result);
 	}
 
-	/**
-	 * Get all entries from a table.
-	 * @param {...any} sql The query to execute.
-	 * @returns {Promise<any[]>}
-	 */
 	runAll(...sql) {
 		return this.run(...sql)
 			.then(result => result.rows);
 	}
 
-	/**
-	 * Get one entry from a table.
-	 * @param {...any} sql The query to execute.
-	 * @returns {Promise<Object>}
-	 */
 	runOne(...sql) {
 		return this.run(...sql)
 			.then(result => result.rows[0]);

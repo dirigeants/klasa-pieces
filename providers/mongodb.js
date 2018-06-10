@@ -31,89 +31,41 @@ module.exports = class extends Provider {
 		return this.db;
 	}
 
-	/**
-	 * Checks if a table exists.
-	 * @param {string} table The name of the table you want to check.
-	 * @returns {Promise<boolean>}
-	 */
 	hasTable(table) {
 		return this.db.listCollections().toArray().then(collections => collections.some(col => col.name === table));
 	}
 
-	/**
-	 * Create a collection within a DB. Options may be specfied, refer to MongoDB docs.
-	 * @param {string} table Name of the Collection to crate
-	 * @returns {Promise<Collection>} Returns a promise containing the created Collection.
-	 */
 	createTable(table) {
 		return this.db.createCollection(table);
 	}
 
-	/**
-	 * Drops a collection within a DB.
-	 * @param {string} table Name of the collection to drop.
-	 * @returns {Promise<boolean>}
-	 */
 	deleteTable(table) {
 		return this.db.dropCollection(table);
 	}
 
 	/* Document methods */
 
-	/**
-	 * Retrieves all Documents in a collection.
-	 * @param {string} table Name of the Collection
-	 * @returns {Promise<Array>}
-	 */
 	getAll(table, filter = []) {
 		if (filter.length) return this.db.collection(table).find({ id: { $in: filter } }, { _id: 0 }).toArray();
 		return this.db.collection(table).find({}, { _id: 0 }).toArray();
 	}
 
-	/**
-	 *
-	 * @param {string} table The name of the table you want to get the data from.
-	 * @returns {Promise<string[]>}
-	 */
 	getKeys(table) {
 		return this.db.collection(table).find({}, { id: 1, _id: 0 }).toArray();
 	}
 
-	/**
-	 * Retrieves a single Document from a Collection that matches a user determined ID
-	 * @param {string} table Name of the Collection
-	 * @param {string|Object} id ID of the document
-	 * @returns {Promise<?Object>}
-	 */
 	get(table, id) {
 		return this.db.collection(table).findOne(resolveQuery(id));
 	}
 
-	/**
-	 * Checks if a document from a Collection exists.
-	 * @param {string} table Name of the Collection
-	 * @param {string|Object} id ID of the document
-	 * @returns {Promise<boolean>}
-	 */
 	has(table, id) {
 		return this.get(table, id).then(Boolean);
 	}
 
-	/**
-	 * Get a random value from a Collection.
-	 * @param {string} table Name of the Collection
-	 * @returns {Promise<Object>}
-	 */
 	getRandom(table) {
 		return this.db.collection(table).aggregate({ $sample: { size: 1 } });
 	}
 
-	/**
-	 * Remove a value or object from all entries.
-	 * @param {string} table The name of the table.
-	 * @param {string} doc The object to remove or a path to update.
-	 * @returns {Promise<Object>}
-	 */
 	async removeValue(table, doc) {
 		// { channels: { modlog: true } }
 		if (typeof doc === 'object') {
@@ -131,45 +83,18 @@ module.exports = class extends Provider {
 		throw new TypeError(`Expected an object or a string as first parameter. Got: ${typeof doc}`);
 	}
 
-	/**
-	 * Inserts a Document into a Collection using a user provided object.
-	 * @param {string} table Name of the Collection
-	 * @param {(string|Object)} id ID of the document
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc Document Object to insert
-	 * @returns {Promise}
-	 */
 	create(table, id, doc = {}) {
 		return this.db.collection(table).insertOne(mergeObjects(this.parseUpdateInput(doc), resolveQuery(id)));
 	}
 
-	/**
-	 * Deletes a Document from a Collection that matches a user determined ID *
-	 * @param {string} table Name of the Collection
-	 * @param {string} id ID of the document
-	 * @returns {Promise<void>}
-	 */
 	delete(table, id) {
 		return this.db.collection(table).deleteOne(resolveQuery(id));
 	}
 
-	/**
-	 * Updates a Document using MongoDB Update Operators. *
-	 * @param {string} table Name of the Collection
-	 * @param {Object} id The Filter used to select the document to update
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc The update operations to be applied to the document
-	 * @returns {Promise<void>}
-	 */
 	update(table, id, doc) {
 		return this.db.collection(table).updateOne(resolveQuery(id), { $set: this.parseUpdateInput(doc) });
 	}
 
-	/**
-	 * Replaces a Document with a new Document specified by the user *
-	 * @param {string} table Name of the Collection
-	 * @param {Object} id The Filter used to select the document to update
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} doc The Document that replaces the matching document
-	 * @returns {Promise<void>}
-	 */
 	replace(table, id, doc) {
 		return this.db.collection(table).replaceOne(resolveQuery(id), this.parseUpdateInput(doc));
 	}

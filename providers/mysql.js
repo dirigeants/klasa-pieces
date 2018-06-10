@@ -59,21 +59,12 @@ module.exports = class extends SQLProvider {
 
 	/* Table methods */
 
-	/**
-	 * @param {string} table Check if a table exists
-	 * @returns {Promise<boolean>}
-	 */
 	hasTable(table) {
 		return this.run(`SHOW TABLES LIKE '${table}';`)
 			.then(result => !!result)
 			.catch(() => false);
 	}
 
-	/**
-	 * @param {string} table The name of the table to create
-	 * @param {Array<Iterable>} rows The rows with their respective datatypes
-	 * @returns {Promise<Object[]>}
-	 */
 	createTable(table, rows) {
 		if (rows) return this.runAll(`CREATE TABLE ${sanitizeKeyName(table)} (${rows});`);
 
@@ -89,18 +80,10 @@ module.exports = class extends SQLProvider {
 		);
 	}
 
-	/**
-	 * @param {string} table The name of the table to drop
-	 * @returns {Promise<Object[]>}
-	 */
 	deleteTable(table) {
 		return this.exec(`DROP TABLE ${sanitizeKeyName(table)};`);
 	}
 
-	/**
-	 * @param {string} table The table with the rows to count
-	 * @returns {Promise<number>}
-	 */
 	countRows(table) {
 		return this.run(`SELECT COUNT(*) FROM ${sanitizeKeyName(table)};`)
 			.then(result => result['COUNT(*)']);
@@ -108,11 +91,6 @@ module.exports = class extends SQLProvider {
 
 	/* Row methods */
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {array} [entries] Filter the query by getting only the data which is present in the database
-	 * @returns {Promise<Object[]>}
-	 */
 	getAll(table, entries = []) {
 		if (entries.length) {
 			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}');`)
@@ -122,21 +100,11 @@ module.exports = class extends SQLProvider {
 			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @returns {Promise<Object[]>}
-	 */
 	getKeys(table) {
 		return this.runAll(`SELECT id FROM ${sanitizeKeyName(table)};`)
 			.then(rows => rows.map(row => row.id));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} key The key to filter the data from
-	 * @param {*} [value] The value of the filtered key
-	 * @returns {Promise<Object>}
-	 */
 	get(table, key, value) {
 		// If a key is given (id), swap it and search by id - value
 		if (typeof value === 'undefined') {
@@ -147,33 +115,16 @@ module.exports = class extends SQLProvider {
 			.then(result => this.parseEntry(table, result));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} id The value of the id
-	 * @returns {Promise<boolean>}
-	 */
 	has(table, id) {
 		return this.run(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeString(id)} LIMIT 1;`)
 			.then(Boolean);
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @returns {Promise<Object>}
-	 */
 	getRandom(table) {
 		return this.run(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RAND() LIMIT 1;`)
 			.then(result => this.parseEntry(table, result));
 	}
 
-	/**
-	 * @param {string} table The name of the table to get the data from
-	 * @param {string} key The key to sort by
-	 * @param {('ASC'|'DESC')} [order='DESC'] Whether the order should be ascendent or descendent
-	 * @param {number} [limitMin] The minimum range
-	 * @param {number} [limitMax] The maximum range
-	 * @returns {Promise<Object[]>}
-	 */
 	async getSorted(table, key, order = 'DESC', limitMin, limitMax) {
 		if (order !== 'DESC' && order !== 'ASC') {
 			throw new TypeError(`MySQL#getSorted 'order' parameter expects either 'DESC' or 'ASC'. Got: ${order}`);
@@ -183,12 +134,6 @@ module.exports = class extends SQLProvider {
 			.then(results => results.map(output => this.parseEntry(table, output)));
 	}
 
-	/**
-	 * @param {string} table The name of the table to insert the new data
-	 * @param {string} id The id of the new row to insert
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<any[]>}
-	 */
 	create(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
@@ -200,12 +145,6 @@ module.exports = class extends SQLProvider {
 		return this.exec(`INSERT INTO ${sanitizeKeyName(table)} (${keys.map(sanitizeKeyName).join(', ')}) VALUES (${values.map(sanitizeInput).join(', ')});`);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {(ConfigurationUpdateResultEntry[] | [string, any][] | Object<string, *>)} data The data to update
-	 * @returns {Promise<any[]>}
-	 */
 	update(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 		const update = new Array(keys.length);
@@ -214,22 +153,10 @@ module.exports = class extends SQLProvider {
 		return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${update.join(', ')} WHERE id = ${sanitizeString(id)};`);
 	}
 
-	/**
-	 * @param {...*} args The arguments
-	 * @alias MSSQL#update
-	 * @returns {Promise<any[]>}
-	 */
 	replace(...args) {
 		return this.update(...args);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {string} key The key to update
-	 * @param {number} [amount=1] The value to increase
-	 * @returns {Promise<any[]>}
-	 */
 	incrementValue(table, id, key, amount = 1) {
 		if (amount < 0 || !isNumber(amount)) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
@@ -238,13 +165,6 @@ module.exports = class extends SQLProvider {
 		return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${key} = ${key} + ${amount} WHERE id = ${sanitizeString(id)};`);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update the data from
-	 * @param {string} id The id of the row to update
-	 * @param {string} key The key to update
-	 * @param {number} [amount=1] The value to decrease
-	 * @returns {Promise<any[]>}
-	 */
 	decrementValue(table, id, key, amount = 1) {
 		if (amount < 0 || !isNumber(amount)) {
 			throw new TypeError(`MySQL#incrementValue expects the parameter 'amount' to be an integer greater or equal than zero. Got: ${amount}`);
@@ -253,21 +173,10 @@ module.exports = class extends SQLProvider {
 		return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${key} = GREATEST(0, ${key} - ${amount}) WHERE id = ${sanitizeString(id)};`);
 	}
 
-	/**
-	 * @param {string} table The name of the table to update
-	 * @param {string} id The id of the row to delete
-	 * @returns {Promise<any[]>}
-	 */
 	delete(table, id) {
 		return this.exec(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeString(id)};`);
 	}
 
-	/**
-	 * Add a new column to a table's schema.
-	 * @param {string} table The table to update
-	 * @param {(SchemaFolder | SchemaPiece)} piece The SchemaFolder or SchemaPiece added to the schema
-	 * @returns {Promise<*>}
-	 */
 	addColumn(table, piece) {
 		if (!(piece instanceof Schema)) throw new TypeError('Invalid usage of PostgreSQL#addColumn. Expected a SchemaPiece or SchemaFolder instance.');
 		return this.exec(piece.type !== 'Folder' ?
@@ -275,54 +184,27 @@ module.exports = class extends SQLProvider {
 			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);
 	}
 
-	/**
-	 * Remove a column from a table's schema.
-	 * @param {string} table The name of the table to edit.
-	 * @param {(string|string[])} key The key to remove.
-	 * @returns {Promise<any[]>}
-	 */
 	removeColumn(table, key) {
 		if (typeof key === 'string') return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP COLUMN ${sanitizeKeyName(key)};`);
 		if (Array.isArray(key)) return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} DROP ${key.map(sanitizeKeyName).join(', ')};`);
 		throw new TypeError('Invalid usage of MySQL#removeColumn. Expected a string or string[].');
 	}
 
-	/**
-	 * Alters the datatype from a column.
-	 * @param {string} table The table to update
-	 * @param {SchemaPiece} piece The modified SchemaPiece
-	 * @returns {Promise<*>}
-	 */
 	updateColumn(table, piece) {
 		const [column, ...datatype] = this.qb.parse(piece).split(' ');
 		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(column)} TYPE ${datatype};`);
 	}
 
-	/**
-	 * Get a row from an arbitrary SQL query.
-	 * @param {string} sql The query to execute.
-	 * @returns {Promise<Object>}
-	 */
 	run(sql) {
 		return this.db.query(sql)
 			.then(([rows]) => rows[0]);
 	}
 
-	/**
-	 * Get all rows from an arbitrary SQL query.
-	 * @param {string} sql The query to execute.
-	 * @returns {Promise<Object[]>}
-	 */
 	runAll(sql) {
 		return this.db.query(sql)
 			.then(([rows]) => rows);
 	}
 
-	/**
-	 *
-	 * @param {string} sql The query to execute
-	 * @returns {Promise<Object[]>}
-	 */
 	exec(sql) {
 		return this.db.query(sql);
 	}
