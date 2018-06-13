@@ -18,7 +18,7 @@ module.exports = class extends Command {
 		}
 
 		const message = messageBank
-			.filter(ms => !ms.author.bot && !ms.content.replace(/[\W0-9]*/g, '').length < 20)
+			.filter(ms => !ms.author.bot && ms.content.replace(/[\W0-9]*/g, '').length >= 20)
 			.random();
 
 		if (!message) throw 'Could not find a quote';
