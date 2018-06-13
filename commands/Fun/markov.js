@@ -17,12 +17,7 @@ module.exports = class extends Command {
 			messageBank = messageBank.concat(await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id }));
 		}
 
-		const markovBank = [];
-		for (const message of messageBank.values()) {
-			if (message.content) markovBank.push(message.content);
-		}
-
-		const quotes = new MarkovChain(markovBank.join(' '));
+		const quotes = new MarkovChain(messageBank.map(message => message.content).join(' '));
 		const chain = quotes.start(this.useUpperCase).end(20).process();
 		return msg.sendMessage(chain.substring(0, 1999));
 	}

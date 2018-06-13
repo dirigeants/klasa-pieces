@@ -17,17 +17,15 @@ module.exports = class extends Command {
 			messageBank = messageBank.concat(await msg.channel.messages.fetch({ limit: 100, before: messageBank.last().id }));
 		}
 
-		for (let i = 0; i < messageBank.size; i++) {
-			const message = messageBank.random();
-			if (message.author.bot) continue;
-			if (message.content.replace(/[\W0-9]*/g, '').length < 20) continue;
+		const message = messageBank
+			.filter(ms => !ms.author.bot && !ms.content.replace(/[\W0-9]*/g, '').length < 20)
+			.random();
 
-			const embed = new MessageEmbed()
-				.setDescription(message.content)
-				.setAuthor(message.author.username, message.author.displayAvatarURL());
-			return msg.sendEmbed(embed);
-		}
-		return msg.sendMessage(`Couldn't find a quote.`);
+		if (!message) throw 'Could not find a quote';
+
+		return msg.sendEmbed(new MessageEmbed()
+			.setDescription(message.content)
+			.setAuthor(message.author.username, message.author.displayAvatarURL()));
 	}
 
 };

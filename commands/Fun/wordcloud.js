@@ -32,13 +32,8 @@ module.exports = class extends Command {
 			});
 		}
 
-		const wordList = [];
-
-		for (const word in wordBank) {
-			if (wordBank[word] < 3) continue;
-			if (word.length < 5) continue;
-			wordList.push({ text: word, size: 10 * wordBank[word] });
-		}
+		const wordList = wordBank.filter(word => wordBank[word] > 3 && word.length > 4)
+			.map(word => ({ text: word, size: 10 * wordBank[word] }));
 
 		ctx.fillStyle = 'black';
 		ctx.fillRect(0, 0, 2000, 2000);
