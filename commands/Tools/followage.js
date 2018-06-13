@@ -24,10 +24,9 @@ module.exports = class extends Command {
 			.then(res => [this.differenceDays(new Date(res.body.created_at), new Date()), res.body.channel.logo])
 			.catch(() => { throw `${twitchName} isn't following ${channelName}, or it is banned, or doesn't exist at all.`; });
 
-		const embed = new MessageEmbed()
+		return msg.sendEmbed(new MessageEmbed()
 			.setColor(6570406)
-			.setAuthor(`${twitchName} has been following ${channelName} for ${days} days.`, logo);
-		return msg.sendEmbed(embed);
+			.setAuthor(`${twitchName} has been following ${channelName} for ${days} days.`, logo));
 	}
 
 	differenceDays(first, second) {
