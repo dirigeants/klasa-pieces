@@ -7,7 +7,7 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			description: 'Returns a random message from someone in the channel.',
-			requiredPermissions: ['READ_MESSAGE_HISTORY']
+			requiredPermissions: ['READ_MESSAGE_HISTORY', 'EMBED_LINKS']
 		});
 	}
 

@@ -9,13 +9,13 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			description: 'Generate a wordcloud from the messages in a chat.',
-			requiredPermissions: ['ATTACH_FILES']
+			requiredPermissions: ['ATTACH_FILES', 'READ_MESSAGE_HISTORY']
 		});
 	}
 
 	async run(msg) {
-		const FinalImage = new Canvas(2000, 2000);
-		const ctx = FinalImage.getContext('2d');
+		const finalImage = new Canvas(2000, 2000);
+		const ctx = finalImage.getContext('2d');
 		const wordBank = {};
 
 		let messageBank = await msg.channel.messages.fetch({ limit: 100 });
@@ -32,7 +32,7 @@ module.exports = class extends Command {
 			});
 		}
 
-		const wordList = wordBank.filter(word => wordBank[word] > 3 && word.length > 4)
+		const wordList = Object.keys(wordBank).filter(word => wordBank[word] > 3 && word.length > 4)
 			.map(word => ({ text: word, size: 10 * wordBank[word] }));
 
 		ctx.fillStyle = 'black';
@@ -48,7 +48,7 @@ module.exports = class extends Command {
 				ctx.fillText(word.text, word.x, word.y);
 				ctx.rotate(-rotation);
 			}
-			const buffer = FinalImage.toBuffer();
+			const buffer = finalImage.toBuffer();
 			return msg.sendMessage(new MessageAttachment(buffer, 'image.jpg'));
 		};
 
