@@ -6,7 +6,6 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			cooldown: 3,
 			aliases: ['wiki'],
 			description: 'Finds a Wikipedia Article by title.',
 			usage: '<query:str>'
@@ -27,7 +26,8 @@ module.exports = class extends Command {
 			.setURL(article.content_urls.desktop.page)
 			.setTitle(article.title)
 			.setDescription(article.extract);
-		return msg.sendMessage({ embed });
+
+		return msg.sendEmbed(embed);
 	}
 
 };
