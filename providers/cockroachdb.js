@@ -5,6 +5,17 @@ module.exports = class extends SQLProvider {
 
 	constructor(...args) {
 		super(...args);
+		this.qb = new QueryBuilder({
+			boolean: 'BOOL',
+			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			float: 'DOUBLE PRECISION',
+			uuid: 'UUID',
+			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
+			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
+			array: type => `${type}[]`,
+			arrayResolver: (values, piece, resolver) => values.length ? `array[${values.map(value => resolver(value, piece)).join(', ')}]` : "'{}'",
+			formatDatatype: (name, datatype, def = null) => `"${name}" ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
+		});
 		this.db = null;
 	}
 
