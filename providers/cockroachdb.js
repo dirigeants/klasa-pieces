@@ -1,4 +1,4 @@
-const { SQLProvider, Type, Schema, util: { mergeDefault, isNumber } } = require('klasa');
+const { SQLProvider, Type, Schema, QueryBuilder, util: { mergeDefault, isNumber } } = require('klasa');
 const { Pool } = require('pg');
 
 module.exports = class extends SQLProvider {
