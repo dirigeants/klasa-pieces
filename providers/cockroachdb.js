@@ -1,38 +1,50 @@
-const { SQLProvider, Type, Schema, QueryBuilder, util: { mergeDefault, isNumber } } = require('klasa');
+const { SQLProvider, Type, Schema, util: { mergeDefault, isNumber } } = require('klasa');
 const { Pool } = require('pg');
- 
-module.exports = class extends Provider {
 
-     constructor(...args) {
-        super(...args);
-        this.db = null;
-    }
-    
-    async init() {
-        const pool =  new Pool({ 
-            host: 'localhost',
-            user: 'root',
-            port: 26257,
-            database: 'klasa' });
-            
-            pool.connect((error, client) => {
-                if (error) throw this.client.console.error(`Can't connect to DB.\n${error}`);
-                this.db = client;
-            });   
-    }
+module.exports = class extends SQLProvider {
 
-    get exec() {
-        return this.db;
-    }
-    
-    /* Table methods */
+	constructor(...args) {
+		super(...args);
+		this.db = null;
+	}
 
-    hasTable(table) {
-        return this.db.query('SHOW TABLES;')
-        .then(result => result.rows.filter(row => row.Table === table).length === 0 ? false : true);
-    }
 
-    createTable(table, rows) {
+	async init() {
+		const connection = mergeDefault({
+			host: 'localhost',
+			port: 26257,
+			database: 'klasa',
+			options: {
+				max: 20,
+				idleTimeoutMillis: 30000,
+				connectionTimeoutMillis: 2000
+			}
+		}, this.client.options.providers.cockroachdb);
+
+		this.db = new Pool(Object.assign({
+			host: connection.host,
+			port: connection.port,
+			user: connection.user,
+			password: connection.password,
+			database: connection.db
+		}, connection.options));
+
+		this.db.on('error', error => this.client.emit('error', error));
+		await this.db.connect();
+	}
+
+	get exec() {
+		return this.db;
+	}
+
+	/* Table methods */
+
+	hasTable(table) {
+		return this.db.query('SHOW TABLES;')
+			.then(result => result.rows.filter(row => row.Table === table).length !== 0);
+	}
+
+	createTable(table, rows) {
 		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
 		const gateway = this.client.gateways[table];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
@@ -43,9 +55,9 @@ module.exports = class extends Provider {
 				${['id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE', ...schemaValues.map(this.qb.parse.bind(this.qb))].join(', ')}
 			)`
 		);
-    }
-    
-    deleteTable(table) {
+	}
+
+	deleteTable(table) {
 		return this.run(`DROP TABLE IF EXISTS ${sanitizeKeyName(table)};`);
 	}
 
