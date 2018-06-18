@@ -15,6 +15,7 @@ module.exports = class extends Command {
 
 	async run(msg, [channel = msg.channel, ...message]) {
 		if (channel.postable === false && channel !== msg.channel) throw 'The selected channel is not postable.';
+		if (channel.guild !== msg.guild) throw 'You can\'t echo in other servers!';
 		return channel.send(message.join(' '));
 	}
 
