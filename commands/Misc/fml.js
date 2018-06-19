@@ -1,6 +1,6 @@
 const { Command } = require('klasa');
 const { MessageEmbed } = require('discord.js');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 const HTMLParser = require('fast-html-parser');
 
 module.exports = class extends Command {
@@ -10,8 +10,8 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const res = await snekfetch.get('http://www.fmylife.com/random');
-		const root = HTMLParser.parse(res.text);
+		const res = await fetch('http://www.fmylife.com/random');
+		const root = HTMLParser.parse(await res.text());
 		const article = root.querySelector('.block a');
 		const downdoot = root.querySelector('.vote-down');
 		const updoot = root.querySelector('.vote-up');

@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -12,11 +12,11 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [subreddit]) {
-		const { data } = await snekfetch
-			.get(`https://www.reddit.com/r/${subreddit}/random.json`)
-			.then(res => {
-				if (res.body.error) throw this.errorMessage;
-				return res.body[0].data.children[0];
+		const { data } = await fetch(`https://www.reddit.com/r/${subreddit}/random.json`)
+			.then(async res => {
+				const body = await res.json();
+				if (body.error) throw this.errorMessage;
+				return body[0].data.children[0];
 			})
 			.catch(() => { throw this.errorMessage; });
 

@@ -1,6 +1,6 @@
 const { Command } = require('klasa');
 const { MessageEmbed } = require('discord.js');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 // Create a TMDB account on https://www.themoviedb.org/ (if you haven't yet) and go to https://www.themoviedb.org/settings/api to get your API key.
 const tmdbAPIkey = '';
 
@@ -17,14 +17,15 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [query, page = 1]) {
-		const request = await snekfetch.get(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbAPIkey}&query=${query}`);
-		const movie = request.body.results[page - 1];
+		const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbAPIkey}&query=${query}`);
+		const body = await response.json();
+		const movie = body.results[page - 1];
 
 		if (!movie) throw `I couldn't find a movie with title **${query}** in page ${page}.`;
 
 		const embed = new MessageEmbed()
 			.setImage(`https://image.tmdb.org/t/p/original${movie.poster_path}`)
-			.setTitle(`${movie.title} (${page} out of ${request.body.results.length} results)`)
+			.setTitle(`${movie.title} (${page} out of ${body.results.length} results)`)
 			.setDescription(movie.overview)
 			.setFooter(`${this.client.user.username} uses the TMDb API but is not endorsed or certified by TMDb.`, 'https://www.themoviedb.org/static_cache/v4/logos/208x226-stacked-green-9484383bd9853615c113f020def5cbe27f6d08a84ff834f41371f223ebad4a3c.png'); // eslint-disable-line max-len
 		if (movie.title !== movie.original_title) embed.addField('Original Title', movie.original_title, true);

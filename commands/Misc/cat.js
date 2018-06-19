@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -11,7 +11,8 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const { body: { file } } = await snekfetch.get('http://aws.random.cat/meow');
+		const res = await fetch('http://aws.random.cat/meow');
+		const { file } = await res.json();
 		return msg.channel.sendFile(file, `cat.${file.slice(file.lastIndexOf('.'), file.length)}`);
 	}
 
