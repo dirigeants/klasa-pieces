@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const { post } = require('snekfetch');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -12,7 +12,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [code]) {
-		const { body } = await post('https://hastebin.com/documents').send(code);
+		const { body } = await fetch('https://hastebin.com/documents', { method: 'POST', body: code });
 		return msg.sendMessage(`https://hastebin.com/${body.key}`);
 	}
 

@@ -1,6 +1,6 @@
 const { Command, Timestamp } = require('klasa');
 const { MessageEmbed } = require('discord.js');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 
 /**
  * https://dev.twitch.tv/docs/v5/guides/authentication/
@@ -18,8 +18,8 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [twitchName]) {
-		const body = await snekfetch.get(`https://api.twitch.tv/kraken/channels/${twitchName}?client_id=${clientID}`)
-			.then(res => res.body)
+		const body = await fetch(`https://api.twitch.tv/kraken/channels/${twitchName}?client_id=${clientID}`)
+			.then(async res => await res.json())
 			.catch(() => { throw 'Unable to find account. Did you spell it correctly?'; });
 
 		const creationDate = this.timestamp.display(body.created_at);

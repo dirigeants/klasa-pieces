@@ -1,6 +1,7 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
 const wolframAppID = 'https://account.wolfram.com/auth/create';
+const querystring = require('querystring');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -12,13 +13,14 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [query]) {
-		const { pods } = await snekfetch
-			.get('http://api.wolframalpha.com/v2/query')
-			.query('input', query)
-			.query('primary', true)
-			.query('appid', wolframAppID)
-			.query('output', 'json')
-			.then(res => JSON.parse(res.text).queryresult)
+		const qs = querystring.stringify({
+			input: query,
+			primary: true,
+			appid: wolframAppID,
+			output: 'json'
+		});
+		const { pods } = await fetch(`http://api.wolframalpha.com/v2/query?${qs}`)
+			.then(async res => await res.json().then(res2 => res2.queryresult))
 			.catch(() => msg.sendMessage('There was an error. Please try again.'));
 
 		if (!pods || pods.error) throw "Couldn't find an answer to that question!";

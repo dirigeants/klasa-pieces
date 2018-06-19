@@ -13,7 +13,6 @@ module.exports = class extends Command {
 			usage: '<messageid:msg>'
 		});
 
-		this.providerEngine = 'json';
 		this.provider = null;
 		this.timestamp = new Timestamp('DD/MM/YYYY [@] HH:mm:ss');
 	}
@@ -54,8 +53,7 @@ module.exports = class extends Command {
 	}
 
 	async init() {
-		this.provider = this.client.providers.get(this.providerEngine);
-		if (!this.provider) throw new Error(`The Provider ${this.providerEngine} does not seem to exist.`);
+		this.provider = this.client.providers.default;
 
 		if (!await this.provider.hasTable('starboard')) {
 			const SQLCreate = ['id TEXT NOT NULL UNIQUE', "messages TEXT NOT NULL DEFAULT '[]'"];

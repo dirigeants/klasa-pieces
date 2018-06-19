@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 const { MessageEmbed } = require('discord.js');
 
 module.exports = class extends Command {
@@ -14,9 +14,8 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [subredditName]) {
-		let subreddit = await snekfetch
-			.get(`https://www.reddit.com/r/${subredditName}/about.json`)
-			.then(res => res.body)
+		let subreddit = await fetch(`https://www.reddit.com/r/${subredditName}/about.json`)
+			.then(async res => await res.json())
 			.catch(() => { throw this.errorMessage; });
 
 		if (subreddit.kind !== 't5') throw `That subreddit doesn't exist.`;

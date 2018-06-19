@@ -1,6 +1,6 @@
 const { Command, Stopwatch, Type, util } = require('klasa');
 const { inspect } = require('util');
-const { post } = require('snekfetch');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -126,7 +126,8 @@ module.exports = class extends Command {
 	}
 
 	async getHaste(result) {
-		const { body } = await post('https://hastebin.com/documents').send(result);
+		const res = await fetch('https://hastebin.com/documents', { method: 'POST', body: result });
+		const body = await res.json();
 		return `https://hastebin.com/${body.key}.js`;
 	}
 
