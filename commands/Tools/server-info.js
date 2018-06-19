@@ -25,8 +25,8 @@ module.exports = class extends Command {
 		this.timestamp = new Timestamp('d MMMM YYYY');
 	}
 
-	async run(msg) {
-		const serverInfo = new MessageEmbed()
+	run(msg) {
+		return msg.sendEmbed(new MessageEmbed()
 			.setColor(0x00AE86)
 			.setThumbnail(msg.guild.iconURL())
 			.addField('❯ Name', msg.guild.name, true)
@@ -36,9 +36,7 @@ module.exports = class extends Command {
 			.addField('❯ Explicit Filter', this.filterLevels[msg.guild.explicitContentFilter], true)
 			.addField('❯ Verification Level', this.verificationLevels[msg.guild.verificationLevel], true)
 			.addField('❯ Owner', msg.guild.owner ? msg.guild.owner.user.tag : 'None', true)
-			.addField('❯ Members', msg.guild.memberCount, true);
-
-		return msg.sendEmbed(serverInfo);
+			.addField('❯ Members', msg.guild.memberCount, true));
 	}
 
 };

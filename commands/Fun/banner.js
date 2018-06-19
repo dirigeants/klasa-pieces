@@ -11,8 +11,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [banner]) {
-		const data = await figletAsync(banner);
-		return msg.sendCode('', data);
+		return msg.sendCode('', await figletAsync(banner));
 	}
 
 };

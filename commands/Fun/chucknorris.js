@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -12,9 +12,10 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const { body } = await snekfetch.get('http://api.chucknorris.io/jokes/random');
-
-		return msg.sendMessage(`**😁 Chuck Norris Joke:** ${body.value}`);
+		const joke = await fetch('http://api.chucknorris.io/jokes/random')
+			.then(response => response.json())
+			.then(body => body.value);
+		return msg.sendMessage(`**😁 Chuck Norris Joke:** ${joke}`);
 	}
 
 };

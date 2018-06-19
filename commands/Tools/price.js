@@ -15,10 +15,9 @@ module.exports = class extends Command {
 		const c1 = coin.toUpperCase();
 		const c2 = currency.toUpperCase();
 
-		const res = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${c1}&tsyms=${c2}`).catch(() => {
-			throw 'There was an error, please make sure you specified an appropriate coin and currency.';
-		});
-		const body = await res.json();
+		const body = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${c1}&tsyms=${c2}`)
+			.then(response => response.json())
+			.catch(() => { throw 'There was an error, please make sure you specified an appropriate coin and currency.'; });
 		if (!body[c2]) return msg.sendMessage('There was an error, please make sure you specified an appropriate coin and currency.');
 		return msg.sendMessage(`Current price of ${amount} ${c1} is ${(body[c2] * amount).toLocaleString()} ${c2}`);
 	}

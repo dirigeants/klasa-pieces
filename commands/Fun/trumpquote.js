@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -8,12 +8,12 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const { value } = await snekfetch
-			.get(`https://api.tronalddump.io/random/quote`)
-			.then(res => JSON.parse(res.body))
+		const quote = await fetch('https://api.tronalddump.io/random/quote')
+			.then(response => response.json())
+			.then(body => body.value)
 			.catch(() => { throw 'There was an error. Please try again.'; });
 
-		return msg.sendMessage(value);
+		return msg.sendMessage(quote);
 	}
 
 };

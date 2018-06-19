@@ -41,9 +41,10 @@ module.exports = class extends Command {
 		this.timestamp = new Timestamp('MMMM dd YYYY');
 	}
 
-	async run(msg, [role]) {
+	run(msg, [role]) {
 		const allPermissions = Object.entries(role.permissions.serialize()).filter(perm => perm[1]).map(([perm]) => this.perms[perm]).join(', ');
-		const roleInfo = new MessageEmbed()
+
+		return msg.sendEmbed(new MessageEmbed()
 			.setColor(role.hexColor || 0xFFFFFF)
 			.addField('❯ Name', role.name, true)
 			.addField('❯ ID', role.id, true)
@@ -51,9 +52,7 @@ module.exports = class extends Command {
 			.addField('❯ Creation Date', this.timestamp.display(role.createdAt), true)
 			.addField('❯ Hoisted', role.hoist ? 'Yes' : 'No', true)
 			.addField('❯ Mentionable', role.mentionable ? 'Yes' : 'No', true)
-			.addField('❯ Permissions', allPermissions);
-
-		return msg.sendEmbed(roleInfo);
+			.addField('❯ Permissions', allPermissions));
 	}
 
 };

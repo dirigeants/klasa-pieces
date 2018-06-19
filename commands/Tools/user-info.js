@@ -18,7 +18,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [member = msg.member]) {
-		const userInfo = new MessageEmbed()
+		return msg.sendEmbed(new MessageEmbed()
 			.setColor(member.displayHexColor || 0xFFFFFF)
 			.setThumbnail(member.user.displayAvatarURL())
 			.addField('❯ Name', member.user.tag, true)
@@ -28,9 +28,7 @@ module.exports = class extends Command {
 			.addField('❯ Status', this.statuses[member.presence.status], true)
 			.addField('❯ Playing', member.presence.activity ? member.presence.activity.name : 'N/A', true)
 			.addField('❯ Highest Role', member.roles.size > 1 ? member.roles.highest.name : 'None', true)
-			.addField('❯ Hoist Role', member.roles.hoist ? member.roles.hoist.name : 'None', true);
-
-		return msg.sendEmbed(userInfo);
+			.addField('❯ Hoist Role', member.roles.hoist ? member.roles.hoist.name : 'None', true));
 	}
 
 };

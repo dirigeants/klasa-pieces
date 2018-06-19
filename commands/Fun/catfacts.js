@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
+const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
@@ -11,8 +11,10 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const { body } = await snekfetch.get('https://catfact.ninja/fact');
-		return msg.sendMessage(`📢 **Catfact:** *${body.fact}*`);
+		const fact = await fetch('https://catfact.ninja/fact')
+			.then(response => response.json())
+			.then(body => body.fact);
+		return msg.sendMessage(`📢 **Catfact:** *${fact}*`);
 	}
 
 };

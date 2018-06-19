@@ -12,9 +12,10 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const res = await fetch('https://dog.ceo/api/breeds/image/random');
-		const { message } = await res.json();
-		return msg.channel.sendFile(message);
+		const url = await fetch('https://dog.ceo/api/breeds/image/random')
+			.then(response => response.json())
+			.then(body => body.message);
+		return msg.channel.sendFile(url);
 	}
 
 };

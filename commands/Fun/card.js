@@ -11,8 +11,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	async run(msg, [num]) {
-		const numCards = num;
+	async run(msg, [numCards]) {
 		const lines = [];
 
 		for (let i = 0; i < numCards; ++i) {

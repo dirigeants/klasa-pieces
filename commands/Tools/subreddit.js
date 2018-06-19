@@ -14,14 +14,15 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [subredditName]) {
-		let subreddit = await fetch(`https://www.reddit.com/r/${subredditName}/about.json`)
-			.then(async res => await res.json())
+		const subreddit = await fetch(`https://www.reddit.com/r/${subredditName}/about.json`)
+			.then(response => response.json())
+			.then(body => {
+				if (body.kind === 't5') return subreddit.data;
+				throw `That subreddit doesn't exist.`;
+			})
 			.catch(() => { throw this.errorMessage; });
 
-		if (subreddit.kind !== 't5') throw `That subreddit doesn't exist.`;
-		else subreddit = subreddit.data;
-
-		const embed = new MessageEmbed()
+		return msg.sendEmbed(new MessageEmbed()
 			.setTitle(subreddit.title)
 			.setDescription(subreddit.public_description)
 			.setURL(`https://www.reddit.com/r/${subredditName}/`)
@@ -29,9 +30,7 @@ module.exports = class extends Command {
 			.setThumbnail(subreddit.icon_img)
 			.setImage(subreddit.banner_img)
 			.addField('Subscribers', subreddit.subscribers.toLocaleString(), true)
-			.addField('Users Active', subreddit.accounts_active.toLocaleString(), true);
-
-		return msg.sendEmbed(embed);
+			.addField('Users Active', subreddit.accounts_active.toLocaleString(), true));
 	}
 
 };

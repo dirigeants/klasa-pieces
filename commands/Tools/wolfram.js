@@ -19,9 +19,10 @@ module.exports = class extends Command {
 			appid: wolframAppID,
 			output: 'json'
 		});
-		const { pods } = await fetch(`http://api.wolframalpha.com/v2/query?${qs}`)
-			.then(async res => await res.json().then(res2 => res2.queryresult))
-			.catch(() => msg.sendMessage('There was an error. Please try again.'));
+		const pods = await fetch(`http://api.wolframalpha.com/v2/query?${qs}`)
+			.then(response => response.json())
+			.then(body => body.queryresult.pods)
+			.catch(() => { throw 'There was an error. Please try again.'; });
 
 		if (!pods || pods.error) throw "Couldn't find an answer to that question!";
 

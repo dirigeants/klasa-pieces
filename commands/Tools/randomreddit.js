@@ -12,11 +12,11 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [subreddit]) {
-		const { data } = await fetch(`https://www.reddit.com/r/${subreddit}/random.json`)
-			.then(async res => {
-				const body = await res.json();
+		const data = await fetch(`https://www.reddit.com/r/${subreddit}/random.json`)
+			.then(response => response.json())
+			.then(body => {
 				if (body.error) throw this.errorMessage;
-				return body[0].data.children[0];
+				return body[0].data.children[0].data;
 			})
 			.catch(() => { throw this.errorMessage; });
 

@@ -12,8 +12,10 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [code]) {
-		const { body } = await fetch('https://hastebin.com/documents', { method: 'POST', body: code });
-		return msg.sendMessage(`https://hastebin.com/${body.key}`);
+		const key = await fetch('https://hastebin.com/documents', { method: 'POST', body: code })
+			.then(response => response.json())
+			.then(body => body.key);
+		return msg.sendMessage(`https://hastebin.com/${key}`);
 	}
 
 };

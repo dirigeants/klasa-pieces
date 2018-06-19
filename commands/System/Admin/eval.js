@@ -125,10 +125,11 @@ module.exports = class extends Command {
 		return asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`;
 	}
 
-	async getHaste(result) {
-		const res = await fetch('https://hastebin.com/documents', { method: 'POST', body: result });
-		const body = await res.json();
-		return `https://hastebin.com/${body.key}.js`;
+	async getHaste(evalResult) {
+		const key = await fetch('https://hastebin.com/documents', { method: 'POST', body: evalResult })
+			.then(response => response.json())
+			.then(body => body.key);
+		return `https://hastebin.com/${key}.js`;
 	}
 
 };
@@ -154,4 +155,3 @@ module.exports = class extends Command {
 	COMMAND_EVAL_OUTPUT_FILE: (time, type) => `Sent the result as a file.\n**Type**:${type}\n${time}`,
 	COMMAND_EVAL_OUTPUT_HASTEBIN: (time, url, type) => `Sent the result to hastebin: ${url}\n**Type**:${type}\n${time}\n`
 */
-

@@ -1,6 +1,6 @@
 const { Command } = require('klasa');
 const { MessageAttachment } = require('discord.js');
-const { get } = require('snekfetch');
+const fetch = require('node-fetch');
 const faceapp = require('faceapp');
 
 module.exports = class extends Command {
@@ -18,9 +18,11 @@ module.exports = class extends Command {
 		const [attachment] = msg.attachments.values();
 		if (!attachment || !attachment.height) throw 'Please upload an image.';
 
-		const { body: image } = await get(attachment.url).catch(() => {
-			throw 'I could not download the file. Can you try again with another image?';
-		});
+		const image = await fetch(attachment.url)
+			.then(response => response.blob())
+			.catch(() => {
+				throw 'I could not download the file. Can you try again with another image?';
+			});
 
 		const faceappImage = await faceapp
 			.process(image, filter)

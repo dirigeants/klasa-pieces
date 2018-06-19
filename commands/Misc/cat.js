@@ -11,8 +11,9 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const res = await fetch('http://aws.random.cat/meow');
-		const { file } = await res.json();
+		const file = await fetch('http://aws.random.cat/meow')
+			.then(response => response.json())
+			.then(body => body.file);
 		return msg.channel.sendFile(file, `cat.${file.slice(file.lastIndexOf('.'), file.length)}`);
 	}
 
