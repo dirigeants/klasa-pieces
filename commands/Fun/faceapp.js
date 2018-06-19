@@ -19,7 +19,7 @@ module.exports = class extends Command {
 		if (!attachment || !attachment.height) throw 'Please upload an image.';
 
 		const image = await fetch(attachment.url)
-			.then(response => response.blob())
+			.then(response => response.buffer())
 			.catch(() => {
 				throw 'I could not download the file. Can you try again with another image?';
 			});

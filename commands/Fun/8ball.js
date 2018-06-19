@@ -11,7 +11,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	async run(msg, [question]) {
+	run(msg, [question]) {
 		return msg.reply(question.endsWith('?') ?
 			`🎱 ${answers[Math.floor(Math.random() * answers.length)]}` :
 			"🎱 That doesn't look like a question, try again please.");
@@ -45,4 +45,3 @@ const answers = [
 	'There is a small chance.',
 	'Yes!'
 ];
-
