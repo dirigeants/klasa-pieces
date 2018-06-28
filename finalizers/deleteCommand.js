@@ -3,8 +3,8 @@ const { Finalizer } = require('klasa');
 module.exports = class extends Finalizer {
 
 	async run(msg) {
-		if (msg.guild && msg.guild.configs.deleteCommand) return msg.delete();
-		return null;
+		if (!msg.deletable && !msg.guild && !msg.guild.configs.deleteCommand) return null;
+		return msg.delete();
 	}
 
 	async init() {
