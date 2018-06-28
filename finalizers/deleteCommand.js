@@ -1,10 +1,6 @@
-const { Inhibitor } = require('klasa');
+const { Finalizer } = require('klasa');
 
-module.exports = class extends Inhibitor {
-
-	constructor(...args) {
-		super(...args, { spamProtection: true });
-	}
+module.exports = class extends Finalizer {
 
 	async run(msg) {
 		if (msg.guild && msg.guild.configs.deleteCommand) return msg.delete();
