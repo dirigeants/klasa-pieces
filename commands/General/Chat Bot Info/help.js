@@ -1,5 +1,7 @@
 const { Command, RichDisplay, util } = require('klasa');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
+
+const PERMISSIONS_RICHDISPLAY = new Permissions([Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.ADD_REACTIONS]);
 
 module.exports = class extends Command {
 
@@ -19,17 +21,16 @@ module.exports = class extends Command {
 
 	async run(message, [command]) {
 		if (command) {
-			const info = [
+			return message.sendMessage([
 				`= ${command.name} = `,
 				util.isFunction(command.description) ? command.description(message) : command.description,
 				message.language.get('COMMAND_HELP_USAGE', command.usage.fullUsage(message)),
 				message.language.get('COMMAND_HELP_EXTENDED'),
 				util.isFunction(command.extendedHelp) ? command.extendedHelp(message) : command.extendedHelp
-			].join('\n');
-			return message.sendMessage(info, { code: 'asciidoc' });
+			], { code: 'asciidoc' });
 		}
 
-		if (message.channel.permissionsFor(this.client.user).has(['MANAGE_REACTIONS', 'MANAGE_MESSAGES'])) {
+		if (message.channel.permissionsFor(this.client.user).has(PERMISSIONS_RICHDISPLAY)) {
 			return (await this.buildDisplay(message)).run(await message.send('Loading Commands...'));
 		}
 
@@ -41,7 +42,7 @@ module.exports = class extends Command {
 
 	async buildHelp(message) {
 		const commands = await this._fetchCommands(message);
-		const { prefix } = message.guildConfigs.prefix;
+		const { prefix } = message.guildConfigs;
 
 		const helpMessage = [];
 		for (const [category, list] of commands) {
@@ -53,7 +54,7 @@ module.exports = class extends Command {
 
 	async buildDisplay(message) {
 		const commands = await this._fetchCommands(message);
-		const { prefix } = message.guildConfigs.prefix;
+		const { prefix } = message.guildConfigs;
 		const display = new RichDisplay();
 		for (const [category, list] of commands) {
 			display.addPage(new MessageEmbed()
