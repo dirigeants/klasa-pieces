@@ -2,12 +2,12 @@ const { Command, RichDisplay, util } = require('klasa');
 const { MessageEmbed, Permissions } = require('discord.js');
 
 const PERMISSIONS_RICHDISPLAY = new Permissions([Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.ADD_REACTIONS]);
+const time = 1000 * 60 * 3;
 
 module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			aliases: ['commands', 'cmds'],
 			guarded: true,
 			description: (message) => message.language.get('COMMAND_HELP_DESCRIPTION'),
 			usage: '(Command:command)'
@@ -17,6 +17,9 @@ module.exports = class extends Command {
 			if (!arg || arg === '') return undefined;
 			return this.client.arguments.get('command').run(arg, possible, message);
 		});
+
+		// Cache the handlers
+		this.handlers = new Map();
 	}
 
 	async run(message, [command]) {
@@ -30,8 +33,18 @@ module.exports = class extends Command {
 			], { code: 'asciidoc' });
 		}
 
-		if (message.channel.permissionsFor(this.client.user).has(PERMISSIONS_RICHDISPLAY)) {
-			return (await this.buildDisplay(message)).run(await message.send('Loading Commands...'));
+		if (message.guild && message.channel.permissionsFor(this.client.user).has(PERMISSIONS_RICHDISPLAY)) {
+			// Finish the previous handler
+			const previousHandler = this.handlers.get(message.author.id);
+			if (previousHandler) previousHandler.stop();
+
+			const handler = await (await this.buildDisplay(message)).run(await message.send('Loading Commands...'), {
+				filter: (reaction, user) => user.id === message.author.id,
+				time
+			});
+			handler.on('end', () => this.handlers.delete(message.author.id));
+			this.handlers.set(message.author.id, handler);
+			return handler;
 		}
 
 		const method = this.client.user.bot ? 'author' : 'channel';
@@ -46,9 +59,8 @@ module.exports = class extends Command {
 
 		const helpMessage = [];
 		for (const [category, list] of commands) {
-			helpMessage.push(`**${category} Commands**:\n`, list.map(this.formatCommand.bind(this, message, prefix)).join('\n'));
+			helpMessage.push(`**${category} Commands**:\n`, list.map(this.formatCommand.bind(this, message, prefix, false)).join('\n'), '');
 		}
-
 		return helpMessage.join('\n');
 	}
 
@@ -56,19 +68,21 @@ module.exports = class extends Command {
 		const commands = await this._fetchCommands(message);
 		const { prefix } = message.guildConfigs;
 		const display = new RichDisplay();
+		const color = message.member.displayColor;
 		for (const [category, list] of commands) {
 			display.addPage(new MessageEmbed()
 				.setTitle(`${category} Commands`)
-				.setDescription(list.map(this.formatCommand.bind(this, message, prefix)).join('\n'))
+				.setColor(color)
+				.setDescription(list.map(this.formatCommand.bind(this, message, prefix, true)).join('\n'))
 			);
 		}
 
 		return display;
 	}
 
-	formatCommand(message, prefix, command) {
+	formatCommand(message, prefix, richDisplay, command) {
 		const description = typeof command.description === 'function' ? command.description(message) : command.description;
-		return `• **${prefix}${command.name}** → ${description}`;
+		return richDisplay ? `• ${prefix}${command.name} → ${description}` : `• **${prefix}${command.name}** → ${description}`;
 	}
 
 	async _fetchCommands(message) {
