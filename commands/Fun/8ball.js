@@ -5,7 +5,6 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['8', 'magic', '8ball', 'mirror'],
-
 			description: 'Magic 8-Ball, does exactly what the toy does.',
 			usage: '<query:str>'
 		});

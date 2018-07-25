@@ -5,7 +5,6 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['choose', 'decide'],
-
 			description: 'Makes a decision for you given some choices.',
 			usage: '<choices:str> [...]',
 			usageDelim: '|'

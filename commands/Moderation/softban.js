@@ -7,9 +7,8 @@ module.exports = class extends Command {
 			permissionLevel: 6,
 			requiredPermissions: ['BAN_MEMBERS'],
 			runIn: ['text'],
-
 			description: 'Softbans a mentioned user. Currently does not require reason (no mod-log).',
-			usage: '<member:user> [days:int{1,7}] [reason:string]',
+			usage: '<member:user> [days:int{1,7}] [reason:string] [...]',
 			usageDelim: ' '
 		});
 	}

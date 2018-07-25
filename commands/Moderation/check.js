@@ -7,7 +7,6 @@ module.exports = class extends Command {
 			permissionLevel: 6,
 			runIn: ['text'],
 			requiredSettings: ['minAccAge'],
-
 			description: 'Checks the guild for any user accounts younger than the minimum account age.'
 		});
 	}

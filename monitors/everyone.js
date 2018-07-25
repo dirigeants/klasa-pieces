@@ -9,16 +9,15 @@ module.exports = class extends Monitor {
 
 	async run(msg) {
 		if (!msg.member ||
-			!msg.guild.configs.everyoneRole ||
+			!msg.guild.configs.roles.everyone ||
 			!msg.mentions.roles.size ||
 			msg.guild.me.roles.highest.position <= msg.member.roles.highest.position ||
-			!msg.guild.me.permissions.has(FLAGS.MANAGE_ROLES) ||
-			!await msg.hasAtLeastPermissionLevel(1)
+			!msg.guild.me.permissions.has(FLAGS.MANAGE_ROLES)
 		) return;
 
-		const everyone = msg.guild.roles.get(msg.guild.configs.everyoneRole);
+		const everyone = msg.guild.roles.get(msg.guild.configs.roles.everyone);
 		if (!everyone) {
-			await msg.guild.configs.reset('everyoneRole');
+			await msg.guild.configs.reset('roles.everyone');
 			return;
 		}
 		if (!msg.mentions.roles.has(everyone.id)) return;
@@ -32,9 +31,15 @@ module.exports = class extends Monitor {
 		].join('\n'));
 	}
 
+	// Run schema initialising
 	async init() {
-		if (!this.client.gateways.guilds.schema.has('everyoneRole')) {
-			await this.client.gateways.guilds.schema.add('everyoneRole', { type: 'role' });
+		// Ensure guild configs have the keys needed for this piece
+		const { schema } = this.client.gateways.guilds;
+
+		if (!schema.has('roles')) {
+			await schema.add('roles', { everyone: { type: 'role' } });
+		} else if (!schema.roles.has('everyone')) {
+			await schema.roles.add('everyone', { type: 'role' });
 		}
 	}
 

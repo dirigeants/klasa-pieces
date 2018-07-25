@@ -8,7 +8,6 @@ module.exports = class extends Command {
 			permissionLevel: 6,
 			runIn: ['text'],
 			requiredSettings: ['starboard'],
-
 			description: 'Stars a message.',
 			usage: '<messageid:msg>'
 		});
