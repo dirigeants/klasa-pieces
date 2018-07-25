@@ -1,4 +1,4 @@
-const { Command } = require('klasa');
+const {	Command } = require('klasa');
 
 module.exports = class extends Command {
 
@@ -9,19 +9,16 @@ module.exports = class extends Command {
 			runIn: ['text'],
 
 			description: 'Unbans a user id.',
-			usage: '<userid:string> [reason:string] [...]',
+			usage: '<user:user> [reason:string] [...]',
 			usageDelim: ' '
 		});
 	}
 
 	async run(msg, [userid, ...reason]) {
 		const user = await this.client.users.fetch(userid);
-		const options = {};
-		reason = reason.length ? reason.join(' ') : null;
-		if (reason) options.reason = reason;
 		const bans = await msg.guild.fetchBans();
 		if (bans.has(userid)) {
-			await msg.guild.members.unban(userid, reason);
+			await msg.guild.members.unban(userid, reason.join(' '));
 		}
 
 		return msg.sendMessage(`${user.tag} was unbanned.${reason ? ` With reason of: ${reason}` : ''}`);

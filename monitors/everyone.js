@@ -35,9 +35,14 @@ module.exports = class extends Monitor {
 	async init() {
 		// Ensure guild configs have the keys needed for this piece
 		const { schema } = this.client.gateways.guilds;
+
 		if (!schema.has('roles')) {
 			await schema.add('roles', { everyone: { type: 'role' } });
-		} else if (!schema.roles.has('everyone')) { await schema.roles.add('everyone', { type: 'role' }); }
+		} else
+
+		if (!schema.roles.has('everyone')) {
+			await schema.roles.add('everyone', { type: 'role' });
+		}
 	}
 
 };

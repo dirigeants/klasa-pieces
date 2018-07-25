@@ -9,9 +9,8 @@ const { Task } = require('klasa');
 module.exports = class extends Task {
 
 	async run({ guild, user }) {
-		guild = this.client.guilds.get(guild);
-		await guild.members.get(user).roles.remove(guild.configs.roles.muted);
-		return;
+		const _guild = this.client.guilds.get(guild);
+		await _guild.members.fetch(user).roles.remove(_guild.configs.roles.muted);
 	}
 
 };

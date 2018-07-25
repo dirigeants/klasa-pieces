@@ -4,7 +4,7 @@
 	/tasks/unmute.js
 
 */
-const { Command, Duration } = require('klasa');
+const {	Command, Duration } = require('klasa');
 
 module.exports = class extends Command {
 
@@ -49,7 +49,12 @@ module.exports = class extends Command {
 		if (member.roles.has(msg.guild.configs.roles.muted)) return null;
 		await member.roles.add(msg.guild.configs.roles.muted);
 
-		await this.client.schedule.create('unmute', when, { data: { guild: msg.guild.id, user: member.id } });
+		await this.client.schedule.create('unmute', when, {
+			data: {
+				guild: msg.guild.id,
+				user: member.id
+			}
+		});
 		return msg.sendMessage(`${member.user.tag} got temporarily muted for ${Duration.toNow(when)}.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
@@ -57,9 +62,14 @@ module.exports = class extends Command {
 	async init() {
 		// Ensure guild configs have the keys needed for this piece
 		const { schema } = this.client.gateways.guilds;
+
 		if (!schema.has('roles')) {
 			await schema.add('roles', { muted: { type: 'role' } });
-		} else if (!schema.roles.has('muted')) { await schema.roles.add('muted', { type: 'role' }); }
+		} else
+
+		if (!schema.roles.has('muted')) {
+			await schema.roles.add('muted', { type: 'role' });
+		}
 	}
 
 };
