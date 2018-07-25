@@ -49,7 +49,7 @@ module.exports = class extends Command {
 		if (member.roles.has(msg.guild.configs.roles.muted)) return null;
 		await member.roles.add(msg.guild.configs.roles.muted);
 
-		await this.client.schedule.create('unmute', when, { data: { guild: msg.guild.id, user: member.id }, catchUp: true });
+		await this.client.schedule.create('unmute', when, { data: { guild: msg.guild.id, user: member.id } });
 		return msg.sendMessage(`${member.user.tag} got temporarily muted for ${Duration.toNow(when)}.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
