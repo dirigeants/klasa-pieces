@@ -8,7 +8,7 @@ module.exports = class extends Provider {
 
 	constructor(...args) {
 		super(...args);
-		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'level');
+		this.baseDir = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'level');
 		this.tables = new Collection();
 	}
 

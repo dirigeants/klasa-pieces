@@ -10,7 +10,7 @@ module.exports = class extends Provider {
 
 	constructor(...args) {
 		super(...args);
-		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'nedb');
+		this.baseDir = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'nedb');
 		this.dataStores = new Collection();
 	}
 

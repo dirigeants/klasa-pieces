@@ -12,7 +12,7 @@ module.exports = class extends SQLProvider {
 
 	constructor(...args) {
 		super(...args);
-		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'sqlite');
+		this.baseDir = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'sqlite');
 		this.qb = new QueryBuilder({
 			null: 'NULL',
 			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
