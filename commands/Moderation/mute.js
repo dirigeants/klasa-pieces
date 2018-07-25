@@ -4,7 +4,7 @@
 	/tasks/unmute.js
 
 */
-const {	Command, Duration } = require('klasa');
+const { Command, Duration } = require('klasa');
 
 module.exports = class extends Command {
 
@@ -25,7 +25,7 @@ module.exports = class extends Command {
 		if (user.id === msg.author.id) throw 'Why would you mute yourself?';
 		if (user.id === this.client.user.id) throw 'Have I done something wrong?';
 
-		const member = msg.guild.members.get(user.id) || await msg.guild.members.fetch(user).catch(() => null);
+		const member = await msg.guild.members.fetch(user).catch(() => null);
 		if (member) {
 			if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot mute this user.';
 		}
@@ -41,7 +41,7 @@ module.exports = class extends Command {
 		if (user.id === msg.author.id) throw 'Why would you mute yourself?';
 		if (user.id === this.client.user.id) throw 'Have I done something wrong?';
 
-		const member = msg.guild.members.get(user.id) || await msg.guild.members.fetch(user).catch(() => null);
+		const member = await msg.guild.members.fetch(user).catch(() => null);
 		if (member) {
 			if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot mute this user.';
 		}

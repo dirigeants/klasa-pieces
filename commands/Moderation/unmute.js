@@ -15,7 +15,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [user, ...reason]) {
-		const member = msg.guild.members.get(user.id) || await msg.guild.members.fetch(user).catch(() => null);
+		const member = await msg.guild.members.fetch(user).catch(() => null);
 		if (member) {
 			if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot unmute this user.';
 		}

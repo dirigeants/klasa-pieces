@@ -17,7 +17,7 @@ module.exports = class extends Monitor {
 
 		const everyone = msg.guild.roles.get(msg.guild.configs.roles.everyone);
 		if (!everyone) {
-			await msg.guild.configs.reset('everyone');
+			await msg.guild.configs.reset('roles.everyone');
 			return;
 		}
 		if (!msg.mentions.roles.has(everyone.id)) return;
