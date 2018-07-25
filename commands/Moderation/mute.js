@@ -13,17 +13,16 @@ module.exports = class extends Command {
 			permissionLevel: 6,
 			requiredPermissions: ['MANAGE_ROLES'],
 			runIn: ['text'],
-			description: 'Mutes a mentioned user.',
-			usage: '[when:time] <member:user> [reason:string] [...]',
+			description: 'Mutes a mentioned member.',
+			usage: '[when:time] <member:member> [reason:string] [...]',
 			usageDelim: ' '
 		});
 	}
 
-	async run(msg, [when, user, ...reason]) {
-		if (user.id === msg.author.id) throw 'Why would you mute yourself?';
-		if (user.id === this.client.user.id) throw 'Have I done something wrong?';
+	async run(msg, [when, member, ...reason]) {
+		if (member.id === msg.author.id) throw 'Why would you mute yourself?';
+		if (member.id === this.client.user.id) throw 'Have I done something wrong?';
 
-		const member = await msg.guild.members.fetch(user).catch(() => null);
 		if (!member) throw 'The user is not on the server.';
 		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot mute this user.';
 

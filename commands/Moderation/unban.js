@@ -13,11 +13,10 @@ module.exports = class extends Command {
 		});
 	}
 
-	async run(msg, [userid, ...reason]) {
-		const user = await this.client.users.fetch(userid);
+	async run(msg, [user, ...reason]) {
 		const bans = await msg.guild.fetchBans();
-		if (bans.has(userid)) {
-			await msg.guild.members.unban(userid, reason.join(' '));
+		if (bans.has(user.id)) {
+			await msg.guild.members.unban(user, reason.join(' '));
 		}
 
 		return msg.sendMessage(`${user.tag} was unbanned.${reason ? ` With reason of: ${reason}` : ''}`);

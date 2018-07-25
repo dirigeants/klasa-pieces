@@ -8,17 +8,16 @@ module.exports = class extends Command {
 			requiredPermissions: ['MANAGE_ROLES'],
 			runIn: ['text'],
 			description: 'Unmutes a mentioned user.',
-			usage: '<member:user> [reason:string] [...]',
+			usage: '<member:member> [reason:string] [...]',
 			usageDelim: ' '
 		});
 	}
 
-	async run(msg, [user, ...reason]) {
-		const member = await msg.guild.members.fetch(user).catch(() => null);
-		if (member) {
-			if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot unmute this user.';
-		}
+	async run(msg, [member, ...reason]) {
+		if (!member) throw 'The user is not on the server';
+		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot unmute this user.';
 		if (!member.roles.has(msg.guild.configs.roles.muted)) throw 'This user is not muted.';
+
 		await member.roles.remove(msg.guild.configs.roles.muted);
 
 		return msg.sendMessage(`${member.user.tag} was unmuted.${reason ? ` With reason of: ${reason}` : ''}`);
