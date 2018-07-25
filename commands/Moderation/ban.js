@@ -9,7 +9,7 @@ module.exports = class extends Command {
 			runIn: ['text'],
 
 			description: 'Bans a mentioned user. Currently does not require reason (no mod-log).',
-			usage: '<member:user> [reason:string]',
+			usage: '<member:user> [reason:string] [...]',
 			usageDelim: ' '
 		});
 	}

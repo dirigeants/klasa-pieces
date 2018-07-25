@@ -9,16 +9,20 @@ module.exports = class extends Command {
 			runIn: ['text'],
 
 			description: 'Kicks a mentioned user. Currently does not require reason (no mod-log).',
-			usage: '<member:member> [reason:string] [...]',
+			usage: '<member:user> [reason:string] [...]',
 			usageDelim: ' '
 		});
 	}
 
-	async run(msg, [member, ...reason]) {
-		if (member.id === msg.author.id) throw 'Why would you kick yourself?';
-		if (member.id === this.client.user.id) throw 'Have I done something wrong?';
-		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot kick this user.';
-		if (member.kickable === false) throw 'I cannot kick this user.';
+	async run(msg, [user, ...reason]) {
+		if (user.id === msg.author.id) throw 'Why would you kick yourself?';
+		if (user.id === this.client.user.id) throw 'Have I done something wrong?';
+
+		const member = await msg.guild.members.fetch(user).catch(() => null);
+		if (member) {
+			if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot kick this user.';
+			if (!member.kickable) throw 'I cannot kick this user.';
+		}
 
 		reason = reason.length > 0 ? reason.join(' ') : null;
 		await member.kick(reason);

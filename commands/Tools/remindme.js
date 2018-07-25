@@ -1,3 +1,9 @@
+/*
+
+	To use this correctly, you will also need the reminder task located in
+	/tasks/reminder.js
+
+*/
 const { Command } = require('klasa');
 
 module.exports = class extends Command {

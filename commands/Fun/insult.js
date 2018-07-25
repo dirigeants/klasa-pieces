@@ -6,7 +6,8 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			description: 'Insults who you mention.',
-			usage: '<user:mention>'
+			usage: '<user:mention>',
+			nsfw: true
 		});
 	}
 
