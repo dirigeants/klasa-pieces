@@ -9,15 +9,15 @@ module.exports = class extends Monitor {
 
 	async run(msg) {
 		if (!msg.member ||
-			!msg.guild.configs.roles.everyoneRole ||
+			!msg.guild.configs.roles.everyone ||
 			!msg.mentions.roles.size ||
 			msg.guild.me.roles.highest.position <= msg.member.roles.highest.position ||
 			!msg.guild.me.permissions.has(FLAGS.MANAGE_ROLES)
 		) return;
 
-		const everyone = msg.guild.roles.get(msg.guild.configs.roles.everyoneRole);
+		const everyone = msg.guild.roles.get(msg.guild.configs.roles.everyone);
 		if (!everyone) {
-			await msg.guild.configs.reset('everyoneRole');
+			await msg.guild.configs.reset('everyone');
 			return;
 		}
 		if (!msg.mentions.roles.has(everyone.id)) return;
@@ -36,8 +36,8 @@ module.exports = class extends Monitor {
 		// Ensure guild configs have the keys needed for this piece
 		const { schema } = this.client.gateways.guilds;
 		if (!schema.has('roles')) {
-			await schema.add('roles', { everyoneRole: { type: 'role' } });
-		} else if (!schema.roles.has('everyoneRole')) { await schema.roles.add('everyoneRole', { type: 'role' }); }
+			await schema.add('roles', { everyone: { type: 'role' } });
+		} else if (!schema.roles.has('everyone')) { await schema.roles.add('everyone', { type: 'role' }); }
 	}
 
 };
