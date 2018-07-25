@@ -5,7 +5,6 @@ module.exports = class extends Extendable {
 	constructor(...args) {
 		super(...args, {
 			appliesTo: ['Command'],
-			enabled: true,
 			klasa: true
 		});
 	}
