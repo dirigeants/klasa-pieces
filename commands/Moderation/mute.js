@@ -15,7 +15,7 @@ module.exports = class extends Command {
 			runIn: ['text'],
 
 			description: 'Mutes a mentioned user.',
-			usage: '[temp] [when:time|days:number] <member:user> [reason:string] [...]',
+			usage: '<temp|run:default> [when:time|days:number] <member:user> [reason:string] [...]',
 			usageDelim: ' ',
 			subcommands: true
 		});
@@ -49,7 +49,7 @@ module.exports = class extends Command {
 		if (member.roles.has(msg.guild.configs.roles.muted)) return null;
 		await member.roles.add(msg.guild.configs.roles.muted);
 
-		await this.client.schedule.create('unmute', when, { data: { guild: msg.guild.id, user }, catchUp: true });
+		await this.client.schedule.create('unmute', when, { data: { guild: msg.guild.id, user: member.id }, catchUp: true });
 		return msg.sendMessage(`${member.user.tag} got temporarily muted for ${Duration.toNow(when)}.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 

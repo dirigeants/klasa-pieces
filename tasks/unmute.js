@@ -10,7 +10,7 @@ module.exports = class extends Task {
 
 	async run({ guild, user }) {
 		guild = this.client.guilds.get(guild);
-		await guild.members.get(user.id).roles.remove(guild.configs.roles.muted);
+		await guild.members.get(user).roles.remove(guild.configs.roles.muted);
 		return;
 	}
 
