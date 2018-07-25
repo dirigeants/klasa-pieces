@@ -7,8 +7,7 @@ module.exports = class extends Command {
 			permissionLevel: 6,
 			requiredPermissions: ['BAN_MEMBERS'],
 			runIn: ['text'],
-
-			description: 'Unbans a user id.',
+			description: 'Unbans a user.',
 			usage: '<user:user> [reason:string] [...]',
 			usageDelim: ' '
 		});

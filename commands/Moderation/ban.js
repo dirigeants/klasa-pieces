@@ -7,7 +7,6 @@ module.exports = class extends Command {
 			permissionLevel: 6,
 			requiredPermissions: ['BAN_MEMBERS'],
 			runIn: ['text'],
-
 			description: 'Bans a mentioned user. Currently does not require reason (no mod-log).',
 			usage: '<member:user> [reason:string] [...]',
 			usageDelim: ' '

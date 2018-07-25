@@ -38,9 +38,7 @@ module.exports = class extends Monitor {
 
 		if (!schema.has('roles')) {
 			await schema.add('roles', { everyone: { type: 'role' } });
-		} else
-
-		if (!schema.roles.has('everyone')) {
+		} else if (!schema.roles.has('everyone')) {
 			await schema.roles.add('everyone', { type: 'role' });
 		}
 	}

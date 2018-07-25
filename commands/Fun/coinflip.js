@@ -5,7 +5,6 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['coin'],
-
 			description: 'Flips one or more coins',
 			usage: '[coins:int]'
 		});
