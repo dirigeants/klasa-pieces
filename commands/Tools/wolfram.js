@@ -1,7 +1,10 @@
 const { Command } = require('klasa');
-const wolframAppID = 'https://account.wolfram.com/auth/create';
-const querystring = require('querystring');
 const fetch = require('node-fetch');
+
+/**
+ * https://account.wolfram.com/auth/create
+ */
+const wolframAppID = 'CLIENT_ID_HERE';
 
 module.exports = class extends Command {
 
@@ -13,13 +16,15 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [query]) {
-		const qs = querystring.stringify({
-			input: query,
-			primary: true,
-			appid: wolframAppID,
-			output: 'json'
-		});
-		const pods = await fetch(`http://api.wolframalpha.com/v2/query?${qs}`)
+		const url = new URL('http://api.wolframalpha.com/v2/query');
+		url.search = new URLSearchParams([
+			['input', query],
+			['primary', true],
+			['appid', wolframAppID],
+			['output', 'json']
+		]);
+
+		const pods = await fetch(url)
 			.then(response => response.json())
 			.then(body => body.queryresult.pods)
 			.catch(() => { throw 'There was an error. Please try again.'; });

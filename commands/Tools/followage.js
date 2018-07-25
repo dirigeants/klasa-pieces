@@ -1,13 +1,11 @@
 const { Command } = require('klasa');
 const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
-const querystring = require('querystring');
 
 /**
  * https://dev.twitch.tv/docs/v5/guides/authentication/
  */
-// eslint-disable-next-line camelcase
-const qs = querystring.stringify({ client_id: 'CLIENT_ID_HERE' });
+const query = new URLSearchParams([['client_id', 'CLIENT_ID_HERE']]);
 
 module.exports = class extends Command {
 
@@ -20,7 +18,10 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [twitchName, channelName]) {
-		const body = await fetch(`https://api.twitch.tv/kraken/users/${twitchName}/follows/channels/${channelName}?${qs}`)
+		const url = new URL(`https://api.twitch.tv/kraken/users/${encodeURIComponent(twitchName)}/follows/channels/${channelName}`);
+		url.search = query;
+
+		const body = await fetch(url)
 			.then(response => response.json())
 			.catch(() => { throw `${twitchName} isn't following ${channelName}, or it is banned, or doesn't exist at all.`; });
 		const days = this.differenceDays(new Date(body.created_at), new Date());

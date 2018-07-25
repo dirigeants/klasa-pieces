@@ -1,7 +1,6 @@
 const { Command } = require('klasa');
 const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
-const querystring = require('querystring');
 // Create a TMDB account on https://www.themoviedb.org/ (if you haven't yet) and go to https://www.themoviedb.org/settings/api to get your API key.
 const tmdbAPIkey = 'API_KEY_HERE';
 
@@ -18,9 +17,10 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [query, page = 1]) {
-		// eslint-disable-next-line camelcase
-		const qs = querystring.stringify({ api_key: tmdbAPIkey, query });
-		const body = await fetch(`https://api.themoviedb.org/3/search/tv?${qs}`)
+		const url = new URL('https://api.themoviedb.org/3/search/tv');
+		url.search = new URLSearchParams([['api_key', tmdbAPIkey], ['query', query]]);
+
+		const body = await fetch(url)
 			.then(response => response.json());
 		const show = body.results[page - 1];
 		if (!show) throw `I couldn't find a TV show with title **${query}** in page ${page}.`;
