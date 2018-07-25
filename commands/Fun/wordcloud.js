@@ -1,13 +1,13 @@
 const { Command } = require('klasa');
 const { MessageAttachment } = require('discord.js');
 const cloud = require('d3-cloud');
-const canvas = require('canvas');
+const Canvas = require('canvas');
 const messageLimitHundreds = 1;
 
 // Blame node-canvas for this dirty workaround. Canvas.createCanvas for 2.x, new canvas.Canvas for 1.x
-const createCanvas = typeof canvas.createCanvas === 'function' ?
-	(...args) => canvas.createCanvas(...args) :
-	(...args) => new canvas.Canvas(...args);
+const createCanvas = typeof Canvas.createCanvas === 'function' ?
+	(...args) => Canvas.createCanvas(...args) :
+	(...args) => new Canvas(...args);
 
 module.exports = class extends Command {
 
