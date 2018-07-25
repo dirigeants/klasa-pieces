@@ -23,7 +23,6 @@ module.exports = class extends Command {
 		if (member.id === msg.author.id) throw 'Why would you mute yourself?';
 		if (member.id === this.client.user.id) throw 'Have I done something wrong?';
 
-		if (!member) throw 'The user is not on the server.';
 		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot mute this user.';
 
 		if (member.roles.has(msg.guild.configs.roles.muted)) throw 'The member is already muted.';

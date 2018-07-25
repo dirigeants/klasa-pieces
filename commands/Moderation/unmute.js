@@ -14,7 +14,6 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [member, ...reason]) {
-		if (!member) throw 'The user is not on the server';
 		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot unmute this user.';
 		if (!member.roles.has(msg.guild.configs.roles.muted)) throw 'This user is not muted.';
 
