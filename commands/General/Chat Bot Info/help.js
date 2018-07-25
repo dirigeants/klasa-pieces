@@ -1,4 +1,4 @@
-const { Command, RichDisplay, util } = require('klasa');
+const { Command, RichDisplay, util: { isFunction } } = require('klasa');
 const { MessageEmbed, Permissions } = require('discord.js');
 
 const PERMISSIONS_RICHDISPLAY = new Permissions([Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.ADD_REACTIONS]);
@@ -8,6 +8,7 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
+			aliases: ['commands', 'cmd', 'cmds'],
 			guarded: true,
 			description: (message) => message.language.get('COMMAND_HELP_DESCRIPTION'),
 			usage: '(Command:command)'
@@ -26,14 +27,14 @@ module.exports = class extends Command {
 		if (command) {
 			return message.sendMessage([
 				`= ${command.name} = `,
-				util.isFunction(command.description) ? command.description(message) : command.description,
+				isFunction(command.description) ? command.description(message) : command.description,
 				message.language.get('COMMAND_HELP_USAGE', command.usage.fullUsage(message)),
 				message.language.get('COMMAND_HELP_EXTENDED'),
-				util.isFunction(command.extendedHelp) ? command.extendedHelp(message) : command.extendedHelp
+				isFunction(command.extendedHelp) ? command.extendedHelp(message) : command.extendedHelp
 			], { code: 'asciidoc' });
 		}
 
-		if (message.guild && message.channel.permissionsFor(this.client.user).has(PERMISSIONS_RICHDISPLAY)) {
+		if (!message.flags.all && message.guild && message.channel.permissionsFor(this.client.user).has(PERMISSIONS_RICHDISPLAY)) {
 			// Finish the previous handler
 			const previousHandler = this.handlers.get(message.author.id);
 			if (previousHandler) previousHandler.stop();
@@ -61,6 +62,7 @@ module.exports = class extends Command {
 		for (const [category, list] of commands) {
 			helpMessage.push(`**${category} Commands**:\n`, list.map(this.formatCommand.bind(this, message, prefix, false)).join('\n'), '');
 		}
+
 		return helpMessage.join('\n');
 	}
 
@@ -81,7 +83,7 @@ module.exports = class extends Command {
 	}
 
 	formatCommand(message, prefix, richDisplay, command) {
-		const description = typeof command.description === 'function' ? command.description(message) : command.description;
+		const description = isFunction(command.description) ? command.description(message) : command.description;
 		return richDisplay ? `• ${prefix}${command.name} → ${description}` : `• **${prefix}${command.name}** → ${description}`;
 	}
 
