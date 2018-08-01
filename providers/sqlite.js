@@ -83,12 +83,6 @@ module.exports = class extends SQLProvider {
 			.catch(() => null);
 	}
 
-	getSchemaKeys(table) {
-		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
-			.then((output) => Object.keys(output).filter(k => k !== 'id'))
-			.catch(() => null);
-	}
-
 	create(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
