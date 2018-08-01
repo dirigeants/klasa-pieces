@@ -77,7 +77,7 @@ module.exports = class extends SQLProvider {
 			.catch(() => false);
 	}
 
-	getRandom(table, schemaKeys = false) {
+	getRandom(table) {
 		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
 			.then(output => this.parseEntry(table, output))
 			.catch(() => null);
