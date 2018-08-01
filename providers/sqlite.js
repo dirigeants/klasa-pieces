@@ -77,9 +77,15 @@ module.exports = class extends SQLProvider {
 			.catch(() => false);
 	}
 
-	getRandom(table) {
+	getRandom(table, schemaKeys = false) {
 		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
 			.then(output => this.parseEntry(table, output))
+			.catch(() => null);
+	}
+
+	getSchemaKeys(table) {
+		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
+			.then((output) => Object.keys(output).filter(k => k !== 'id'))
 			.catch(() => null);
 	}
 
@@ -108,11 +114,11 @@ module.exports = class extends SQLProvider {
 		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(row)}`);
 	}
 
-	addColumn(table, key, datatype) {
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(key)} ${datatype}`);
+	addColumn(table, piece) {
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(piece.key)} ${piece.type}`);
 	}
 
-	async removeColumn(table, key) {
+	async removeColumn(table, schemaPiece) {
 		const gateway = this.client.gateways[gateway];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
 
@@ -120,8 +126,8 @@ module.exports = class extends SQLProvider {
 			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
 
 		const allPieces = [...gateway.schema.values(true)];
-		const index = allPieces.findIndex(piece => key === piece.path);
-		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+		const index = allPieces.findIndex(piece => schemaPiece.path === piece.path);
+		if (index === -1) throw new Error(`There is no key ${schemaPiece.key} defined in the current schema for ${table}.`);
 
 		const filteredPieces = allPieces.slice();
 		filteredPieces.splice(index, 1);
@@ -139,7 +145,7 @@ module.exports = class extends SQLProvider {
 		return true;
 	}
 
-	async updateColumn(table, key, datatype) {
+	async updateColumn(table, schemaPiece) {
 		const gateway = this.client.gateways[gateway];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
 
@@ -147,12 +153,12 @@ module.exports = class extends SQLProvider {
 			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
 
 		const allPieces = [...gateway.schema.values(true)];
-		const index = allPieces.findIndex(piece => key === piece.path);
-		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+		const index = allPieces.findIndex(piece => schemaPiece.path === piece.path);
+		if (index === -1) throw new Error(`There is no key ${schemaPiece.key} defined in the current schema for ${table}.`);
 
 		const allPiecesNames = allPieces.map(piece => sanitizeKeyName(piece.path)).join(', ');
 		const parsedDatatypes = allPieces.map(this.qb.parse.bind(this.qb));
-		parsedDatatypes[index] = `${sanitizeKeyName(key)} ${datatype}`;
+		parsedDatatypes[index] = `${sanitizeKeyName(schemaPiece.key)} ${schemaPiece.type}`;
 
 		await this.createTable(sanitizedCloneTable, parsedDatatypes);
 		await this.exec([
@@ -193,6 +199,7 @@ module.exports = class extends SQLProvider {
  * @private
  */
 function sanitizeKeyName(value) {
+	console.log(value);
 	if (typeof value !== 'string') throw new TypeError(`[SANITIZE_NAME] Expected a string, got: ${new Type(value)}`);
 	if (/`|"/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') return value;
