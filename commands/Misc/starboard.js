@@ -24,7 +24,7 @@ module.exports = class extends Command {
 	}
 
 	async sendStar(msg, message, channel) {
-		if (!await this.provider.has('starboard', message.guild.id)) await this.provider.set('starboard', message.guild.id, JSON.stringify([]));
+		if (!await this.provider.has('starboard', message.guild.id)) await this.provider.create('starboard', message.guild.id, JSON.stringify([]));
 
 		const msgArray = await this.provider.get('starboard', message.guild.id);
 		if (msgArray.includes(message.id)) throw 'This message has already been starred.';
