@@ -27,10 +27,10 @@ module.exports = class extends Command {
 		if (command) {
 			return message.sendMessage([
 				`= ${command.name} = `,
-				isFunction(command.description) ? command.description(message) : command.description,
+				isFunction(command.description) ? command.description(message.language) : command.description,
 				message.language.get('COMMAND_HELP_USAGE', command.usage.fullUsage(message)),
 				message.language.get('COMMAND_HELP_EXTENDED'),
-				isFunction(command.extendedHelp) ? command.extendedHelp(message) : command.extendedHelp
+				isFunction(command.extendedHelp) ? command.extendedHelp(message.language) : command.extendedHelp
 			], { code: 'asciidoc' });
 		}
 
@@ -83,7 +83,7 @@ module.exports = class extends Command {
 	}
 
 	formatCommand(message, prefix, richDisplay, command) {
-		const description = isFunction(command.description) ? command.description(message) : command.description;
+		const description = isFunction(command.description) ? command.description(message.language) : command.description;
 		return richDisplay ? `• ${prefix}${command.name} → ${description}` : `• **${prefix}${command.name}** → ${description}`;
 	}
 
