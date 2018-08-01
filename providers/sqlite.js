@@ -199,7 +199,6 @@ module.exports = class extends SQLProvider {
  * @private
  */
 function sanitizeKeyName(value) {
-	console.log(value);
 	if (typeof value !== 'string') throw new TypeError(`[SANITIZE_NAME] Expected a string, got: ${new Type(value)}`);
 	if (/`|"/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') return value;
