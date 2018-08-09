@@ -181,7 +181,7 @@ module.exports = class extends SQLProvider {
 			SELECT Field_Name
 			FROM INFORMATION_SCHEMA.COLUMNS
 			WHERE TABLE_NAME = @0
-		`, [table]).map(result => result.map(row => row.Field_Name));
+		`, [table]).then(result => result.map(row => row.Field_Name));
 	}
 
 	run(sql, inputs, outputs) {
