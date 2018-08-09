@@ -37,7 +37,7 @@ module.exports = class extends SQLProvider {
 			port: connection.port,
 			user: connection.user,
 			password: connection.password,
-			database: connection.db
+			database: connection.database
 		}, connection.options));
 
 		this.db.on('error', error => this.client.emit('error', error));
@@ -174,8 +174,12 @@ module.exports = class extends SQLProvider {
 	}
 
 	getColumns(table) {
-		return this.runAll(`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = ${sanitizeKeyName(table)};`)
-			.then(result => result.map(row => row.column_name));
+		return this.runAll(`
+			SELECT column_name
+			FROM information_schema.columns
+			WHERE table_schema = ${sanitizeKeyName(this.client.options.providers.cockroachdb.database)}
+				AND table_name = ${sanitizeKeyName(table)};`
+		).then(result => result.map(row => row.column_name));
 	}
 
 	run(...sql) {
