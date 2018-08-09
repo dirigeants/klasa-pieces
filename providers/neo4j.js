@@ -1,4 +1,4 @@
-const { Provider, util: { mergeDefault, makeObject, isObject, mergeObjects } } = require('klasa');
+const { Provider, util: { mergeDefault, isObject, mergeObjects } } = require('klasa');
 const { v1: neo4j } = require('neo4j-driver');
 
 module.exports = class extends Provider {

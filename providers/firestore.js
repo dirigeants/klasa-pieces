@@ -17,8 +17,6 @@
 const { Provider } = require('klasa');
 const firebase = require('firebase-admin');
 
-const { FieldValue } = firebase;
-
 module.exports = class extends Provider {
 
 	constructor(...args) {

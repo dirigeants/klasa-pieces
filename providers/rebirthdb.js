@@ -1,4 +1,4 @@
-const { Provider, Type, util: { mergeDefault, isObject, makeObject, chunk } } = require('klasa');
+const { Provider, util: { mergeDefault, chunk } } = require('klasa');
 const { r } = require('rebirthdbts'); // eslint-disable-line id-length
 
 module.exports = class extends Provider {
