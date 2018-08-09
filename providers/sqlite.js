@@ -57,29 +57,29 @@ module.exports = class extends SQLProvider {
 	/* Document methods */
 
 	getAll(table, entries = []) {
-		if (entries.length) {
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}')`);
-		}
-		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)}`);
+		return this.runAll(entries.length ?
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}');` :
+			`SELECT * FROM ${sanitizeKeyName(table)};`)
+			.then(output => output.map(entry => this.parseEntry(table, entry)));
 	}
 
 	get(table, key, value = null) {
 		return this.runGet(value === null ?
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)}` :
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeValue(value)}`)
-			.then(output => this.parseEntry(table, output))
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)};` :
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeValue(value)};`)
+			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
 
 	has(table, key) {
-		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(key)}`)
+		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(key)};`)
 			.then(() => true)
 			.catch(() => false);
 	}
 
 	getRandom(table) {
-		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
-			.then(output => this.parseEntry(table, output))
+		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1;`)
+			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
 
