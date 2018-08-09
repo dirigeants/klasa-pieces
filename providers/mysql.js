@@ -199,8 +199,8 @@ module.exports = class extends SQLProvider {
 		return this.runAll(`
 			SELECT \`COLUMN_NAME\`
 			FROM \`INFORMATION_SCHEMA\`.\`COLUMNS\`
-			WHERE \`TABLE_SCHEMA\` = ${sanitizeKeyName(this.client.options.providers.mysql.database)}
-				AND \`TABLE_NAME\` = ${sanitizeKeyName(table)};
+			WHERE \`TABLE_SCHEMA\` = ${sanitizeString(this.client.options.providers.mysql.database)}
+				AND \`TABLE_NAME\` = ${sanitizeString(table)};
 		`).then(result => result.map(row => row.COLUMN_NAME));
 	}
 
