@@ -180,7 +180,7 @@ module.exports = class extends SQLProvider {
 		return this.run(`
 			SELECT Field_Name
 			FROM INFORMATION_SCHEMA.COLUMNS
-			WHERE TABLE_NAME = @0
+			WHERE TABLE_NAME = @0;
 		`, [table]).then(result => result.map(row => row.Field_Name));
 	}
 
