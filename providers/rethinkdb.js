@@ -88,19 +88,4 @@ module.exports = class extends Provider {
 		return this.db.table(table).get(id).delete().run();
 	}
 
-	async removeValue(table, path) {
-		// { channels: { modlog: true } }
-		if (isObject(path)) {
-			return this.db.table(table).replace(row => row.without(path)).run();
-		}
-
-		// 'channels.modlog'
-		if (typeof path === 'string') {
-			const rPath = makeObject(path, true);
-			return this.db.table(table).replace(row => row.without(rPath)).run();
-		}
-
-		throw new TypeError(`Expected an object or a string as first parameter. Got: ${new Type(path)}`);
-	}
-
 };

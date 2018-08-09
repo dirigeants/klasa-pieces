@@ -176,6 +176,14 @@ module.exports = class extends SQLProvider {
 			ALTER COLUMN @1 @2;`, [table, column, datatype]);
 	}
 
+	getColumns(table) {
+		return this.run(`
+			SELECT Field_Name
+			FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE TABLE_NAME = @0
+		`, [table]).map(result => result.map(row => row.Field_Name));
+	}
+
 	run(sql, inputs, outputs) {
 		if (inputs.length > 0) {
 			const request = new mssql.Request();

@@ -172,6 +172,11 @@ module.exports = class extends SQLProvider {
 		};`);
 	}
 
+	getColumns(table) {
+		return this.runAll(`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = ${sanitizeKeyName(table)}`)
+			.then(result => result.map(row => row.column_name));
+	}
+
 	run(...sql) {
 		return this.db.query(...sql)
 			.then(result => result);

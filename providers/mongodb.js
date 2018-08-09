@@ -66,23 +66,6 @@ module.exports = class extends Provider {
 		return this.db.collection(table).aggregate({ $sample: { size: 1 } });
 	}
 
-	async removeValue(table, doc) {
-		// { channels: { modlog: true } }
-		if (typeof doc === 'object') {
-			return this.db.table(table).update({}, { $unset: doc }, { multi: true });
-		}
-		// 'channels.modlog'
-		if (typeof doc === 'string') {
-			const route = doc.split('.');
-			const object = {};
-			let ref = object;
-			for (let i = 0; i < route.length - 1; i++) ref = ref[route[i]] = {};
-			ref[route[route.length - 1]] = true;
-			return this.db.table(table).update({}, { $unset: object }, { multi: true });
-		}
-		throw new TypeError(`Expected an object or a string as first parameter. Got: ${typeof doc}`);
-	}
-
 	create(table, id, doc = {}) {
 		return this.db.collection(table).insertOne(mergeObjects(this.parseUpdateInput(doc), resolveQuery(id)));
 	}

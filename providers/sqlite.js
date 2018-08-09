@@ -165,6 +165,11 @@ module.exports = class extends SQLProvider {
 		return true;
 	}
 
+	getColumns(table) {
+		return this.runAll(`PRAGMA table_info(${sanitizeKeyName(table)})`)
+			.then(result => result.map(row => row.name));
+	}
+
 	// Get a row from an arbitrary SQL query.
 	runGet(sql) {
 		return db.get(sql);
