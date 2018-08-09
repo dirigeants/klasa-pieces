@@ -59,14 +59,15 @@ module.exports = class extends SQLProvider {
 	getAll(table, entries = []) {
 		return this.runAll(entries.length ?
 			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}');` :
-			`SELECT * FROM ${sanitizeKeyName(table)};`);
+			`SELECT * FROM ${sanitizeKeyName(table)};`)
+			.then(output => output.map(entry => this.parseEntry(table, entry)));
 	}
 
 	get(table, key, value = null) {
 		return this.runGet(value === null ?
 			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)};` :
 			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeValue(value)};`)
-			.then(output => this.parseEntry(table, output))
+			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
 
@@ -78,7 +79,7 @@ module.exports = class extends SQLProvider {
 
 	getRandom(table) {
 		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1;`)
-			.then(output => this.parseEntry(table, output))
+			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
 
