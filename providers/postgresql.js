@@ -172,11 +172,11 @@ module.exports = class extends SQLProvider {
 		};`);
 	}
 
-	getColumns(table) {
+	getColumns(table, schema = 'public') {
 		return this.runAll(`
 			SELECT column_name
 			FROM information_schema.columns
-			WHERE table_schema = ${sanitizeKeyName(this.client.options.providers.postgresql.database)}
+			WHERE table_schema = ${sanitizeKeyName(schema)}
 				AND table_name = ${sanitizeKeyName(table)};
 		`).then(result => result.map(row => row.column_name));
 	}
