@@ -109,7 +109,7 @@ module.exports = class extends SQLProvider {
 	}
 
 	addColumn(table, piece) {
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(piece.key)} ${piece.type}`);
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(piece.path)} ${piece.type}`);
 	}
 
 	async removeColumn(table, schemaPiece) {
