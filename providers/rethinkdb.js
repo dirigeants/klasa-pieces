@@ -20,6 +20,10 @@ module.exports = class extends Provider {
 		return await this.db.now() - now;
 	}
 
+	async shutdown() {
+		return this.connection.getPoolMaster().drain();
+	}
+
 	/* Table methods */
 
 	async hasTable(table) {
