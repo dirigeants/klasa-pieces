@@ -5,7 +5,6 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['coin'],
-
 			description: 'Flips one or more coins',
 			usage: '[coins:int]'
 		});
@@ -20,7 +19,7 @@ module.exports = class extends Command {
 			if (Math.random() > 0.5) heads++;
 			else tails++;
 		}
-		return msg.sendMessage(`You flipped ${coins} coins. ${heads} ${heads === '1' ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
+		return msg.sendMessage(`You flipped ${coins} coins. ${heads} ${heads === 1 ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
 	}
 
 };

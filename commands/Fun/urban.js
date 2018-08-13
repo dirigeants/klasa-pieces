@@ -1,46 +1,70 @@
-const { Command } = require('klasa');
+const { Command, util: { toTitleCase } } = require('klasa');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
+
+const ZWS = '\u200B';
 
 module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
+			aliases: ['ud', 'urbandictionary'],
+			requiredPermissions: ['EMBED_LINKS'],
 			description: 'Searches the Urban Dictionary library for a definition to the search term.',
-			usage: '<search:str> [resultNum:int]',
-			usageDelim: ', '
+			usage: '<query:string> [page:integer{0,10}]',
+			usageDelim: ', ',
+			nsfw: true
 		});
 	}
 
-	async run(msg, [search, index = 1]) {
-		const body = await fetch(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(search)}`)
-			.then(response => response.json());
+	async run(msg, [query, ind = 1]) {
+		const index = ind - 1;
+		if (index < 0) {
+			throw 'The number cannot be zero or negative.';
+		}
 
-		return msg.sendMessage(this.getDefinition(search, body, index - 1));
+		const { list } = await fetch(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(query)}`, 'json');
+
+		const result = list[index];
+		if (typeof result === 'undefined') {
+			throw index === 0 ?
+				'I could not find this entry in UrbanDictionary' :
+				'I could not find this page in UrbanDictionary, try a lower page index';
+		}
+
+		const definition = this.content(result.definition, result.permalink);
+		return msg.sendEmbed(new MessageEmbed()
+			.setTitle(`Word: ${toTitleCase(query)}`)
+			.setURL(result.permalink)
+			.setColor(msg.color)
+			.setThumbnail('http://i.imgur.com/CcIZZsa.png')
+			.splitFields([
+				`→ \`Definition\` :: ${ind}/${list.length}\n${definition}`,
+				`→ \`Example\` :: ${result.example}`,
+				`→ \`Author\` :: ${result.author}`
+			])
+			.addField(ZWS, `\\👍 ${result.thumbs_up}`, true)
+			.addField(ZWS, `\\👎 ${result.thumbs_down}`, true)
+			.setFooter('© Urban Dictionary'));
 	}
 
-	getDefinition(search, body, index) {
-		const result = body.list[index];
-		if (!result) throw 'No entry found.';
-
-		const wdef = result.definition.length > 1000 ?
-			`${this.splitText(result.definition, 1000)}...` :
-			result.definition;
-
-		return [
-			`**Word:** ${search}`,
-			`\n**Definition:** ${index + 1} out of ${body.list.length}\n_${wdef}_`,
-			`\n**Example:**\n${result.example}`,
-			`\n**${result.thumbs_up}** 👍 | **${result.thumbs_down}** 👎`,
-			`\n*By ${result.author}*`,
-			`\n**Tags**: ${body.tags.join(', ')}`,
-			`<${result.permalink}>`
-		].join('\n');
+	content(definition, permalink) {
+		if (definition.length < 750) return definition;
+		return `${this.cutText(definition, 750)}... [continue reading](${permalink})`;
 	}
 
-	splitText(string, length, endBy = ' ') {
-		const a = string.substring(0, length).lastIndexOf(endBy);
-		const pos = a === -1 ? length : a;
-		return string.substring(0, pos);
+	cutText(str, length) {
+		if (str.length < length) return str;
+		const cut = this.splitText(str, length - 3);
+		if (cut.length < length - 3) return `${cut}...`;
+		return `${cut.slice(0, length - 3)}...`;
+	}
+
+	splitText(str, length, char = ' ') {
+		// eslint-disable-next-line id-length
+		const x = str.substring(0, length).lastIndexOf(char);
+		const pos = x === -1 ? length : x;
+		return str.substring(0, pos);
 	}
 
 };

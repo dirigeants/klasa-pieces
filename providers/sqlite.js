@@ -12,7 +12,7 @@ module.exports = class extends SQLProvider {
 
 	constructor(...args) {
 		super(...args);
-		this.baseDir = resolve(this.client.clientBaseDir, 'bwd', 'provider', 'sqlite');
+		this.baseDir = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'sqlite');
 		this.qb = new QueryBuilder({
 			null: 'NULL',
 			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
@@ -57,29 +57,29 @@ module.exports = class extends SQLProvider {
 	/* Document methods */
 
 	getAll(table, entries = []) {
-		if (entries.length) {
-			return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}')`);
-		}
-		return this.runAll(`SELECT * FROM ${sanitizeKeyName(table)}`);
+		return this.runAll(entries.length ?
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}');` :
+			`SELECT * FROM ${sanitizeKeyName(table)};`)
+			.then(output => output.map(entry => this.parseEntry(table, entry)));
 	}
 
 	get(table, key, value = null) {
 		return this.runGet(value === null ?
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)}` :
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeValue(value)}`)
-			.then(output => this.parseEntry(table, output))
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)};` :
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeValue(value)};`)
+			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
 
 	has(table, key) {
-		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(key)}`)
+		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(key)};`)
 			.then(() => true)
 			.catch(() => false);
 	}
 
 	getRandom(table) {
-		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1`)
-			.then(output => this.parseEntry(table, output))
+		return this.runGet(`SELECT * FROM ${sanitizeKeyName(table)} ORDER BY RANDOM() LIMIT 1;`)
+			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
 
@@ -108,11 +108,11 @@ module.exports = class extends SQLProvider {
 		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(row)}`);
 	}
 
-	addColumn(table, key, datatype) {
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(key)} ${datatype}`);
+	addColumn(table, piece) {
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(piece.path)} ${piece.type}`);
 	}
 
-	async removeColumn(table, key) {
+	async removeColumn(table, schemaPiece) {
 		const gateway = this.client.gateways[gateway];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
 
@@ -120,8 +120,8 @@ module.exports = class extends SQLProvider {
 			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
 
 		const allPieces = [...gateway.schema.values(true)];
-		const index = allPieces.findIndex(piece => key === piece.path);
-		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+		const index = allPieces.findIndex(piece => schemaPiece.path === piece.path);
+		if (index === -1) throw new Error(`There is no key ${schemaPiece.key} defined in the current schema for ${table}.`);
 
 		const filteredPieces = allPieces.slice();
 		filteredPieces.splice(index, 1);
@@ -139,7 +139,7 @@ module.exports = class extends SQLProvider {
 		return true;
 	}
 
-	async updateColumn(table, key, datatype) {
+	async updateColumn(table, schemaPiece) {
 		const gateway = this.client.gateways[gateway];
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
 
@@ -147,12 +147,12 @@ module.exports = class extends SQLProvider {
 			sanitizedCloneTable = sanitizeKeyName(`${table}_temp`);
 
 		const allPieces = [...gateway.schema.values(true)];
-		const index = allPieces.findIndex(piece => key === piece.path);
-		if (index === -1) throw new Error(`There is no key ${key} defined in the current schema for ${table}.`);
+		const index = allPieces.findIndex(piece => schemaPiece.path === piece.path);
+		if (index === -1) throw new Error(`There is no key ${schemaPiece.key} defined in the current schema for ${table}.`);
 
 		const allPiecesNames = allPieces.map(piece => sanitizeKeyName(piece.path)).join(', ');
 		const parsedDatatypes = allPieces.map(this.qb.parse.bind(this.qb));
-		parsedDatatypes[index] = `${sanitizeKeyName(key)} ${datatype}`;
+		parsedDatatypes[index] = `${sanitizeKeyName(schemaPiece.key)} ${schemaPiece.type}`;
 
 		await this.createTable(sanitizedCloneTable, parsedDatatypes);
 		await this.exec([

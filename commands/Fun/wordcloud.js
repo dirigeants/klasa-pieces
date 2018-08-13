@@ -1,8 +1,13 @@
 const { Command } = require('klasa');
 const { MessageAttachment } = require('discord.js');
 const cloud = require('d3-cloud');
-const { Canvas } = require('canvas');
+const Canvas = require('canvas');
 const messageLimitHundreds = 1;
+
+// Blame node-canvas for this dirty workaround. Canvas.createCanvas for 2.x, new canvas.Canvas for 1.x
+const createCanvas = typeof Canvas.createCanvas === 'function' ?
+	(...args) => Canvas.createCanvas(...args) :
+	(...args) => new Canvas(...args);
 
 module.exports = class extends Command {
 
@@ -14,7 +19,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const finalImage = new Canvas(2000, 2000);
+		const finalImage = createCanvas(2000, 2000);
 		const ctx = finalImage.getContext('2d');
 		const wordBank = {};
 
@@ -54,7 +59,7 @@ module.exports = class extends Command {
 
 
 		cloud().size([1950, 1950])
-			.canvas(() => new Canvas(1, 1))
+			.canvas(() => createCanvas(1, 1))
 			.words(wordList)
 			.padding(1)
 			.rotate(() => 0)
