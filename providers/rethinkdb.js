@@ -21,7 +21,7 @@ module.exports = class extends Provider {
 	}
 
 	async shutdown() {
-		return this.connection.getPoolMaster().drain();
+		return this.db.getPoolMaster().drain();
 	}
 
 	/* Table methods */
