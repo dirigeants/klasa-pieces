@@ -1,4 +1,4 @@
-const { SQLProvider, QueryBuilder, Schema, Timestamp, Type, util: { mergeDefault, isNumber, isObject } } = require('klasa');
+const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault, isNumber, isObject } } = require('klasa');
 
 /**
  * NOTE: You need to install mysql2
@@ -178,7 +178,6 @@ module.exports = class extends SQLProvider {
 	}
 
 	addColumn(table, piece) {
-		if (!(piece instanceof Schema)) throw new TypeError('Invalid usage of PostgreSQL#addColumn. Expected a SchemaPiece or SchemaFolder instance.');
 		return this.exec(piece.type !== 'Folder' ?
 			`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${this.qb.parse(piece)};` :
 			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);

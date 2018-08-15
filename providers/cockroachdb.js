@@ -1,4 +1,4 @@
-const { SQLProvider, Type, Schema, QueryBuilder, util: { mergeDefault, isNumber } } = require('klasa');
+const { SQLProvider, Type, QueryBuilder, util: { mergeDefault, isNumber } } = require('klasa');
 const { Pool } = require('pg');
 
 module.exports = class extends SQLProvider {
@@ -154,7 +154,6 @@ module.exports = class extends SQLProvider {
 	}
 
 	addColumn(table, piece) {
-		if (!(piece instanceof Schema)) throw new TypeError('Invalid usage of PostgreSQL#addColumn. Expected a SchemaPiece or SchemaFolder instance.');
 		return this.run(piece.type !== 'Folder' ?
 			`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${this.qb.parse(piece)};` :
 			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);
