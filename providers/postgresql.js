@@ -176,9 +176,9 @@ module.exports = class extends SQLProvider {
 		return this.runAll(`
 			SELECT column_name
 			FROM information_schema.columns
-			WHERE table_schema = ${sanitizeKeyName(schema)}
+			WHERE table_schema = $1
 				AND table_name = ${sanitizeKeyName(table)};
-		`).then(result => result.map(row => row.column_name));
+		`, [schema]).then(result => result.map(row => row.column_name));
 	}
 
 	run(...sql) {
