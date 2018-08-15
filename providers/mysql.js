@@ -42,14 +42,14 @@ module.exports = class extends SQLProvider {
 			port: 3306,
 			user: 'root',
 			password: '',
-			db: 'klasa'
+			database: 'klasa'
 		}, this.client.options.providers.mysql);
 		this.db = await mysql.createConnection({
 			host: connection.host,
 			port: connection.port.toString(),
 			user: connection.user,
 			password: connection.password,
-			database: connection.db
+			database: connection.database
 		});
 		this.heartBeatInterval = setInterval(() => {
 			this.db.query('SELECT 1=1')
@@ -193,6 +193,15 @@ module.exports = class extends SQLProvider {
 	updateColumn(table, piece) {
 		const [column, ...datatype] = this.qb.parse(piece).split(' ');
 		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} MODIFY COLUMN ${sanitizeKeyName(column)} TYPE ${datatype};`);
+	}
+
+	getColumns(table) {
+		return this.runAll(`
+			SELECT \`COLUMN_NAME\`
+			FROM \`INFORMATION_SCHEMA\`.\`COLUMNS\`
+			WHERE \`TABLE_SCHEMA\` = ${sanitizeString(this.client.options.providers.mysql.database)}
+				AND \`TABLE_NAME\` = ${sanitizeString(table)};
+		`).then(result => result.map(row => row.COLUMN_NAME));
 	}
 
 	run(sql) {

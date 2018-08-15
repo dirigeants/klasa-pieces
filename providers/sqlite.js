@@ -33,7 +33,7 @@ module.exports = class extends SQLProvider {
 	/* Table methods */
 
 	hasTable(table) {
-		return this.runGet(`SELECT name FROM sqlite_master WHERE type='table' AND name='${table}'`)
+		return this.runGet(`SELECT name FROM sqlite_master WHERE type='table' AND name='${table}';`)
 			.then(Boolean);
 	}
 
@@ -46,12 +46,12 @@ module.exports = class extends SQLProvider {
 		return this.run(`
 			CREATE TABLE ${sanitizeKeyName(table)} (
 				id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
-			)`
+			);`
 		);
 	}
 
 	deleteTable(table) {
-		return this.run(`DROP TABLE ${sanitizeKeyName(table)}`);
+		return this.run(`DROP TABLE ${sanitizeKeyName(table)};`);
 	}
 
 	/* Document methods */
@@ -89,7 +89,7 @@ module.exports = class extends SQLProvider {
 		// Push the id to the inserts.
 		keys.push('id');
 		values.push(id);
-		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${values.map(sanitizeValue).join(', ')} )`);
+		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${values.map(sanitizeValue).join(', ')} );`);
 	}
 
 	update(table, id, data) {
@@ -97,7 +97,7 @@ module.exports = class extends SQLProvider {
 		return this.run(`
 			UPDATE ${sanitizeKeyName(table)}
 			SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = ${sanitizeValue(values[i])}`)}
-			WHERE id = ${sanitizeValue(id)}`);
+			WHERE id = ${sanitizeValue(id)};`);
 	}
 
 	replace(...args) {
@@ -105,11 +105,11 @@ module.exports = class extends SQLProvider {
 	}
 
 	delete(table, row) {
-		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(row)}`);
+		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(row)};`);
 	}
 
 	addColumn(table, piece) {
-		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(piece.path)} ${piece.type}`);
+		return this.exec(`ALTER TABLE ${sanitizeKeyName(table)} ADD ${sanitizeKeyName(piece.path)} ${piece.type};`);
 	}
 
 	async removeColumn(table, schemaPiece) {
@@ -132,10 +132,10 @@ module.exports = class extends SQLProvider {
 		await this.exec([
 			`INSERT INTO ${sanitizedCloneTable} (${filteredPiecesNames})`,
 			`	SELECT ${filteredPiecesNames}`,
-			`	FROM ${sanitizedTable}`
+			`	FROM ${sanitizedTable};`
 		].join('\n'));
-		await this.exec(`DROP TABLE ${sanitizedTable}`);
-		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable}`);
+		await this.exec(`DROP TABLE ${sanitizedTable};`);
+		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable};`);
 		return true;
 	}
 
@@ -158,11 +158,16 @@ module.exports = class extends SQLProvider {
 		await this.exec([
 			`INSERT INTO ${sanitizedCloneTable} (${allPiecesNames})`,
 			`	SELECT ${allPiecesNames}`,
-			`	FROM ${sanitizedTable}`
+			`	FROM ${sanitizedTable};`
 		].join('\n'));
-		await this.exec(`DROP TABLE ${sanitizedTable}`);
-		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable}`);
+		await this.exec(`DROP TABLE ${sanitizedTable};`);
+		await this.exec(`ALTER TABLE ${sanitizedCloneTable} RENAME TO ${sanitizedTable};`);
 		return true;
+	}
+
+	getColumns(table) {
+		return this.runAll(`PRAGMA table_info(${sanitizeKeyName(table)});`)
+			.then(result => result.map(row => row.name));
 	}
 
 	// Get a row from an arbitrary SQL query.

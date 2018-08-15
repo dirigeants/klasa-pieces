@@ -99,17 +99,4 @@ module.exports = class extends Provider {
 			.then(db => db.delete(document));
 	}
 
-	async removeValue(table, path) {
-		const route = path.split('.');
-		const values = await this.getAll(table);
-		await Promise.all(values.map(object => this._removeValue(table, route, object)));
-	}
-
-	_removeValue(table, route, object) {
-		let value = object;
-		for (let j = 0; j < route.length - 1; j++) value = value[route[j]] || {};
-		delete value[route[route.length - 1]];
-		return this.replace(table, object.id, object);
-	}
-
 };

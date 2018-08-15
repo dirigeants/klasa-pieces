@@ -23,7 +23,7 @@ module.exports = class extends SQLProvider {
 		const connection = mergeDefault({
 			host: 'localhost',
 			port: 5432,
-			db: 'klasa',
+			database: 'klasa',
 			options: {
 				max: 20,
 				idleTimeoutMillis: 30000,
@@ -35,7 +35,7 @@ module.exports = class extends SQLProvider {
 			port: connection.port,
 			user: connection.user,
 			password: connection.password,
-			database: connection.db
+			database: connection.database
 		}, connection.options));
 
 		this.db.on('error', err => this.client.emit('error', err));
@@ -170,6 +170,15 @@ module.exports = class extends SQLProvider {
 		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER COLUMN ${column} TYPE ${datatype}${piece.default ?
 			`, ALTER COLUMN ${column} SET NOT NULL, ALTER COLUMN ${column} SET DEFAULT ${this.qb.parseValue(piece.default, piece)}` : ''
 		};`);
+	}
+
+	getColumns(table, schema = 'public') {
+		return this.runAll(`
+			SELECT column_name
+			FROM information_schema.columns
+			WHERE table_schema = ${sanitizeKeyName(schema)}
+				AND table_name = ${sanitizeKeyName(table)};
+		`).then(result => result.map(row => row.column_name));
 	}
 
 	run(...sql) {

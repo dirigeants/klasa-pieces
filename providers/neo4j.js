@@ -1,4 +1,4 @@
-const { Provider, util: { mergeDefault, makeObject, isObject, mergeObjects } } = require('klasa');
+const { Provider, util: { mergeDefault, isObject, mergeObjects } } = require('klasa');
 const { v1: neo4j } = require('neo4j-driver');
 
 module.exports = class extends Provider {
@@ -82,17 +82,6 @@ module.exports = class extends Provider {
 		return this.db.run(`MATCH (n:${table} {id : {id} }) SET ${object} RETURN n`, { id });
 	}
 
-	async removeValue(table, path) {
-		const keys = await this.getKeys(table);
-		if (isObject(path) && typeof newValue === 'undefined') {
-			await Promise.all(keys.map(node => this.remove(table, node, path)));
-		} else if (typeof path === 'string' && typeof newValue !== 'undefined') {
-			await Promise.all(keys.map(node => this.remove(table, node, makeObject(path, null))));
-		} else {
-			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
-		}
-	}
-
 	async remove(table, id, path) {
 		const [entry] = this.db.run(`MATCH (n:${table} {id: {id} }) RETURN n`, { id }).then(data => data.records.map(node => node._fields[0].properties));
 		Object.keys(path).map(key => delete entry[key]);
@@ -100,4 +89,3 @@ module.exports = class extends Provider {
 	}
 
 };
-

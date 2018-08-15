@@ -1,4 +1,4 @@
-const { Provider, Type, util: { mergeDefault, isObject, makeObject, chunk } } = require('klasa');
+const { Provider, util: { mergeDefault, chunk } } = require('klasa');
 const rethink = require('rethinkdbdash');
 
 module.exports = class extends Provider {
@@ -95,21 +95,6 @@ module.exports = class extends Provider {
 
 	async delete(table, id) {
 		return this.db.table(table).get(id).delete().run();
-	}
-
-	async removeValue(table, path) {
-		// { channels: { modlog: true } }
-		if (isObject(path)) {
-			return this.db.table(table).replace(row => row.without(path)).run();
-		}
-
-		// 'channels.modlog'
-		if (typeof path === 'string') {
-			const rPath = makeObject(path, true);
-			return this.db.table(table).replace(row => row.without(rPath)).run();
-		}
-
-		throw new TypeError(`Expected an object or a string as first parameter. Got: ${new Type(path)}`);
 	}
 
 };

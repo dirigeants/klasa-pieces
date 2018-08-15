@@ -17,8 +17,6 @@
 const { Provider } = require('klasa');
 const firebase = require('firebase-admin');
 
-const { FieldValue } = firebase;
-
 module.exports = class extends Provider {
 
 	constructor(...args) {
@@ -77,19 +75,6 @@ module.exports = class extends Provider {
 		return filter.length ? data.filter(nodes => filter.includes(nodes.id)) : data;
 	}
 
-	async removeValue(table, path) {
-		const keys = await this.getKeys(table);
-
-		if (typeof path === 'object' && typeof newValue === 'undefined') {
-			for (const key of Object.keys(path)) path[key] = FieldValue.deleteValue();
-			await Promise.all(keys.map(doc => this.update(table, doc, path)));
-		} else if (typeof path === 'string' && typeof newValue !== 'undefined') {
-			await Promise.all(keys.map(doc => this.update(table, doc, { path: FieldValue.deleteValue() })));
-		} else {
-			throw new TypeError(`Expected an object as first parameter or a string and a non-undefined value. Got: ${typeof key} and ${typeof value}`);
-		}
-	}
-
 	packData(data, id) {
 		return {
 			...data,
@@ -98,4 +83,3 @@ module.exports = class extends Provider {
 	}
 
 };
-
