@@ -10,6 +10,11 @@ module.exports = class extends Provider {
 			silent: false
 		}, this.client.options.providers.rethinkdb));
 	}
+	
+	async init () {
+		const { db } = this.db._poolMaster._options;
+		await this.db.branch(this.db.dbList().contains(db), null, this.db.dbCreate(db));
+	}
 
 	get exec() {
 		return this.db;
