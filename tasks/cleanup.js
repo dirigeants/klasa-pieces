@@ -52,11 +52,9 @@ module.exports = class MemorySweeper extends Task {
 
 		// Per-Channel sweeper
 		for (const channel of this.client.channels.values()) {
-			if (channel.messages) messages += channel.messages.sweep(msg => msg.id < OLD_SNOWFLAKE);
-			if (channel.lastMessageID) {
-				channel.lastMessageID = null;
-				messages++;
-			}
+			if (!channel.messages) continue;
+			messages += channel.messages.sweep(msg => msg.id < OLD_SNOWFLAKE);
+			channel.lastMessageID = null;
 		}
 
 		// Per-User sweeper
