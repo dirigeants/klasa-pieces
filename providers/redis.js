@@ -1,17 +1,21 @@
-const { Provider } = require('klasa');
+const { Provider, util } = require('klasa');
 const { Client } = require('redis-nextra');
 
 module.exports = class extends Provider {
 
 	constructor(...args) {
-		super(...args, { enabled: true });
+		super(...args);
 
-		const { hosts, options } = this.client.providers.redis;
+		const { hosts, options } = util.mergeDefault(this.client.providers.redis, {
+			hosts: ['127.0.0.1:6379'],
+			options: {}
+		});
+
 		this.db = new Client(hosts, options);
 
 		this.db.on('ready', () => this.client.emit('debug', 'Redis initialized.'))
-			.on('serverReconnect', server => this.client.emit('warn', `Redis server: ${server.host.string} is reconnecting`))
-			.on('error', err => this.client.emit('err', err));
+			.on('serverReconnect', server => this.client.emit('warn', `Redis server: ${server.host.string} is reconnecting.`))
+			.on('error', err => this.client.emit('error', err));
 	}
 
 	hasTable(table) {
@@ -46,16 +50,9 @@ module.exports = class extends Provider {
 		return this.db.table(table).setJson(id, data);
 	}
 
-	set(...args) {
-		return this.create(...args);
-	}
-
-	insert(...args) {
-		return this.create(...args);
-	}
-
-	update(...args) {
-		return this.set(...args);
+	async update(table, document, data) {
+		const existent = await this.get(table, document);
+		return this.create(table, document, util.mergeObjects(existent || { id: document }, this.parseUpdateInput(data)));
 	}
 
 	replace(...args) {
