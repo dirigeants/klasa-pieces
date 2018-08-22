@@ -9,8 +9,8 @@ function resolveMember(query, guild) {
 	if (typeof query === 'string') {
 		if (USER_REGEXP.test(query)) return guild.client.users.fetch(USER_REGEXP.exec(query)[1]).catch(() => null);
 		if (/\w{1,32}#\d{4}/.test(query)) {
-      const res = guild.members.find(member => member.user.tag.toLowerCase() === query.toLowerCase());
-      return res || null;
+			const res = guild.members.find(member => member.user.tag.toLowerCase() === query.toLowerCase());
+			return res || null;
 		}
 	}
 	return null;
@@ -19,7 +19,7 @@ function resolveMember(query, guild) {
 module.exports = class extends Argument {
 
 	async run(arg, possible, msg) {
-		if (!msg.guild) return throw 'This command can only be used inside a guild.';
+		if (!msg.guild) throw 'This command can only be used inside a guild.';
 		const resUser = await resolveMember(arg, msg.guild);
 		if (resUser) return resUser;
 
@@ -32,8 +32,8 @@ module.exports = class extends Argument {
 		let querySearch;
 		if (results.length > 0) {
 			const regWord = new RegExp(`\\b${regExpEsc(arg)}\\b`, 'i');
-      const filtered = results.filter(member => regWord.test(member.user.username);
-      querySearch = filtered.length > 0 ? filtered : results;
+			const filtered = results.filter(member => regWord.test(member.user.username));
+			querySearch = filtered.length > 0 ? filtered : results;
 		} else {
 			querySearch = results;
 		}
