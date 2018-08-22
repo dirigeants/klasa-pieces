@@ -8,9 +8,9 @@ module.exports = class extends Provider {
 
 	constructor(...args) {
 		super(...args);
-		const defaults = util.mergeDefault({
-			baseDirectory: resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'etf')
-		}, this.client.options.providers.etf);
+
+		const baseDirectory = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'etf');
+		const defaults = util.mergeDefault({ baseDirectory }, this.client.options.providers.etf);
 
 		this.baseDirectory = defaults.baseDirectory;
 	}
