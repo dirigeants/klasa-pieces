@@ -97,6 +97,6 @@ const parseUpdateObject = (doc, pref = '', oldObj = {}) => {
 			}
 			parseUpdateObject(doc[key], `${prefix}${key}`, obj);
 		}
-  	}
-  	return obj;
+	}
+	return obj;
 };
