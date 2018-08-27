@@ -75,7 +75,7 @@ module.exports = class extends Provider {
 	}
 
 	update(table, id, doc) {
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: this.parseUpdateInput(doc) });
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: parseUpdateObject(this.parseUpdateInput(doc)) });
 	}
 
 	replace(table, id, doc) {
@@ -85,3 +85,18 @@ module.exports = class extends Provider {
 };
 
 const resolveQuery = query => isObject(query) ? query : { id: query };
+
+const parseUpdateObject = (doc, pref = '', oldObj = {}) => {
+  const obj = oldObj;
+  const prefix = pref !== '' ? `${pref}.` : '';
+  for (const key in doc) {
+    if (Object.prototype.hasOwnProperty.call(doc, key)) {
+      if (typeof doc[key] !== 'object' || Object.keys(doc[key]).length === 0) {
+        obj[`${prefix}${key}`] = doc[key];
+        continue;
+      }
+      parseObject(doc[key], `${prefix}${key}`, obj);
+    }
+  }
+  return obj;
+};
