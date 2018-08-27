@@ -87,16 +87,16 @@ module.exports = class extends Provider {
 const resolveQuery = query => isObject(query) ? query : { id: query };
 
 const parseUpdateObject = (doc, pref = '', oldObj = {}) => {
-  const obj = oldObj;
-  const prefix = pref !== '' ? `${pref}.` : '';
-  for (const key in doc) {
-    if (Object.prototype.hasOwnProperty.call(doc, key)) {
-      if (typeof doc[key] !== 'object' || Object.keys(doc[key]).length === 0) {
-        obj[`${prefix}${key}`] = doc[key];
-        continue;
-      }
-      parseUpdateObject(doc[key], `${prefix}${key}`, obj);
-    }
-  }
-  return obj;
+	const obj = oldObj;
+	const prefix = pref !== '' ? `${pref}.` : '';
+	for (const key in doc) {
+		if (Object.prototype.hasOwnProperty.call(doc, key)) {
+			if (typeof doc[key] !== 'object' || Object.keys(doc[key]).length === 0) {
+				obj[`${prefix}${key}`] = doc[key];
+				continue;
+			}
+			parseUpdateObject(doc[key], `${prefix}${key}`, obj);
+		}
+  	}
+  	return obj;
 };
