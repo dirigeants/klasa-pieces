@@ -95,7 +95,7 @@ const parseUpdateObject = (doc, pref = '', oldObj = {}) => {
         obj[`${prefix}${key}`] = doc[key];
         continue;
       }
-      parseObject(doc[key], `${prefix}${key}`, obj);
+      parseUpdateObject(doc[key], `${prefix}${key}`, obj);
     }
   }
   return obj;
