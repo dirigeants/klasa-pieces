@@ -13,7 +13,7 @@ module.exports = class extends Provider {
 
 	async init() {
 		const { db } = this.db._poolMaster._options;
-		return this.db.branch(this.db.dbList().contains(db), null, this.db.dbCreate(db));
+		await this.db.branch(this.db.dbList().contains(db), null, this.db.dbCreate(db)).run();
 	}
 
 	get exec() {
