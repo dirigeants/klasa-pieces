@@ -75,7 +75,7 @@ module.exports = class extends Provider {
 	}
 
 	update(table, id, doc) {
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: parseUpdateObject(this.parseUpdateInput(doc)) });
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: isObject(doc) ? flatten(doc) : parseEngineInput(updated) });
 	}
 
 	replace(table, id, doc) {
@@ -86,17 +86,15 @@ module.exports = class extends Provider {
 
 const resolveQuery = query => isObject(query) ? query : { id: query };
 
-const parseUpdateObject = (doc, pref = '', oldObj = {}) => {
-	const obj = oldObj;
-	const prefix = pref !== '' ? `${pref}.` : '';
-	for (const key in doc) {
-		if (Object.prototype.hasOwnProperty.call(doc, key)) {
-			if (isObject(doc[key]) || Object.keys(doc[key]).length === 0) {
-				obj[`${prefix}${key}`] = doc[key];
-				continue;
-			}
-			parseUpdateObject(doc[key], `${prefix}${key}`, obj);
-		}
-	}
-	return obj;
-};
+function flatten(obj, path = '') {
+    let output = {};
+    for (const [key, value] of Object.entries(obj)) {
+        if (isObject(value)) output = Object.assign(output, flatten(value, path ? `${path}.${key}` : key));
+        else output[path ? `${path}.${key}` : key] = value;
+    }
+    return output;
+}
+
+function parseEngineInput(updated) {
+    return Object.assign({}, ...updated.map(entry => ({ [entry.data[0]]: entry.data[1] })));
+}
