@@ -91,7 +91,7 @@ const parseUpdateObject = (doc, pref = '', oldObj = {}) => {
 	const prefix = pref !== '' ? `${pref}.` : '';
 	for (const key in doc) {
 		if (Object.prototype.hasOwnProperty.call(doc, key)) {
-			if (typeof doc[key] !== 'object' || Object.keys(doc[key]).length === 0) {
+			if (isObject(doc[key]) || Object.keys(doc[key]).length === 0) {
 				obj[`${prefix}${key}`] = doc[key];
 				continue;
 			}
