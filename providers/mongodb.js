@@ -20,7 +20,8 @@ module.exports = class extends Provider {
 			auth: {
 				user: connection.user,
 				password: connection.password
-			}
+			},
+			useNewUrlParser: true
 		}));
 		this.db = mongoClient.db(connection.db);
 	}
@@ -75,7 +76,7 @@ module.exports = class extends Provider {
 	}
 
 	update(table, id, doc) {
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: isObject(doc) ? flatten(doc) : parseEngineInput(doc.updated) });
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: isObject(doc) ? flatten(doc) : parseEngineInput(doc) });
 	}
 
 	replace(table, id, doc) {
