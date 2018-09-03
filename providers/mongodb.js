@@ -75,7 +75,7 @@ module.exports = class extends Provider {
 	}
 
 	update(table, id, doc) {
-		return this.db.collection(table).updateOne(resolveQuery(id), { $set: isObject(doc) ? flatten(doc) : parseEngineInput(doc.updated) });
+		return this.db.collection(table).updateOne(resolveQuery(id), { $set: isObject(doc) ? flatten(doc) : parseEngineInput(doc) });
 	}
 
 	replace(table, id, doc) {
