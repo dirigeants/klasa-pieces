@@ -20,7 +20,8 @@ module.exports = class extends Provider {
 			auth: {
 				user: connection.user,
 				password: connection.password
-			}
+			},
+			useNewUrlParser: true
 		}));
 		this.db = mongoClient.db(connection.db);
 	}
