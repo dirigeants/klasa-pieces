@@ -74,7 +74,7 @@ module.exports = class extends SQLProvider {
 		const schemaValues = [...gateway.schema.values(true)];
 		return this.run(`
 			CREATE TABLE ${sanitizeKeyName(table)} (
-				id VARCHAR(18) NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''},
+				id VARCHAR(${gateway.idLength || 18}) NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''},
 				PRIMARY KEY(id)
 			)`
 		);
@@ -294,11 +294,11 @@ function sanitizeObject(value) {
 
 /**
  * @param {boolean} value The boolean to sanitize
- * @returns {number}
+ * @returns {string}
  * @private
  */
 function sanitizeBoolean(value) {
-	return value ? 1 : 0;
+	return value ? '1' : '0';
 }
 
 /**
