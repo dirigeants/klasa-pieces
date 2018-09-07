@@ -1,5 +1,8 @@
 const { Monitor } = require('klasa');
 
+// Add to your schema definition:
+// KlasaClient.defaultGuildSchema.add('antiinvite', 'boolean', { default: false });
+
 module.exports = class extends Monitor {
 
 	constructor(...args) {
@@ -16,12 +19,6 @@ module.exports = class extends Monitor {
 		if (!/(https?:\/\/)?(www\.)?(discord\.(gg|li|me|io)|discordapp\.com\/invite)\/.+/.test(msg.content)) return null;
 		return msg.delete()
 			.catch(err => this.client.emit('log', err, 'error'));
-	}
-
-	async init() {
-		if (!this.client.gateways.guilds.schema.has('antiinvite')) {
-			await this.client.gateways.guilds.schema.add('antiinvite', { type: 'boolean', default: false });
-		}
 	}
 
 };

@@ -6,6 +6,10 @@
 */
 const { Command, Duration } = require('klasa');
 
+// Add to your schema definition:
+// KlasaClient.defaultGuildSchema.add('roles', schema => schema
+//   .add('muted', 'role'));
+
 module.exports = class extends Command {
 
 	constructor(...args) {
@@ -39,19 +43,6 @@ module.exports = class extends Command {
 		}
 
 		return msg.sendMessage(`${member.user.tag} got muted.${reason ? ` With reason of: ${reason}` : ''}`);
-	}
-
-
-	// Run schema initialising
-	async init() {
-		// Ensure guild configs have the keys needed for this piece
-		const { schema } = this.client.gateways.guilds;
-
-		if (!schema.has('roles')) {
-			await schema.add('roles', { muted: { type: 'role' } });
-		} else if (!schema.roles.has('muted')) {
-			await schema.roles.add('muted', { type: 'role' });
-		}
 	}
 
 };

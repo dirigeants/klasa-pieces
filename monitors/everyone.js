@@ -1,6 +1,10 @@
 const { Monitor } = require('klasa');
 const { Permissions: { FLAGS } } = require('discord.js');
 
+// Add to your schema definition:
+// KlasaClient.defaultGuildSchema.add('roles', schema => schema
+//   .add('everyone', 'role'));
+
 module.exports = class extends Monitor {
 
 	constructor(...args) {
@@ -29,18 +33,6 @@ module.exports = class extends Monitor {
 			'',
 			'By the way leaving and rejoining to remove the role from yourself **WILL** result in a stricter punishment.'
 		].join('\n'));
-	}
-
-	// Run schema initialising
-	async init() {
-		// Ensure guild configs have the keys needed for this piece
-		const { schema } = this.client.gateways.guilds;
-
-		if (!schema.has('roles')) {
-			await schema.add('roles', { everyone: { type: 'role' } });
-		} else if (!schema.roles.has('everyone')) {
-			await schema.roles.add('everyone', { type: 'role' });
-		}
 	}
 
 };

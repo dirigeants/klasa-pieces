@@ -38,9 +38,9 @@ module.exports = class extends Command {
 			.setURL(result.permalink)
 			.setColor(msg.color)
 			.setThumbnail('http://i.imgur.com/CcIZZsa.png')
-			.splitFields([
+			.setDescription([
 				`→ \`Definition\` :: ${ind}/${list.length}\n${definition}`,
-				`→ \`Example\` :: ${result.example}`,
+				`→ \`Example\` :: ${this.cutText(result.example, 750)}`,
 				`→ \`Author\` :: ${result.author}`
 			])
 			.addField(ZWS, `\\👍 ${result.thumbs_up}`, true)

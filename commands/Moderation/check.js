@@ -1,5 +1,8 @@
 const { Command, util } = require('klasa');
 
+// Add to your schema definition:
+// KlasaClient.defaultGuildSchema.add('minAccAge', 'integer', { default: 1800000 });
+
 module.exports = class extends Command {
 
 	constructor(...args) {
@@ -24,12 +27,6 @@ module.exports = class extends Command {
 		return msg.sendMessage(users.length > 0 ?
 			`The following users are less than the Minimum Account Age:${util.codeBlock('', users.join('\n'))}` :
 			'No users less than Minimum Account Age were found in this server.');
-	}
-
-	async init() {
-		if (!this.client.gateways.guilds.schema.has('minAccAge')) {
-			await this.client.gateways.guilds.schema.add('minAccAge', { type: 'integer', default: 1800000 });
-		}
 	}
 
 };
