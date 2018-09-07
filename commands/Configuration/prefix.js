@@ -15,13 +15,13 @@ module.exports = class extends Command {
 
 	async run(msg, [prefix]) {
 		if (prefix === 'reset') return this.reset(msg);
-		if (msg.guild.configs.prefix === prefix) throw msg.language.get('CONFIGURATION_EQUALS');
-		await msg.guild.configs.update('prefix', prefix);
+		if (msg.guild.settings.prefix === prefix) throw msg.language.get('CONFIGURATION_EQUALS');
+		await msg.guild.settings.update('prefix', prefix);
 		return msg.sendMessage(`The prefix for this guild has been set to ${prefix}`);
 	}
 
 	async reset(msg) {
-		await msg.guild.configs.update('prefix', this.client.options.prefix);
+		await msg.guild.settings.update('prefix', this.client.options.prefix);
 		return msg.sendMessage(`Switched back the guild's prefix back to \`${this.client.options.prefix}\`!`);
 	}
 

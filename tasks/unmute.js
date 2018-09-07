@@ -13,7 +13,7 @@ module.exports = class extends Task {
 		if (!_guild) return;
 		const member = await _guild.members.fetch(user).catch(() => null);
 		if (!member) return;
-		await member.roles.remove(_guild.configs.roles.muted);
+		await member.roles.remove(_guild.settings.roles.muted);
 	}
 
 };

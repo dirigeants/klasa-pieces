@@ -14,7 +14,7 @@ module.exports = class extends Monitor {
 	}
 
 	async run(msg) {
-		if (!msg.guild || !msg.guild.configs.antiinvite) return null;
+		if (!msg.guild || !msg.guild.settings.antiinvite) return null;
 		if (await msg.hasAtLeastPermissionLevel(6)) return null;
 		if (!/(https?:\/\/)?(www\.)?(discord\.(gg|li|me|io)|discordapp\.com\/invite)\/.+/.test(msg.content)) return null;
 		return msg.delete()

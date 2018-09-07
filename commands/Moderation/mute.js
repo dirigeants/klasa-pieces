@@ -29,8 +29,8 @@ module.exports = class extends Command {
 
 		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot mute this user.';
 
-		if (member.roles.has(msg.guild.configs.roles.muted)) throw 'The member is already muted.';
-		await member.roles.add(msg.guild.configs.roles.muted);
+		if (member.roles.has(msg.guild.settings.roles.muted)) throw 'The member is already muted.';
+		await member.roles.add(msg.guild.settings.roles.muted);
 
 		if (when) {
 			await this.client.schedule.create('unmute', when, {

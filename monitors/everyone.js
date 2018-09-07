@@ -13,15 +13,15 @@ module.exports = class extends Monitor {
 
 	async run(msg) {
 		if (!msg.member ||
-			!msg.guild.configs.roles.everyone ||
+			!msg.guild.settings.roles.everyone ||
 			!msg.mentions.roles.size ||
 			msg.guild.me.roles.highest.position <= msg.member.roles.highest.position ||
 			!msg.guild.me.permissions.has(FLAGS.MANAGE_ROLES)
 		) return;
 
-		const everyone = msg.guild.roles.get(msg.guild.configs.roles.everyone);
+		const everyone = msg.guild.roles.get(msg.guild.settings.roles.everyone);
 		if (!everyone) {
-			await msg.guild.configs.reset('roles.everyone');
+			await msg.guild.settings.reset('roles.everyone');
 			return;
 		}
 		if (!msg.mentions.roles.has(everyone.id)) return;

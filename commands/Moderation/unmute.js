@@ -15,9 +15,9 @@ module.exports = class extends Command {
 
 	async run(msg, [member, ...reason]) {
 		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot unmute this user.';
-		if (!member.roles.has(msg.guild.configs.roles.muted)) throw 'This user is not muted.';
+		if (!member.roles.has(msg.guild.settings.roles.muted)) throw 'This user is not muted.';
 
-		await member.roles.remove(msg.guild.configs.roles.muted);
+		await member.roles.remove(msg.guild.settings.roles.muted);
 
 		return msg.sendMessage(`${member.user.tag} was unmuted.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
