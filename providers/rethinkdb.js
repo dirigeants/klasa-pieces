@@ -7,6 +7,8 @@ module.exports = class extends Provider {
 		super(...args);
 		this.db = rethink(mergeDefault({
 			db: 'test',
+			user: 'admin',
+			password: '',
 			silent: false
 		}, this.client.options.providers.rethinkdb));
 	}
