@@ -10,7 +10,7 @@ module.exports = class extends Event {
 
 	run({ timeout, limit, method, route }) {
 		this.client.emit('verbose', [
-			`${HEADER}`,
+			HEADER,
 			`Timeout: ${timeout}ms`,
 			`Limit: ${limit} requests`,
 			`Method: ${method.toUpperCase()}`,
