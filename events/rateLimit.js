@@ -1,3 +1,7 @@
+/**
+ * KlasaConsoleConfig#useColor must be
+ * enabled in order to use this piece.
+ */
 const { Event, Colors } = require('klasa');
 
 const HEADER = new Colors({ text: 'red' });
