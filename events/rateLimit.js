@@ -15,7 +15,7 @@ module.exports = class extends Event {
 			`Limit: ${limit} requests`,
 			`Method: ${method.toUpperCase()}`,
 			`Route: ${route}`
-		]);
+		].join('\n'));
 	}
 
 };
