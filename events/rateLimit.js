@@ -4,13 +4,13 @@
  */
 const { Event, Colors } = require('klasa');
 
-const HEADER = new Colors({ text: 'red' });
+const HEADER = new Colors({ text: 'red' }).format('[RATELIMIT]');
 
 module.exports = class extends Event {
 
 	run({ timeout, limit, method, route }) {
 		this.client.emit('verbose', [
-			`${HEADER.format('[RATELIMIT]')}`,
+			`${HEADER}`,
 			`Timeout: ${timeout}ms`,
 			`Limit: ${limit} requests`,
 			`Method: ${method.toUpperCase()}`,
