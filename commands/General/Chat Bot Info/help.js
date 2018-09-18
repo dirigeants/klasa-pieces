@@ -34,7 +34,7 @@ module.exports = class extends Command {
 			], { code: 'asciidoc' });
 		}
 
-		if (!message.flags.all && message.guild && message.channel.permissionsFor(this.client.user).has(PERMISSIONS_RICHDISPLAY)) {
+		if (!('all' in message.flags) && message.guild && message.channel.permissionsFor(this.client.user).has(PERMISSIONS_RICHDISPLAY)) {
 			// Finish the previous handler
 			const previousHandler = this.handlers.get(message.author.id);
 			if (previousHandler) previousHandler.stop();
@@ -48,10 +48,9 @@ module.exports = class extends Command {
 			return handler;
 		}
 
-		const method = this.client.user.bot ? 'author' : 'channel';
-		return message[method].send(await this.buildHelp(message), { split: { char: '\n' } })
-			.then(() => { if (message.channel.type !== 'dm' && this.client.user.bot) message.sendMessage(message.language.get('COMMAND_HELP_DM')); })
-			.catch(() => { if (message.channel.type !== 'dm' && this.client.user.bot) message.sendMessage(message.language.get('COMMAND_HELP_NODM')); });
+		return message.author.send(await this.buildHelp(message), { split: { char: '\n' } })
+			.then(() => { if (message.channel.type !== 'dm') message.sendMessage(message.language.get('COMMAND_HELP_DM')); })
+			.catch(() => { if (message.channel.type !== 'dm') message.sendMessage(message.language.get('COMMAND_HELP_NODM')); });
 	}
 
 	async buildHelp(message) {
