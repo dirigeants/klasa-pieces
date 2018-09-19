@@ -38,7 +38,7 @@ module.exports = class extends Command {
 			MOVE_MEMBERS: 'Move Members',
 			USE_VAD: 'Use Voice Activity'
 		};
-		this.timestamp = new Timestamp('MMMM dd YYYY');
+		this.timestamp = new Timestamp('dddd, MMMM d YYYY');
 	}
 
 	run(msg, [role]) {
