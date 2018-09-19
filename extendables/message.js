@@ -34,7 +34,7 @@ const awaitReaction = async (msg, message) => {
 const awaitMessage = async (message) => {
 	const messages = await message.channel.awaitMessages(mes => mes.author === message.author, { time: 20000, max: 1 });
 	if (messages.size === 0) throw null;
-	const message = await messages.first();
-	if (message.content.toLowerCase() === 'yes') return true;
+	const responseMessage = await messages.first();
+	if (responseMessage.content.toLowerCase() === 'yes') return true;
 	throw null;
 };
