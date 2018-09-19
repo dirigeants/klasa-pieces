@@ -32,7 +32,7 @@ module.exports = class extends Command {
 			.setTitle(`${movie.title} (${page} out of ${body.results.length} results)`)
 			.setDescription(movie.overview)
 			.setFooter(`${this.client.user.username} uses the TMDb API but is not endorsed or certified by TMDb.`,
-				'https://www.themoviedb.org/assets/1/v4/logos/408x161-powered-by-rectangle-green-bb4301c10ddc749b4e79463811a68afebeae66ef43d17bcfd8ff0e60ded7ce99.png';
+				'https://www.themoviedb.org/assets/1/v4/logos/408x161-powered-by-rectangle-green-bb4301c10ddc749b4e79463811a68afebeae66ef43d17bcfd8ff0e60ded7ce99.png');
 		if (movie.title !== movie.original_title) embed.addField('Original Title', movie.original_title, true);
 		embed
 			.addField('Vote Count', movie.vote_count, true)
