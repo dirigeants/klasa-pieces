@@ -58,8 +58,8 @@ module.exports = class extends SQLProvider {
 
 	async getAll(table, entries = []) {
 		let output;
-		if (entries.length) output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${'?, '.repeat(entries.length).slice(0, -2)} );`, entries)
-		else output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`)
+		if (entries.length) output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${'?, '.repeat(entries.length).slice(0, -2)} );`, entries);
+		else output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`);
 		return output.map(entry => this.parseEntry(table, entry));
 	}
 
