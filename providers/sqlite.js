@@ -3,6 +3,8 @@ const { resolve } = require('path');
 const db = require('sqlite');
 const fs = require('fs-nextra');
 
+const valueList = amount => new Array(amount).fill('?').join(', ');
+
 const TIMEPARSERS = {
 	DATE: new Timestamp('YYYY-MM-DD'),
 	DATETIME: new Timestamp('YYYY-MM-DD hh:mm:ss')
@@ -58,7 +60,7 @@ module.exports = class extends SQLProvider {
 
 	async getAll(table, entries = []) {
 		let output;
-		if (entries.length) output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${'?, '.repeat(entries.length).slice(0, -2)} );`, entries);
+		if (entries.length) output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${valueList(entries.length)} );`, entries);
 		else output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`);
 		return output.map(entry => this.parseEntry(table, entry));
 	}
@@ -89,7 +91,7 @@ module.exports = class extends SQLProvider {
 		// Push the id to the inserts.
 		keys.push('id');
 		values.push(id);
-		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${'?, '.repeat(values.length).slice(0, -2)} );`, values);
+		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${valueList(values.length)} );`, values);
 	}
 
 	update(table, id, data) {
