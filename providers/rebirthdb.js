@@ -22,7 +22,7 @@ module.exports = class extends Provider {
 
 	async ping() {
 		const now = Date.now();
-		return await this.db.now() - now;
+		return (await this.db.now().run()).getTime() - now;
 	}
 
 	/* Table methods */
