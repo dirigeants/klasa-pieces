@@ -95,9 +95,7 @@ module.exports = class extends SQLProvider {
 	}
 
 	update(table, id, data) {
-		console.log(id, data);
 		const [keys, values] = this.parseUpdateInput(data, false);
-		console.log(keys, values);
 		return this.run(`
 			UPDATE ${sanitizeKeyName(table)}
 			SET ${keys.map(key => `${sanitizeKeyName(key)} = ?`)}
