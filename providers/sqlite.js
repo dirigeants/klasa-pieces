@@ -33,7 +33,7 @@ module.exports = class extends SQLProvider {
 	/* Table methods */
 
 	hasTable(table) {
-		return this.runGet(`SELECT name FROM sqlite_master WHERE type='table' AND name='${table}';`)
+		return this.runGet(`SELECT name FROM sqlite_master WHERE type='table' AND name=${sanitizeKeyName(table)};`)
 			.then(Boolean);
 	}
 
@@ -56,23 +56,23 @@ module.exports = class extends SQLProvider {
 
 	/* Document methods */
 
-	getAll(table, entries = []) {
-		return this.runAll(entries.length ?
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ('${entries.join("', '")}');` :
-			`SELECT * FROM ${sanitizeKeyName(table)};`)
-			.then(output => output.map(entry => this.parseEntry(table, entry)));
+	async getAll(table, entries = []) {
+		let output;
+		if (entries.length) output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${'?, '.repeat(entries.length).slice(0, -2)} );`, entries)
+		else output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`)
+		return output.map(entry => this.parseEntry(table, entry));
 	}
 
 	get(table, key, value = null) {
 		return this.runGet(value === null ?
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeKeyName(key)};` :
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ${sanitizeValue(value)};`)
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ?;` :
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ?;`, [value || key])
 			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
 
 	has(table, key) {
-		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(key)};`)
+		return this.runGet(`SELECT id FROM ${sanitizeKeyName(table)} WHERE id = ?;`, [key])
 			.then(() => true)
 			.catch(() => false);
 	}
@@ -89,15 +89,15 @@ module.exports = class extends SQLProvider {
 		// Push the id to the inserts.
 		keys.push('id');
 		values.push(id);
-		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${values.map(sanitizeValue).join(', ')} );`);
+		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${'?, '.repeat(values.length).slice(0, -2)} );`, values);
 	}
 
 	update(table, id, data) {
 		const [keys, values] = this.parseUpdateInput(data, false);
 		return this.run(`
 			UPDATE ${sanitizeKeyName(table)}
-			SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = ${sanitizeValue(values[i])}`)}
-			WHERE id = ${sanitizeValue(id)};`);
+			SET ${keys.map(key => `${sanitizeKeyName(key)} = ?`)}
+			WHERE id = ?;`, [...values, id]);
 	}
 
 	replace(...args) {
@@ -105,7 +105,7 @@ module.exports = class extends SQLProvider {
 	}
 
 	delete(table, row) {
-		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ${sanitizeValue(row)};`);
+		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ?};`, [row]);
 	}
 
 	addColumn(table, piece) {
@@ -171,23 +171,23 @@ module.exports = class extends SQLProvider {
 	}
 
 	// Get a row from an arbitrary SQL query.
-	runGet(sql) {
-		return db.get(sql);
+	runGet(...sql) {
+		return db.get(...sql);
 	}
 
 	// Get all rows from an arbitrary SQL query.
-	runAll(sql) {
-		return db.all(sql);
+	runAll(...sql) {
+		return db.all(...sql);
 	}
 
 	// Run arbitrary SQL query.
-	run(sql) {
-		return db.run(sql);
+	run(...sql) {
+		return db.run(...sql);
 	}
 
 	// Execute arbitrary SQL query.
-	exec(sql) {
-		return db.exec(sql);
+	exec(...sql) {
+		return db.exec(...sql);
 	}
 
 };
@@ -202,14 +202,4 @@ function sanitizeKeyName(value) {
 	if (/`|"/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') return value;
 	return `"${value}"`;
-}
-
-function sanitizeValue(value) {
-	switch (typeof value) {
-		case 'boolean':
-		case 'number': return value;
-		case 'string': return `'${value.replace(/'/, "''")}'`;
-		case 'object': return value === null ? value : JSON.stringify(value);
-		default: return sanitizeValue(String(value));
-	}
 }
