@@ -68,7 +68,7 @@ module.exports = class extends SQLProvider {
 	get(table, key, value = null) {
 		return this.runGet(value === null ?
 			`SELECT * FROM ${sanitizeKeyName(table)} WHERE id = ?;` :
-			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ?;`, [value || key])
+			`SELECT * FROM ${sanitizeKeyName(table)} WHERE ${sanitizeKeyName(key)} = ?;`, [value ? sanitizeValue(value) : key])
 			.then(entry => this.parseEntry(table, entry))
 			.catch(() => null);
 	}
@@ -91,15 +91,17 @@ module.exports = class extends SQLProvider {
 		// Push the id to the inserts.
 		keys.push('id');
 		values.push(id);
-		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${valueList(values.length)} );`, values);
+		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${valueList(values.length)} );`, values.map(sanitizeValue));
 	}
 
 	update(table, id, data) {
+		console.log(id, data);
 		const [keys, values] = this.parseUpdateInput(data, false);
+		console.log(keys, values);
 		return this.run(`
 			UPDATE ${sanitizeKeyName(table)}
 			SET ${keys.map(key => `${sanitizeKeyName(key)} = ?`)}
-			WHERE id = ?;`, [...values, id]);
+			WHERE id = ?;`, [...values.map(sanitizeValue), id]);
 	}
 
 	replace(...args) {
@@ -107,7 +109,7 @@ module.exports = class extends SQLProvider {
 	}
 
 	delete(table, row) {
-		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ?};`, [row]);
+		return this.run(`DELETE FROM ${sanitizeKeyName(table)} WHERE id = ?;`, [row]);
 	}
 
 	addColumn(table, piece) {
@@ -204,4 +206,13 @@ function sanitizeKeyName(value) {
 	if (/`|"/.test(value)) throw new TypeError(`Invalid input (${value}).`);
 	if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') return value;
 	return `"${value}"`;
+}
+
+function sanitizeValue(value) {
+	switch (typeof value) {
+		case 'boolean':
+		case 'number': return value;
+		case 'object': return value === null ? value : JSON.stringify(value);
+		default: return String(value);
+	}
 }
