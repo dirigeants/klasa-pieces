@@ -39,10 +39,11 @@ module.exports = class extends SQLProvider {
 		}, connection.options));
 
 		this.db.on('error', err => this.client.emit('error', err));
-		await this.db.connect();
+		this.dbconnection = await this.db.connect();
 	}
 
 	shutdown() {
+		this.dbconnection.release();
 		return this.db.end();
 	}
 
