@@ -8,12 +8,12 @@ module.exports = class extends Command {
 			requiredPermissions: ['MANAGE_ROLES'],
 			runIn: ['text'],
 			description: 'Unmutes a mentioned user.',
-			usage: '<member:member> [reason:string] [...]',
+			usage: '<member:member> [reason:...string]',
 			usageDelim: ' '
 		});
 	}
 
-	async run(msg, [member, ...reason]) {
+	async run(msg, [member, reason]) {
 		if (member.roles.highest.position >= msg.member.roles.highest.position) throw 'You cannot unmute this user.';
 		if (!member.roles.has(msg.guild.settings.roles.muted)) throw 'This user is not muted.';
 
