@@ -12,7 +12,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		const url = await fetch('https://dog.ceo/api/breeds/image/random')
+		const url = await fetch('https://api.random-d.uk/random')
 			.then(response => response.json())
 			.then(body => body.url);
 		return msg.channel.sendFile(url);
