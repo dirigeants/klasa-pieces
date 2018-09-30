@@ -8,7 +8,7 @@ module.exports = class extends Command {
 			requiredPermissions: ['BAN_MEMBERS'],
 			runIn: ['text'],
 			description: 'Softbans a mentioned user. Currently does not require reason (no mod-log).',
-			usage: '<member:user> [days:int{1,7}] [reason:string] [...]',
+			usage: '<member:user> [days:int{1,7}] [reason:...string]',
 			usageDelim: ' '
 		});
 	}
@@ -24,7 +24,6 @@ module.exports = class extends Command {
 		}
 
 		const options = { days };
-		reason = reason.length ? reason.join(' ') : null;
 		if (reason) options.reason = reason;
 
 		await msg.guild.members.ban(user, options);
