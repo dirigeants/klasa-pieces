@@ -18,12 +18,12 @@ module.exports = class extends Command {
 			requiredPermissions: ['MANAGE_ROLES'],
 			runIn: ['text'],
 			description: 'Mutes a mentioned member.',
-			usage: '[when:time] <member:member> [reason:string] [...]',
+			usage: '[when:time] <member:member> [reason:...string]',
 			usageDelim: ' '
 		});
 	}
 
-	async run(msg, [when, member, ...reason]) {
+	async run(msg, [when, member, reason]) {
 		if (member.id === msg.author.id) throw 'Why would you mute yourself?';
 		if (member.id === this.client.user.id) throw 'Have I done something wrong?';
 
