@@ -19,7 +19,7 @@ module.exports = class extends Command {
 		];
 	}
 
-	run(msg) {
+	async run(msg) {
 		const data = await fetch(`https://imgur.com/r/${this._subreddits[Math.floor(Math.random() * this._subreddits.length)]}/hot.json`)
 			.then(response => response.json())
 			.then(body => body.data);
