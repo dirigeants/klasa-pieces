@@ -8,18 +8,19 @@ module.exports = class extends Command {
 			requiredPermissions: ['BAN_MEMBERS'],
 			runIn: ['text'],
 			description: 'Unbans a user.',
-			usage: '<user:user> [reason:string] [...]',
+			usage: '<user:user> [reason:...string]',
 			usageDelim: ' '
 		});
 	}
 
-	async run(msg, [user, ...reason]) {
+	async run(msg, [user, reason]) {
 		const bans = await msg.guild.fetchBans();
 		if (bans.has(user.id)) {
-			await msg.guild.members.unban(user, reason.join(' '));
+			await msg.guild.members.unban(user, reason);
+			return msg.sendMessage(`${user.tag} was unbanned.${reason ? ` With reason of: ${reason}` : ''}`);
 		}
 
-		return msg.sendMessage(`${user.tag} was unbanned.${reason ? ` With reason of: ${reason}` : ''}`);
+		throw `${user.tag} was never banned. How could I unban them?`;
 	}
 
 };

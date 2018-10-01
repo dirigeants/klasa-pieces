@@ -8,12 +8,12 @@ module.exports = class extends Command {
 			requiredPermissions: ['BAN_MEMBERS'],
 			runIn: ['text'],
 			description: 'Softbans a mentioned user. Currently does not require reason (no mod-log).',
-			usage: '<member:user> [days:int{1,7}] [reason:string] [...]',
+			usage: '<member:user> [days:int{1,7}] [reason:...string]',
 			usageDelim: ' '
 		});
 	}
 
-	async run(msg, [user, days = 1, ...reason]) {
+	async run(msg, [user, days = 1, reason]) {
 		if (user.id === msg.author.id) throw 'Why would you ban yourself?';
 		if (user.id === this.client.user.id) throw 'Have I done something wrong?';
 
@@ -24,7 +24,6 @@ module.exports = class extends Command {
 		}
 
 		const options = { days };
-		reason = reason.length ? reason.join(' ') : null;
 		if (reason) options.reason = reason;
 
 		await msg.guild.members.ban(user, options);
