@@ -18,14 +18,13 @@ module.exports = class CIyde extends Command {
 			body: JSON.stringify(content),
 			headers: { 'Content-Type': 'application/json' }
 		})
-		.then(() => {
-			webhook.delete();
-		})
-		.catch((err) => {
-			console.log(err);
-			return webhook.delete('Error occured when running.');
-		});
+			.then(() => {
+				webhook.delete();
+			})
+			.catch((err) => {
+				console.log(err);
+				return webhook.delete('Error occured when running.');
+			});
 	}
 
 };
-!
