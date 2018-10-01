@@ -1,7 +1,7 @@
 const { Command } = require('klasa');
 const fetch = require('node-fetch');
 
-module.exports = class Clyde extends Command {
+module.exports = class CIyde extends Command {
 
 	constructor(...args) {
 		super(...args, {
