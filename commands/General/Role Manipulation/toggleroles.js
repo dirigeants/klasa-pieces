@@ -1,11 +1,10 @@
 const { Command } = require('klasa');
 
-    /* You need to add the following lines to your guild schematic manager:
+/* You need to add the following lines to your guild schematic manager:
      	.add('selfroles', folder => folder
-		    .add('roles', 'role', { array: true })
-            .add('enabled', 'boolean', { default: true }))
-            
-    */
+		.add('roles', 'role', { array: true })
+		.add('enabled', 'boolean', { default: true }))
+*/
 
 module.exports = class extends Command {
 
