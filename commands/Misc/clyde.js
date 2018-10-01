@@ -28,3 +28,4 @@ module.exports = class CIyde extends Command {
 	}
 
 };
+!
