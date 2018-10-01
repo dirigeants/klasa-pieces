@@ -10,7 +10,7 @@ const e = 'Ⓔⓔ⒠EeḔḕḖḗḘḙḚḛḜḝẸẹẺẻẾếẼẽỀ�
 const f = 'Ⓕⓕ⒡FfḞḟƑƒꜰℲⅎꟻℱ℻';
 const g = 'Ⓖⓖ⒢GgƓḠḡĜĝĞğĠġĢģǤǥǦǧǴℊ⅁ǵ';
 const h = 'Ⓗⓗ⒣HhḢḣḤḥḦḧḨḩḪḫẖĤĥȞȟĦħⱧⱨꜦℍǶℏℎℋℌꜧ';
-const i = 'Ⓘⓘ⒤IiḬḭḮḯĲĳìíîïÌÍÎÏĨĩĪīĬĭĮįıƗƚỺǏǐⅈȉȈȊȋἰἱἲἳἴἵἶἷἸἹἺἻἼἽἾἿ';
+const I = 'Ⓘⓘ⒤IiḬḭḮḯĲĳìíîïÌÍÎÏĨĩĪīĬĭĮįıƗƚỺǏǐⅈȉȈȊȋἰἱἲἳἴἵἶἷἸἹἺἻἼἽἾἿ';
 const j = 'ℑℐⒿⓙ⒥JjĴĵȷⱼɈɉǰ';
 const k = 'Ⓚⓚ⒦KkḰḱḲḳḴḵĶķƘƙꝀꝁꝂꝃꝄꝅǨǩⱩⱪĸ';
 const l = 'Ⓛⓛ⒧LlḶḷḸḹḺḻḼḽĹĺĻļĽİľĿŀŁłỈỉỊịȽⱠꝈꝉⱡⱢꞁℒǇǈǉ⅃⅂ℓ℄';
@@ -60,7 +60,7 @@ module.exports = class CancerText extends Command {
 			} else if (text[i].toLowerCase() === 'h') {
 				cancerCharacters.push(h[Math.floor(Math.random() * h.length) + 1]);
 			} else if (text[i].toLowerCase() === 'i') {
-				cancerCharacters.push(i[Math.floor(Math.random() * i.length) + 1]);
+				cancerCharacters.push(I[Math.floor(Math.random() * I.length) + 1]);
 			} else if (text[i].toLowerCase() === 'j') {
 				cancerCharacters.push(j[Math.floor(Math.random() * j.length) + 1]);
 			} else if (text[i].toLowerCase() === 'k') {
