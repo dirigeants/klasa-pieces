@@ -42,61 +42,61 @@ module.exports = class CancerText extends Command {
 	async run(msg, [text]) {
 		const cancerCharacters = [];
 
-		for (var ii = 0, len = text.length; ii < len; ii++) {
-			if (text[ii].toLowerCase() === 'a') {
+		for(let i = 0; i < text.length; i++) { 
+			if (text[i].toLowerCase() === 'a') {
 				cancerCharacters.push(a[Math.floor(Math.random() * a.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'b') {
+			} else if (text[i].toLowerCase() === 'b') {
 				cancerCharacters.push(b[Math.floor(Math.random() * b.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'c') {
+			} else if (text[i].toLowerCase() === 'c') {
 				cancerCharacters.push(c[Math.floor(Math.random() * c.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'd') {
+			} else if (text[i].toLowerCase() === 'd') {
 				cancerCharacters.push(d[Math.floor(Math.random() * d.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'e') {
+			} else if (text[i].toLowerCase() === 'e') {
 				cancerCharacters.push(e[Math.floor(Math.random() * e.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'f') {
+			} else if (text[i].toLowerCase() === 'f') {
 				cancerCharacters.push(f[Math.floor(Math.random() * f.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'g') {
+			} else if (text[i].toLowerCase() === 'g') {
 				cancerCharacters.push(g[Math.floor(Math.random() * g.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'h') {
+			} else if (text[i].toLowerCase() === 'h') {
 				cancerCharacters.push(h[Math.floor(Math.random() * h.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'i') {
+			} else if (text[i].toLowerCase() === 'i') {
 				cancerCharacters.push(i[Math.floor(Math.random() * i.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'j') {
+			} else if (text[i].toLowerCase() === 'j') {
 				cancerCharacters.push(j[Math.floor(Math.random() * j.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'k') {
+			} else if (text[i].toLowerCase() === 'k') {
 				cancerCharacters.push(k[Math.floor(Math.random() * k.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'l') {
+			} else if (text[i].toLowerCase() === 'l') {
 				cancerCharacters.push(l[Math.floor(Math.random() * l.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'm') {
+			} else if (text[i].toLowerCase() === 'm') {
 				cancerCharacters.push(m[Math.floor(Math.random() * m.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'n') {
+			} else if (text[i].toLowerCase() === 'n') {
 				cancerCharacters.push(n[Math.floor(Math.random() * n.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'o') {
+			} else if (text[i].toLowerCase() === 'o') {
 				cancerCharacters.push(o[Math.floor(Math.random() * o.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'p') {
+			} else if (text[i].toLowerCase() === 'p') {
 				cancerCharacters.push(p[Math.floor(Math.random() * p.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'q') {
+			} else if (text[i].toLowerCase() === 'q') {
 				cancerCharacters.push(q[Math.floor(Math.random() * q.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'r') {
+			} else if (text[i].toLowerCase() === 'r') {
 				cancerCharacters.push(r[Math.floor(Math.random() * r.length) + 1]);
-			} else if (text[ii].toLowerCase() === 's') {
+			} else if (text[i].toLowerCase() === 's') {
 				cancerCharacters.push(s[Math.floor(Math.random() * s.length) + 1]);
-			} else if (text[ii].toLowerCase() === 't') {
+			} else if (text[i].toLowerCase() === 't') {
 				cancerCharacters.push(t[Math.floor(Math.random() * t.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'u') {
+			} else if (text[i].toLowerCase() === 'u') {
 				cancerCharacters.push(u[Math.floor(Math.random() * u.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'v') {
+			} else if (text[i].toLowerCase() === 'v') {
 				cancerCharacters.push(v[Math.floor(Math.random() * v.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'w') {
+			} else if (text[i].toLowerCase() === 'w') {
 				cancerCharacters.push(w[Math.floor(Math.random() * w.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'x') {
+			} else if (text[i].toLowerCase() === 'x') {
 				cancerCharacters.push(x[Math.floor(Math.random() * x.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'y') {
+			} else if (text[i].toLowerCase() === 'y') {
 				cancerCharacters.push(y[Math.floor(Math.random() * y.length) + 1]);
-			} else if (text[ii].toLowerCase() === 'z') {
+			} else if (text[i].toLowerCase() === 'z') {
 				cancerCharacters.push(z[Math.floor(Math.random() * z.length) + 1]);
 			} else {
-				cancerCharacters.push(text[ii]);
+				cancerCharacters.push(text[i]);
 			}
 		}
 		return msg.send(cancerCharacters.join(''), { code: 'fix' });
