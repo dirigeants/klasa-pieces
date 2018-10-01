@@ -1,12 +1,11 @@
+const { MessageEmbed } = require('discord.js');
 const { Command } = require('klasa');
 const fetch = require('node-fetch');
 
 module.exports = class extends Command {
 
 	constructor(...args) {
-		super(...args, {
-			description: 'Shows a meme image from reddit.'
-		});
+		super(...args, { description: 'Shows a meme image from reddit.' });
 		this._subreddits = [
 			'memes',
 			'DeepFriedMemes',
