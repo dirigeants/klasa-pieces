@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const snekfetch = require('snekfetch');
+const fetcg = require('node-fetch');
 
 module.exports = class Clyde extends Command {
 
@@ -13,15 +13,18 @@ module.exports = class Clyde extends Command {
 
 	async run(msg, [content]) {
 		const webhook = await msg.channel.createWebhook('CIyde', { avatar: 'https://discordapp.com/assets/f78426a064bc9dd24847519259bc42af.png' });
-		return snekfetch.post(`https://canary.discordapp.com/api/webhooks/${webhook.id}/${webhook.token}`)
-			.send({ content })
-			.then(() => {
-				webhook.delete();
-			})
-			.catch((err) => {
-				console.log(err);
-				return webhook.delete('Error occured when running.');
-			});
+		return fetch(`https://canary.discordapp.com/api/webhooks/${webhook.id}/${webhook.token}`, {
+			method: 'POST',
+			body: JSON.stringify(content),
+			headers: { 'Content-Type': 'application/json' }
+		})
+		.then(() => {
+			webhook.delete();
+		})
+		.catch((err) => {
+			console.log(err);
+			return webhook.delete('Error occured when running.');
+		});
 	}
 
 };
