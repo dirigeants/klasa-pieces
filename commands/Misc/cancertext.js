@@ -42,7 +42,7 @@ module.exports = class CancerText extends Command {
 	async run(msg, [text]) {
 		const cancerCharacters = [];
 
-		for(let i = 0; i < text.length; i++) { 
+		for (let i = 0; i < text.length; i++) {
 			if (text[i].toLowerCase() === 'a') {
 				cancerCharacters.push(a[Math.floor(Math.random() * a.length) + 1]);
 			} else if (text[i].toLowerCase() === 'b') {
@@ -101,4 +101,5 @@ module.exports = class CancerText extends Command {
 		}
 		return msg.send(cancerCharacters.join(''), { code: 'fix' });
 	}
+
 };
