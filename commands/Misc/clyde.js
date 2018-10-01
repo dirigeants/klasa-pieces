@@ -1,5 +1,5 @@
 const { Command } = require('klasa');
-const fetcg = require('node-fetch');
+const fetch = require('node-fetch');
 
 module.exports = class Clyde extends Command {
 
