@@ -7,6 +7,9 @@ module.exports = class extends Language {
 		this.language = {
 			DEFAULT: (key) => `${key} n'a pas encore été traduit en 'fr-FR'.`,
 			DEFAULT_LANGUAGE: 'Langue par défaut',
+			PREFIX_REMINDER: (prefix = `@${this.client.user.tag}`) => Array.isArray(prefix) ?
+				`Les préfixes pour ce serveur sont : ${prefix.map(pre => `\`${pre}\``).join(', ')}` :
+				`Le préfixe pour ce serveur est : \`${prefix}\``,
 			SETTING_GATEWAY_EXPECTS_GUILD: 'Le paramètre <Guild> attend soit un identifiant soit une instance de serveur.',
 			SETTING_GATEWAY_VALUE_FOR_KEY_NOEXT: (data, key) => `La valeur '${data}' pour la clef '${key}' n'existe pas.`,
 			SETTING_GATEWAY_VALUE_FOR_KEY_ALREXT: (data, key) => `La valeur '${data}' pour la clef '${key}' existe déjà.`,
@@ -169,7 +172,7 @@ module.exports = class extends Language {
 
 	isFeminine(type) {
 		type = type.toString();
-		return ['command', 'commands'].indexOf(type) !== -1;
+		return ['command', 'commands', 'task', 'tasks'].indexOf(type) !== -1;
 	}
 
 	piece(type) {
@@ -183,7 +186,8 @@ module.exports = class extends Language {
 			inhibitor: 'inhibiteur',
 			language: 'langage',
 			monitor: 'contrôleur',
-			provider: 'fournisseur'
+			provider: 'fournisseur',
+			task: 'tâche'
 		}[(plural ? type.slice(0, -1) : type).toLowerCase()];
 		return tp ?
 			`${tp}${plural ? 's' : ''}` :
