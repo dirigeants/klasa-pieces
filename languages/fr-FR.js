@@ -18,7 +18,7 @@ module.exports = class extends Language {
 			SETTING_GATEWAY_KEY_NOEXT: (key) => `La clef '${key}' n'existe pas dans le schema de données actuel.`,
 			SETTING_GATEWAY_INVALID_TYPE: 'Le paramètre \'type\' doit être soit \'add\' ou \'remove\'.',
 			SETTING_GATEWAY_INVALID_FILTERED_VALUE: (piece, value) => `${piece.key} n'accepte pas la valeur : ${value}`,
-			RESOLVER_MULTI_TOO_FEW: (name, min = 1) => `Pas assez de ${name}s frounis. Au moins ${min} ${min === 1 ? 'est' : 'sont'} requis.`,
+			RESOLVER_MULTI_TOO_FEW: (name, min = 1) => `Pas assez de ${name}s fournis. Au moins ${min} ${min === 1 ? 'est' : 'sont'} requis.`,
 			RESOLVER_INVALID_BOOL: (name) => `${name} doit être vrai ou faux.`,
 			RESOLVER_INVALID_CHANNEL: (name) => `${name} doit être un tag ou un identifiant de salon valide.`,
 			RESOLVER_INVALID_CUSTOM: (name, type) => `${name} doit être un(e) ${type} valide.`,
