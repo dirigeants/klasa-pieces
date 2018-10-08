@@ -72,10 +72,10 @@ module.exports = class extends Language {
 				'La commande eval évalue du code tel quel, toute erreur en résultant sera géré.',
 				'Elle utilise également les flags. Écrivez --silent, --depth=number ou --async pour personnaliser le résultat.',
 				'Le flag --silent la fera ne rien afficher.',
-				'Le flag --depth accèpte un nombre, par exemple, --depth=2, pour personnaliser la profondeur d\'util.inspect.',
-				'Le flag --async englobera le code dans une fonction async où vous pourrez profiter de l\'usage du await, à noter que si vous voulez que le code retourner quelque chose, vous aurez besoin d\'utiliser le mot-clef return', // eslint-disable-line max-len
-				'Le flag --showHidden autorisera l\'option showHidden d\'util.inspect.',
-				'Si le résultat est trop large, il l\'affichera dans un fichier, ou dans la console si le bot n\'a pas la permission ATTACH_FILES.'
+				"Le flag --depth accèpte un nombre, par exemple, --depth=2, pour personnaliser la profondeur d'util.inspect.",
+				"Le flag --async englobera le code dans une fonction async où vous pourrez profiter de l'usage du await, à noter que si vous voulez que le code retourner quelque chose, vous aurez besoin d'utiliser le mot-clef return.", // eslint-disable-line max-len
+				"Le flag --showHidden autorisera l'option showHidden d'util.inspect.",
+				"Si le résultat est trop large, il l'affichera dans un fichier, ou dans la console si le bot n'a pas la permission ATTACH_FILES."
 			].join('\n'),
 			COMMAND_EVAL_ERROR: (time, output, type) => `**Erreur**:${output}\n**Type**:${type}\n${time}`,
 			COMMAND_EVAL_OUTPUT: (time, output, type) => `**Résultat**:${output}\n**Type**:${type}\n${time}`,
@@ -83,34 +83,36 @@ module.exports = class extends Language {
 			COMMAND_EVAL_SENDCONSOLE: (time, type) => `Le résultat était trop long... le résultat a été affiché dans la console.\n**Type**:${type}\n${time}`,
 			COMMAND_UNLOAD: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} déchargé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
 			COMMAND_UNLOAD_DESCRIPTION: 'Décharge le composant.',
+			COMMAND_UNLOAD_WARN: "Vous ne voulez probablement pas décharger ceci, car vous ne serez plus en mesure d'éxécuter aucune commande pour l'activer à nouveau",
 			COMMAND_TRANSFER_ERROR: '❌ Ce fichier a déjà été transféré ou n\'a jamais existé.',
-			COMMAND_TRANSFER_SUCCESS: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} transféré${this.isFeminine(type) ? 'e' : ''} avec succès : ${name}`,
+			COMMAND_TRANSFER_SUCCESS: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} transféré${this.isFeminine(type) ? 'e' : ''} avec succès : ${name}.`,
 			COMMAND_TRANSFER_FAILED: (type, name) => `Le transfert de ${this.piece(type)} : ${name} au Client a échoué. Veuillez vérifier votre Console.`,
-			COMMAND_TRANSFER_DESCRIPTION: 'Transfert un composant du noyau dans son dossier respectif',
-			COMMAND_RELOAD: (type, name) => `✅ ${util.toTitleCase(this.piece(type))} rechargé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
-			COMMAND_RELOAD_ALL: (type) => `✅ Tou${this.isFeminine(type) ? 'te' : ''}s les ${this.piece(type)} ont été rechargé${this.isFeminine(type) ? 'e' : ''}s.`,
+			COMMAND_TRANSFER_DESCRIPTION: 'Transfert un composant du noyau dans son dossier respectif.',
+			COMMAND_RELOAD: (type, name, time) => `✅ ${util.toTitleCase(this.piece(type))} rechargé${this.isFeminine(type) ? 'e' : ''} : ${name}. (Temps : ${time})`,
+			COMMAND_RELOAD_FAILED: (type, name) => `❌ Échec lors du rechargement de ${this.piece(type)} : ${name}. Veuillez vérifier votre console.`,
+			COMMAND_RELOAD_ALL: (type, time) => `✅ Tou${this.isFeminine(type) ? 'te' : ''}s les ${this.piece(type)} ont été rechargé${this.isFeminine(type) ? 'e' : ''}s. (Temps : ${time})`,
+			COMMAND_RELOAD_EVERYTHING: (time) => `✅ Tout a été rechargé. (Temps : ${time})`,
 			COMMAND_RELOAD_DESCRIPTION: 'Recharge un composant, ou tous les composants d\'un cache.',
 			COMMAND_REBOOT: 'Redémarrage...',
 			COMMAND_REBOOT_DESCRIPTION: 'Redémarre le bot.',
-			COMMAND_LOAD: (time, type, name) => `✅ ${util.toTitleCase(this.piece(type))} chargé${this.isFeminine(type) ? 'e' : ''} avec succès : ${name}. (Temps: ${time})`,
-			COMMAND_LOAD_FAIL: 'Le fichier n\'existe pas, ou une erreur s\'est produite lors du chargement. Veuillez vérifier votre console.',
-			COMMAND_LOAD_ERROR: (type, name, error) => `❌ Échec lors du chargement de ${this.piece(type)}: ${name}. Raison : ${util.codeBlock('js', error)}`,
+			COMMAND_LOAD: (time, type, name) => `✅ ${util.toTitleCase(this.piece(type))} chargé${this.isFeminine(type) ? 'e' : ''} avec succès : ${name}. (Temps : ${time})`,
+			COMMAND_LOAD_FAIL: "Le fichier n'existe pas, ou une erreur s'est produite lors du chargement. Veuillez vérifier votre console.",
+			COMMAND_LOAD_ERROR: (type, name, error) => `❌ Échec lors du chargement de ${this.piece(type)} : ${name}. Raison : ${util.codeBlock('js', error)}`,
 			COMMAND_LOAD_DESCRIPTION: 'Charge un composant de votre bot.',
 			COMMAND_PING: 'Ping ?',
 			COMMAND_PING_DESCRIPTION: 'Exécute un test de connexion à Discord.',
 			COMMAND_PINGPONG: (diff, ping) => `Pong ! (L'aller-retour a pris : ${diff}ms. Pulsation : ${ping}ms.)`,
-			COMMAND_INVITE_SELFBOT: 'Pourquoi auriez-vous besoin d\'un lien d\'invitation pour un selfbot...',
-			COMMAND_INVITE: (client) => [
-				`Pour ajouter ${client.user.username} à votre serveur discord :`,
-				client.invite,
+			COMMAND_INVITE: () => [
+				`Pour ajouter ${this.client.user.username} à votre serveur discord :`,
+				this.client.invite,
 				util.codeBlock('', [
 					'Le lien ci-dessus est généré de façon à demander le minimum de permissions requises pour utiliser toutes les commandes.',
-					'Je sais que toutes les permissions ne sont pas désirées pour tous les serveurs, donc n\'ayez pas peur de décocher des cases.',
-					'Si vous essayez d\'utiliser une commande nécéssitant plus de permissions que celles que vous avez accordées au bot, il vous le fera savoir'
+					"Je sais que toutes les permissions ne sont pas désirées pour tous les serveurs, donc n'ayez pas peur de décocher des cases.",
+					"Si vous essayez d'utiliser une commande nécéssitant plus de permissions que celles que vous avez accordées au bot, il vous le fera savoir"
 				].join(' ')),
 				'Veuillez soumettre un problème à <https://github.com/dirigeants/klasa> si vous trouvez un bug.'
 			],
-			COMMAND_INVITE_DESCRIPTION: 'Affiche le lien d\'invitation du bot.',
+			COMMAND_INVITE_DESCRIPTION: "Affiche le lien d'invitation du bot.",
 			COMMAND_INFO: [
 				"Klasa est un framework 'plug-and-play' qui étend la librairie Discord.js.",
 				'Une grande partie du code est modularisée, ce qui permet aux développeurs de modifier Klasa pour répondre à leurs besoins.',
@@ -136,7 +138,7 @@ module.exports = class extends Language {
 			COMMAND_HELP_DM: '📥 | Les commandes ont été envoyées dans vos MPs.',
 			COMMAND_HELP_NODM: '❌ | Vous avez désactivé vos MPs, je ne peux pas vous envoyer les commandes.',
 			COMMAND_HELP_COMMAND_NOT_FOUND: '❌ | Commande inconnue, veuillez exécuter la commande help sans argument pour avoir toute la liste.',
-			COMMAND_HELP_USAGE: (usage) => `utilisation :: ${usage}`,
+			COMMAND_HELP_USAGE: (usage) => `Utilisation :: ${usage}`,
 			COMMAND_HELP_EXTENDED: 'Aide étendue ::',
 			COMMAND_ENABLE: (type, name) => `+ ${util.toTitleCase(this.piece(type))} activé${this.isFeminine(type) ? 'e' : ''} : ${name}`,
 			COMMAND_ENABLE_DESCRIPTION: 'Réactive ou active temporairement un(e) commande/inhibiteur/moniteur/finaliseur/événement. L\'état par défaut sera rétabli au redémarrage.',
@@ -153,11 +155,12 @@ module.exports = class extends Language {
 			COMMAND_CONF_GET_NOEXT: (key) => `La clef **${key}** ne semble pas exister.`,
 			COMMAND_CONF_GET: (key, value) => `La valeur pour la clef **${key}** est : \`${value}\``,
 			COMMAND_CONF_RESET: (key, response) => `La clef **${key}** a été réinitialisée à : \`${response}\``,
-			COMMAND_CONF_SERVER_DESCRIPTION: 'Établit une configuration par serveur.',
-			COMMAND_CONF_SERVER: (key, list) => `**Configuration Serveur${key}**\n${list}`,
-			COMMAND_CONF_USER_DESCRIPTION: 'Établit une configuration par utilisateur.',
-			COMMAND_CONF_USER: (key, list) => `**Configuration Utilisateur${key}**\n${list}`,
-			COMMAND_STATS: (memUsage, uptime, users, servers, channels, klasaVersion, discordVersion, processVersion, msg) => [
+			COMMAND_CONF_NOCHANGE: (key) => `La valeur pour **${key}** valait déjà cette valeur.`,
+			COMMAND_CONF_SERVER_DESCRIPTION: 'Établit des paramètres par serveur.',
+			COMMAND_CONF_SERVER: (key, list) => `**Paramètres Serveur${key}**\n${list}`,
+			COMMAND_CONF_USER_DESCRIPTION: 'Établit des paramètres par utilisateur.',
+			COMMAND_CONF_USER: (key, list) => `**Paramètres Utilisateur${key}**\n${list}`,
+			COMMAND_STATS: (memUsage, uptime, users, servers, channels, klasaVersion, discordVersion, processVersion, message) => [
 				'= STATISTIQUES =',
 				'',
 				`• Utilisation Mem :: ${memUsage} Mo`,
@@ -168,9 +171,12 @@ module.exports = class extends Language {
 				`• Klasa           :: v${klasaVersion}`,
 				`• Discord.js      :: v${discordVersion}`,
 				`• Node.js         :: ${processVersion}`,
-				this.client.options.shardCount ? `• Shard           :: ${((msg.guild ? msg.guild.shardID : msg.channel.shardID) || this.client.options.shardId) + 1} / ${this.client.options.shardCount}` : ''
+				this.client.options.shardCount ?
+					`• Shard           :: ${((message.guild ? message.guild.shardID : message.channel.shardID) || this.client.options.shardId) + 1} / ${this.client.options.shardCount}` :
+					''
 			],
-			COMMAND_STATS_DESCRIPTION: 'Fournit des détails et statistiques à propos du bot.'
+			COMMAND_STATS_DESCRIPTION: 'Fournit des détails et statistiques à propos du bot.',
+			MESSAGE_PROMPT_TIMEOUT: 'Le temps est écoulé.'
 		};
 	}
 
