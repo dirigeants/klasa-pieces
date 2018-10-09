@@ -7,7 +7,7 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			cooldown: 10,
-			description: 'Searches Spotify for a song, and returns an embeddable link.',
+			description: 'Searches Spotify for an artist, and returns an embed.',
 			usage: '<query:str{1,100}>'
 		});
 	}
@@ -17,7 +17,7 @@ module.exports = class extends Command {
 			throw 'Missing access token for Spotify. Please try again in a few minutes.';
 		}
 
-		const song = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`,
+		const artist = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=1`,
 			{
 				headers: {
 					Accept: 'application/json',
@@ -26,11 +26,11 @@ module.exports = class extends Command {
 				}
 			})
 			.then(response => response.json())
-			.then(response => response.tracks.items[0])
+			.then(response => response.artists.items[0])
 			.catch(() => { throw 'There was an error. Please try again later.'; });
 
-		if (!song) throw "Couldn't find any songs with that name.";
-		return msg.sendMessage(song.external_urls.spotify);
+		if (!artist) throw "Couldn't find any artists with that name.";
+		return msg.sendMessage(artist.external_urls.spotify);
 	}
 
 };
