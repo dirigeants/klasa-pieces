@@ -3,11 +3,19 @@ const fetch = require('node-fetch');
 
 // Login to https://developer.spotify.com/dashboard/applications
 // Create an app & get your clientID/secret, place them below
-// Run every 1 hour to refresh: this.client.schedule.create("getSpotifyToken", "*/60 * * * *")
+// Run every 1 hour to refresh: this.client.schedule.create("getSpotifyToken", "0 * * * *");
 const clientID = '';
 const clientSecret = '';
 
 const authorization = Buffer.from(`${clientID}:${clientSecret}`).toString('base64');
+const options = {
+	method: 'POST',
+	body: 'grant_type=client_credentials',
+	headers: {
+		Authorization: `Basic ${authorization}`,
+		'Content-Type': 'application/x-www-form-urlencoded'
+	}
+};
 
 module.exports = class extends Task {
 
@@ -20,19 +28,13 @@ module.exports = class extends Task {
 	}
 
 	async _getToken() {
-		const accessToken = await fetch(`https://accounts.spotify.com/api/token`, {
-			method: 'POST',
-			body: 'grant_type=client_credentials',
-			headers: {
-				Authorization: `Basic ${authorization}`,
-				'Content-Type': 'application/x-www-form-urlencoded'
-			}
-		})
-			.then(response => response.json())
-			.then(response => response.access_token)
-			.catch(console.error);
-
-		this.client._spotifyToken = accessToken;
+		try {
+			this.client._spotifyToken = await fetch(`https://accounts.spotify.com/api/token`, options)
+				.then(response => response.json())
+				.then(response => response.access_token);
+		} catch (error) {
+			this.client.emit('wtf', error);
+		}
 	}
 
 };

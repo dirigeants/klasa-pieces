@@ -1,4 +1,8 @@
-// Requires getSpotifyToken task
+/*
+*    Requires getSpotifyToken task
+*    https://github.com/dirigeants/klasa-pieces/blob/master/tasks/getSpotifyToken.js
+*
+*/
 const { Command } = require('klasa');
 const fetch = require('node-fetch');
 
@@ -13,9 +17,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [query]) {
-		if (!this.client._spotifyToken) {
-			throw 'Missing access token for Spotify. Please try again in a few minutes.';
-		}
+		if (!this.client._spotifyToken) return this.client.emit('wtf', 'Spotify Token is undefined.');
 
 		const artist = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=1`,
 			{
@@ -29,8 +31,8 @@ module.exports = class extends Command {
 			.then(response => response.artists.items[0])
 			.catch(() => { throw 'There was an error. Please try again later.'; });
 
-		if (!artist) throw "Couldn't find any artists with that name.";
-		return msg.sendMessage(artist.external_urls.spotify);
+		if (artist) return msg.sendMessage(artist.external_urls.spotify);
+		throw "Couldn't find any artists with that name.";
 	}
 
 };
