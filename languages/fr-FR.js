@@ -55,7 +55,7 @@ module.exports = class extends Language {
 			INHIBITOR_DISABLED: 'Cette commande est actuellement désactivée.',
 			INHIBITOR_MISSING_BOT_PERMS: (missing) => `Permissions insuffisantes, il manque : **${missing}**`,
 			INHIBITOR_NSFW: 'Vous ne pouvez pas utiliser de commande NSFW dans ce salon.',
-			INHIBITOR_PERMISSIONS: 'Vous n\'avez pas la permission d\'utiliser cette commmande.',
+			INHIBITOR_PERMISSIONS: 'Vous n\'avez pas la permission d\'utiliser cette commande.',
 			// eslint-disable-next-line max-len
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `Votre serveur n'a pas le${settings.length > 1 ? 's' : ''} paramètre${settings.length > 1 ? 's' : ''} **${settings.join(', ')}** et ne peux pas s'exécuter.`,
 			INHIBITOR_RUNIN: (types) => `Cette commande est uniquement disponible dans les salons ${types}.`,
