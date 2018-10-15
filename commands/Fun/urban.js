@@ -23,7 +23,8 @@ module.exports = class extends Command {
 			throw 'The number cannot be zero or negative.';
 		}
 
-		const { list } = await fetch(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(query)}`, 'json');
+		const response = await fetch(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(query)}`);
+		const { list } = await response.json();
 
 		const result = list[index];
 		if (typeof result === 'undefined') {
