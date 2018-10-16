@@ -91,7 +91,7 @@ module.exports = class extends Language {
 			COMMAND_INVITE_SELFBOT: '¿Por qué necesitarías un enlace de invitación para un selfbot?',
 			COMMAND_INVITE: (client) => [
 				`Para añadir ${client.user.username} a tu servidor de Discord:`,
-				client.invite,
+				`<${client.invite}>`,
 				util.codeBlock('', [
 					'El enlace de arriba está generado con los permisos necesarios para ejecutar todos los comandos actuales.',
 					'Entiendo que no todos los permisos son necesarios para todos los servidores, pero no se preocupe de remover alguno de los permisos.',
