@@ -104,7 +104,7 @@ module.exports = class extends Language {
 			COMMAND_PINGPONG: (diff, ping) => `Pong ! (L'aller-retour a pris : ${diff}ms. Pulsation : ${ping}ms.)`,
 			COMMAND_INVITE: () => [
 				`Pour ajouter ${this.client.user.username} à votre serveur discord :`,
-				this.client.invite,
+				`<${this.client.invite}>`,
 				util.codeBlock('', [
 					'Le lien ci-dessus est généré de façon à demander le minimum de permissions requises pour utiliser toutes les commandes.',
 					"Je sais que toutes les permissions ne sont pas désirées pour tous les serveurs, donc n'ayez pas peur de décocher des cases.",
