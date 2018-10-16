@@ -57,7 +57,7 @@ module.exports = class extends Language {
 			COMMAND_INVITE_SELFBOT: 'Neden selfbot için invite linkine ihtiyaç duyasın ki!?!?',
 			COMMAND_INVITE: (client) => [
 				`${client.user.username} guildinize eklemek için:`,
-				client.invite,
+				`<${client.invite}>`,
 				util.codeBlock('', [
 					'Yukarıdaki bağlantı tüm komutları kullanmak için istediği minimum yetkiyle oluşturulmuştur.',
 					'Tüm yetkilerin her sunucu için doğru olmadığını biliyorum, bu yüzden yetkilerden herhangi birini almaktan sakınma.',
