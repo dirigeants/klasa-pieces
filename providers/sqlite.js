@@ -1,4 +1,4 @@
-const { SQLProvider, QueryBuilder, Type, Timestamp } = require('klasa');
+const { SQLProvider, QueryBuilder, Type, Timestamp, util: { chunk } } = require('klasa');
 const { resolve } = require('path');
 const db = require('sqlite');
 const fs = require('fs-nextra');
@@ -60,7 +60,7 @@ module.exports = class extends SQLProvider {
 
 	async getAll(table, entries = []) {
 		let output;
-		if (entries.length) output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${valueList(entries.length)} );`, entries);
+		if (entries.length) for (const myChunk of chunk(entries, 999)) output.push(...await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${valueList(myChunk.length)} );`, myChunk));
 		else output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`);
 		return output.map(entry => this.parseEntry(table, entry));
 	}
