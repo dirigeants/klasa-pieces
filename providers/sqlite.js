@@ -59,7 +59,7 @@ module.exports = class extends SQLProvider {
 	/* Document methods */
 
 	async getAll(table, entries = []) {
-		let output;
+		let output = [];
 		if (entries.length) for (const myChunk of chunk(entries, 999)) output.push(...await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${valueList(myChunk.length)} );`, myChunk));
 		else output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`);
 		return output.map(entry => this.parseEntry(table, entry));
