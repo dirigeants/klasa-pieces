@@ -4,10 +4,10 @@ const he = require('he');
 const Twit = require('twit');
 
 // The channel ID you want the tweets to be sent to
-const tweetChannel = '489282012990013472';
+const tweetChannel = '';
 
 // The ID's of the accounts you want to stream tweets from - http://gettwitterid.com/
-const twitterAccounts = ['795551853450625024'];
+const twitterAccounts = [''];
 
 // https://developer.twitter.com/en/apply/user
 /* eslint-disable camelcase */
