@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { SQLProvider, QueryBuilder, Type, Timestamp, util: { chunk } } = require('klasa');
 const { resolve } = require('path');
 const db = require('sqlite');

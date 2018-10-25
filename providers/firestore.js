@@ -1,3 +1,7 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
+const { Provider } = require('klasa');
+const firebase = require('firebase-admin');
+
 /*
 	1. Go to https://firebase.google.com/
 	2. Login/Signup
@@ -13,9 +17,6 @@
 	12. Pass this to the constructor, providers: { default: 'firestore', firestore: { credentials: variable_name_for_json, databaseURL: 'databaseURL from the service account page.'}}
 	13. Download the `firebase-admin` module.
 */
-
-const { Provider } = require('klasa');
-const firebase = require('firebase-admin');
 
 module.exports = class extends Provider {
 

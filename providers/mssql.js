@@ -1,12 +1,13 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
+const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault } } = require('klasa');
+const mssql = require('mssql');
+
 /**
  * #####################################
  * #              UNTESTED             #
  * # THIS PROVIDER MAY OR MAY NOT WORK #
  * #####################################
  */
-
-const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault } } = require('klasa');
-const mssql = require('mssql');
 
 const TIMEPARSERS = {
 	DATE: new Timestamp('YYYY-MM-DD'),

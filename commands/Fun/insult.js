@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Command } = require('klasa');
 const roll = type => type[Math.floor(Math.random() * type.length)];
 

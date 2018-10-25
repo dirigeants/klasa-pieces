@@ -1,10 +1,12 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
+const { Command } = require('klasa');
+
 /*
 
 	To use this correctly, you will also need the reminder task located in
 	/tasks/reminder.js
 
 */
-const { Command } = require('klasa');
 
 module.exports = class extends Command {
 

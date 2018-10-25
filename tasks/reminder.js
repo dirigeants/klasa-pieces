@@ -1,10 +1,12 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
+const { Task } = require('klasa');
+
 /*
 
 	This is to be used with the remindme command located in
 	/commands/Tools/remindme.js
 
 */
-const { Task } = require('klasa');
 
 module.exports = class extends Task {
 
