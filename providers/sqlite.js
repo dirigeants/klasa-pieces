@@ -42,7 +42,7 @@ module.exports = class extends SQLProvider {
 
 	createTable(table, rows) {
 		if (rows) return this.run(`CREATE TABLE ${sanitizeKeyName(table)} (${rows.map(([k, v]) => `${sanitizeKeyName(k)} ${v}`).join(', ')});`);
-		const gateway = this.client.gateways[table];
+		const gateway = this.client.gateways.get(table);
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
 
 		const schemaValues = [...gateway.schema.values(true)];
@@ -118,7 +118,7 @@ module.exports = class extends SQLProvider {
 	}
 
 	async removeColumn(table, schemaPiece) {
-		const gateway = this.client.gateways[table];
+		const gateway = this.client.gateways.get(table);
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
 
 		const sanitizedTable = sanitizeKeyName(table),
@@ -145,7 +145,7 @@ module.exports = class extends SQLProvider {
 	}
 
 	async updateColumn(table, schemaPiece) {
-		const gateway = this.client.gateways[table];
+		const gateway = this.client.gateways.get(table);
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table}.`);
 
 		const sanitizedTable = sanitizeKeyName(table),

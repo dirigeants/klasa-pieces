@@ -75,7 +75,7 @@ module.exports = class extends SQLProvider {
 	createTable(table, rows) {
 		if (rows) return this.run(`CREATE TABLE @0 ( ${rows.map(([k, v]) => `${k} ${v}`).join(', ')} );`, [table]);
 
-		const gateway = this.client.gateways[table];
+		const gateway = this.client.gateways.get(table);
 		if (!gateway) throw new Error(`There is no gateway defined with the name ${table} nor an array of rows with datatypes have been given. Expected any of either.`);
 
 		const schemaValues = [...gateway.schema.values(true)];
