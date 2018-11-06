@@ -16,6 +16,8 @@ module.exports = class extends Language {
 			SETTING_GATEWAY_VALUE_FOR_KEY_ALREXT: (data, key) => `La valeur '${data}' pour la clef '${key}' existe déjà.`,
 			SETTING_GATEWAY_SPECIFY_VALUE: 'Vous devez spécifier une clef pour ajouter ou filtrer.',
 			SETTING_GATEWAY_KEY_NOT_ARRAY: (key) => `La clef '${key}' n'est pas une matrice.`,
+			SETTING_GATEWAY_CHOOSE_KEY: (keys) => `Veuillez choisir une des clefs suivantes: '${keys}'`,
+			SETTING_GATEWAY_UNCONFIGURABLE_FOLDER: "Ce groupe n'est pas configurable.",
 			SETTING_GATEWAY_KEY_NOEXT: (key) => `La clef '${key}' n'existe pas dans le schema de données actuel.`,
 			SETTING_GATEWAY_INVALID_TYPE: 'Le paramètre \'type\' doit être soit \'add\' ou \'remove\'.',
 			SETTING_GATEWAY_INVALID_FILTERED_VALUE: (piece, value) => `${piece.key} n'accepte pas la valeur : ${value}`,
