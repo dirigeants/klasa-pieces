@@ -144,7 +144,7 @@ module.exports = class extends Language {
 			COMMAND_CONF_SERVER: (key, list) => `**Configuración del servidor${key}**\n${list}`,
 			COMMAND_CONF_USER_DESCRIPTION: 'Define la configuración por usuario.',
 			COMMAND_CONF_USER: (key, list) => `**Configuración del usuario${key}**\n${list}`,
-			COMMAND_STATS: (memUsage, uptime, users, servers, channels, klasaVersion, discordVersion, processVersion, msg) => [
+			COMMAND_STATS: (memUsage, uptime, users, servers, channels, klasaVersion, discordVersion, processVersion, message) => [
 				'= STATISTICS =',
 				'',
 				`• Uso Memoria  :: ${memUsage} MB`,
