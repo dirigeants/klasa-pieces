@@ -155,7 +155,7 @@ module.exports = class extends Language {
 				`• Klasa        :: v${klasaVersion}`,
 				`• Discord.js   :: v${discordVersion}`,
 				`• Node.js      :: ${processVersion}`,
-				this.client.options.shardCount ? `• Shard        :: ${((msg.guild ? msg.guild.shardID : msg.channel.shardID) || this.client.options.shardID) + 1} / ${this.client.options.shardCount}` : ''
+				this.client.options.shardCount ? `• Shard        :: ${(message.guild ? message.guild.shardID : 0) + 1} / ${this.client.options.totalShardCount}` : ''
 			],
 			COMMAND_STATS_DESCRIPTION: 'Provee algunos detalles sobre el bot y sus estadísticas.',
 			MESSAGE_PROMPT_TIMEOUT: 'El tiempo ha expirado.'
