@@ -64,7 +64,7 @@ module.exports = class extends Event {
 			.setAuthor(name)
 			.setImage(image);
 
-		this.client.channels.get(tweetChannel).send(url, { embed }).catch(() => null);
+		this.client.channels.get(tweetChannel).send(url, { embed }).catch((err) => this.client.emit('wtf', err);
 	}
 
 };
