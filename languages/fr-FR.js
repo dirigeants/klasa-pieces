@@ -173,7 +173,7 @@ module.exports = class extends Language {
 				`• Discord.js      :: v${discordVersion}`,
 				`• Node.js         :: ${processVersion}`,
 				this.client.options.shardCount ?
-					`• Shard           :: ${((message.guild ? message.guild.shardID : message.channel.shardID) || this.client.options.shardID) + 1} / ${this.client.options.shardCount}` :
+					`• Shard           :: ${(message.guild ? message.guild.shardID : 0) + 1} / ${this.client.options.totalShardCount}` :
 					''
 			],
 			COMMAND_STATS_DESCRIPTION: 'Fournit des détails et statistiques à propos du bot.',
