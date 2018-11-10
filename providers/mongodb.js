@@ -16,11 +16,7 @@ module.exports = class extends Provider {
 			db: 'klasa',
 			options: {}
 		}, this.client.options.providers.mongodb);
-		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, mergeObjects(connection.options, {
-			auth: {
-				user: connection.user,
-				password: connection.password
-			},
+		const mongoClient = await Mongo.connect(`mongodb://${connection.user}:${connection.password}@${connection.host}:${connection.port}/${connection.db}`, mergeObjects(connection.options, {
 			useNewUrlParser: true
 		}));
 		this.db = mongoClient.db(connection.db);
