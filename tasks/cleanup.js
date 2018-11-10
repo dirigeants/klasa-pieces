@@ -35,7 +35,7 @@ module.exports = class MemorySweeper extends Task {
 			// Clear presences
 			presences += guild.presences.size;
 			guild.presences.clear();
-			
+
 			// Clear Voice States
 			voiceStates += guild.voiceStates.size;
 			guild.voiceStates.clear();
