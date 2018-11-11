@@ -1,4 +1,3 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Monitor } = require('klasa');
 
 module.exports = class extends Monitor {
