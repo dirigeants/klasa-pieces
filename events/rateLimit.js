@@ -1,8 +1,10 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
+const { Event, Colors } = require('klasa');
+
 /**
  * KlasaConsoleConfig#useColor must be
  * enabled in order to use this piece.
  */
-const { Event, Colors } = require('klasa');
 
 const HEADER = new Colors({ text: 'red' }).format('[RATELIMIT]');
 

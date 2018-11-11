@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Command } = require('klasa');
 const { join } = require('path');
 const writeSnapshot = require('util')

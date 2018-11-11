@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Command, util: { toTitleCase } } = require('klasa');
 const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
@@ -23,7 +24,8 @@ module.exports = class extends Command {
 			throw 'The number cannot be zero or negative.';
 		}
 
-		const { list } = await fetch(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(query)}`, 'json');
+		const response = await fetch(`http://api.urbandictionary.com/v0/define?term=${encodeURIComponent(query)}`);
+		const { list } = await response.json();
 
 		const result = list[index];
 		if (typeof result === 'undefined') {

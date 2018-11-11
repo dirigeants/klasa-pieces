@@ -1,5 +1,5 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Provider, util: { mergeDefault, mergeObjects, isObject } } = require('klasa');
-
 const { MongoClient: Mongo } = require('mongodb');
 
 module.exports = class extends Provider {
@@ -16,13 +16,9 @@ module.exports = class extends Provider {
 			db: 'klasa',
 			options: {}
 		}, this.client.options.providers.mongodb);
-		const mongoClient = await Mongo.connect(`mongodb://${connection.host}:${connection.port}/`, mergeObjects(connection.options, {
-			auth: {
-				user: connection.user,
-				password: connection.password
-			},
-			useNewUrlParser: true
-		}));
+		const mongoClient = await Mongo.connect(
+			`mongodb://${connection.user}:${connection.password}@${connection.host}:${connection.port}/${connection.db}`,
+			mergeObjects(connection.options, { useNewUrlParser: true }));
 		this.db = mongoClient.db(connection.db);
 	}
 
