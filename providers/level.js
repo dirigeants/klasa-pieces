@@ -3,7 +3,7 @@ const { Provider, util: { mergeObjects } } = require('klasa');
 const { Collection } = require('discord.js');
 const { resolve } = require('path');
 const fs = require('fs-nextra');
-const Level = require('native-level-promise');
+const Level = require('level');
 
 module.exports = class extends Provider {
 
@@ -36,8 +36,12 @@ module.exports = class extends Provider {
 		return this.tables.set(table, new Level(resolve(this.baseDir, table)));
 	}
 
-	deleteTable(table) {
-		if (this.tables.has(table)) return this.tables.get(table).destroy();
+	async deleteTable(table) {
+		if (this.tables.has(table)) {
+			await this.tables.get(table).close();
+			await fs.unlink(`${this.baseDir}/${table}`);
+			return this.tables.delete(table);
+		}
 		return Promise.resolve();
 	}
 
@@ -97,7 +101,7 @@ module.exports = class extends Provider {
 
 	delete(table, id) {
 		return this.get(table, id)
-			.then(db => db.delete(id));
+			.then(db => db.del(id));
 	}
 
 };
