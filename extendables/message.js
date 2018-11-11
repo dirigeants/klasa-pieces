@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Extendable } = require('klasa');
 const { Message } = require('discord.js');
 

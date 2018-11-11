@@ -1,12 +1,13 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
+const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault } } = require('klasa');
+const mssql = require('mssql');
+
 /**
  * #####################################
  * #              UNTESTED             #
  * # THIS PROVIDER MAY OR MAY NOT WORK #
  * #####################################
  */
-
-const { SQLProvider, QueryBuilder, Timestamp, Type, util: { mergeDefault } } = require('klasa');
-const mssql = require('mssql');
 
 const TIMEPARSERS = {
 	DATE: new Timestamp('YYYY-MM-DD'),
@@ -131,8 +132,10 @@ module.exports = class extends SQLProvider {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
 		// Push the id to the inserts.
-		keys.push('id');
-		values.push(id);
+		if (!keys.includes('id')) {
+			keys.push('id');
+			values.push(id);
+		}
 		return this.run(`INSERT INTO ${sanitizeKeyName(table)}
 			(${keys.map(sanitizeKeyName).join(', ')})
 			VALUES (${Array.from({ length: keys.length }, (__, i) => `@${i}`).join(', ')});`, values);

@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Provider, util: { mergeObjects } } = require('klasa');
 const { Collection } = require('discord.js');
 const { resolve } = require('path');
@@ -73,30 +74,30 @@ module.exports = class extends Provider {
 		});
 	}
 
-	get(table, document) {
-		return this.tables.get(table).get(document).then(JSON.parse).catch(() => null);
+	get(table, id) {
+		return this.tables.get(table).get(id).then(JSON.parse).catch(() => null);
 	}
 
-	has(table, document) {
-		return this.tables.get(table).has(document);
+	has(table, id) {
+		return this.tables.get(table).has(id);
 	}
 
-	create(table, document, data = {}) {
-		return this.tables.get(table).put(document, JSON.stringify(mergeObjects(this.parseUpdateInput(data), { id: document })));
+	create(table, id, data = {}) {
+		return this.tables.get(table).put(id, JSON.stringify({ id, ...this.parseUpdateInput(data) }));
 	}
 
-	update(table, document, data) {
-		return this.get(table, document)
-			.then(existent => this.create(table, document, mergeObjects(existent || { id: document }, this.parseUpdateInput(data))));
+	update(table, id, data) {
+		return this.get(table, id)
+			.then(existent => this.create(table, id, mergeObjects(existent || { id }, this.parseUpdateInput(data))));
 	}
 
-	replace(table, document, data) {
-		return this.create(table, document, data);
+	replace(table, id, data) {
+		return this.create(table, id, data);
 	}
 
-	delete(table, document) {
-		return this.get(table, document)
-			.then(db => db.delete(document));
+	delete(table, id) {
+		return this.get(table, id)
+			.then(db => db.delete(id));
 	}
 
 };

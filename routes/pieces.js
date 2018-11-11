@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Route } = require('klasa-dashboard-hooks');
 
 module.exports = class extends Route {
@@ -9,7 +10,7 @@ module.exports = class extends Route {
 	get(request, response) {
 		const { type } = request.params;
 		const store = this.client.pieceStores.get(type);
-		if (!store) response.end('[]');
+		if (!store) return response.end('[]');
 		return response.end(JSON.stringify(store.keyArray()));
 	}
 

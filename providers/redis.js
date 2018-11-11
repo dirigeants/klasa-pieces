@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Provider, util } = require('klasa');
 const { Client } = require('redis-nextra');
 
@@ -50,9 +51,9 @@ module.exports = class extends Provider {
 		return this.db.table(table).setJson(id, data);
 	}
 
-	async update(table, document, data) {
-		const existent = await this.get(table, document);
-		return this.create(table, document, util.mergeObjects(existent || { id: document }, this.parseUpdateInput(data)));
+	async update(table, id, data) {
+		const existent = await this.get(table, id);
+		return this.create(table, id, util.mergeObjects(existent || { id }, this.parseUpdateInput(data)));
 	}
 
 	replace(...args) {
