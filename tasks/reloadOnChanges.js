@@ -1,49 +1,47 @@
-const { Task, Colors } = require('klasa');
+const { Task, Stopwatch } = require('klasa');
 const { watch } = require('chokidar');
+const path = require('path');
 
 module.exports = class extends Task {
 
-	async run(name) {
-		await Promise.all(this.client.pieceStores
-			.filter(store => store.name !== 'providers')
-			.map(async (store) => {
-				await store.loadAll();
-				await store.init();
-			}));
+	async run(name, piece) {
+		const timer = new Stopwatch();
 
-		if (this.client.shard) {
-			await this.client.shard.broadcastEval(`
-        if (this.shard.id !== ${this.client.shard.id}) {
-					this.client.pieceStores
-						.filter(store => store.name !== 'providers')
-						.map(async (store) => {
-		          await store.loadAll();
-		          await store.init();
-	        	});
-				}
-      `);
-		}
+		await this.client.commands.get('reload')
+			.run({ sendLocale: () => null }, [piece]);
 
-		return this.client.emit('log', `${name} was updated. Reloaded all piece stores.`);
+		timer.stop();
+		return this.client.emit('log', `${name} was updated. Reloaded it in ${timer}`);
 	}
 
 	async init() {
-		const { _fileChangeWatcher, reloadStoresOnChange } = this.client;
-		if (!reloadStoresOnChange || _fileChangeWatcher) return;
+		if (this.client._fileChangeWatcher) return;
 
 		this.client._fileChangeWatcher = watch(process.cwd(), {
-			ignored: (path) => path.includes('node_modules') || path.includes('bwd/provider'),
+			ignored: [
+				'**/node_modules/**/*',
+				'**/bwd/provider/**/*'
+			],
 			persistent: true,
-			ignoreInitial: true
+			ignoreInitial: true,
+			cwd: process.cwd()
 		});
 
-		const reloadAllStores = (path) => {
-			const pathArray = path.split(`${process.cwd()}\\`)[1];
-			this.run(new Colors({ text: 'green' }).format(pathArray));
+		const reloadStore = (name) => {
+			const store = name.split(path.sep)
+				.find(dir => this.client.pieceStores.has(dir));
+
+			if (!store) return;
+
+			name = path.basename(name);
+			const piece = this.client.pieceStores.get(store)
+				.get(name.replace(path.extname(name), ''));
+
+			this.run(name, piece);
 		};
 
 		['add', 'change', 'unlink']
-			.map(event => this.client._fileChangeWatcher.on(event, reloadAllStores));
+			.map(event => this.client._fileChangeWatcher.on(event, reloadStore));
 	}
 
 };
