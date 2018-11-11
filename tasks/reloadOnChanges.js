@@ -4,14 +4,27 @@ const path = require('path');
 
 module.exports = class extends Task {
 
-	async run(name, piece) {
+	async run(name, _path, piece) {
 		const timer = new Stopwatch();
 
-		await this.client.commands.get('reload')
-			.run({ sendLocale: () => null }, [piece]);
+		for (const module in require.cache) {
+			if (module.split(path.sep).includes('node_modules')) continue;
+			if (path.extname(module) === '.node') continue;
+			delete require.cache[module];
+		}
+
+		let log;
+		const reload = this.client.commands.get('reload');
+		if (piece) {
+			await reload.run({ sendLocale: () => null }, [piece]);
+			log = `Reloaded it in ${timer}`;
+		} else {
+			await reload.everything({ sendLocale: () => null });
+			log = `Reloaded everything in ${timer}.`;
+		}
 
 		timer.stop();
-		return this.client.emit('log', `${name} was updated. Reloaded it in ${timer}`);
+		return this.client.emit('log', `${name} was updated. ${log}`);
 	}
 
 	async init() {
@@ -27,17 +40,18 @@ module.exports = class extends Task {
 			cwd: process.cwd()
 		});
 
-		const reloadStore = (name) => {
-			const store = name.split(path.sep)
+		const reloadStore = (_path) => {
+			const store = _path.split(path.sep)
 				.find(dir => this.client.pieceStores.has(dir));
 
-			if (!store) return;
+			const name = path.basename(_path);
 
-			name = path.basename(name);
+			if (!store) return this.run(name, _path);
+
 			const piece = this.client.pieceStores.get(store)
 				.get(name.replace(path.extname(name), ''));
 
-			this.run(name, piece);
+			return this.run(name, _path, piece);
 		};
 
 		['add', 'change', 'unlink']
