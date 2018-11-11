@@ -1,4 +1,3 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Command } = require('klasa');
 const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 const suits = ['♠️', '♦', '♥️', '♠️'];

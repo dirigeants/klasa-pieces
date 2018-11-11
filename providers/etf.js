@@ -1,4 +1,3 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Provider, util } = require('klasa');
 // Requires to be installed from https://github.com/devsnek/earl
 const { pack, unpack } = require('earl');
@@ -70,24 +69,24 @@ module.exports = class extends Provider {
 	}
 
 	getRandom(table) {
-		return this.getKeys(table).then(data => data.length ? this.get(table, data[Math.floor(Math.random() * data.length)]) : null);
+		return this.getKeys(table).then(data => this.get(table, data[Math.floor(Math.random() * data.length)]));
 	}
 
-	create(table, id, data = {}) {
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), pack({ id, ...this.parseUpdateInput(data) }));
+	create(table, document, data = {}) {
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${document}.etf`), pack({ id: document, ...data }));
 	}
 
-	async update(table, id, data) {
-		const existent = await this.get(table, id);
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), pack(util.mergeObjects(existent || { id }, this.parseUpdateInput(data))));
+	async update(table, document, data) {
+		const existent = await this.get(table, document);
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${document}.etf`), pack(util.mergeObjects(existent || { id: document }, this.parseUpdateInput(data))));
 	}
 
-	replace(table, id, data) {
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), pack({ id, ...this.parseUpdateInput(data) }));
+	replace(table, document, data) {
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${document}.etf`), pack({ id: document, ...this.parseUpdateInput(data) }));
 	}
 
-	delete(table, id) {
-		return fsn.unlink(resolve(this.baseDirectory, table, `${id}.etf`));
+	delete(table, document) {
+		return fsn.unlink(resolve(this.baseDirectory, table, `${document}.etf`));
 	}
 
 };

@@ -1,5 +1,4 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
-const { SQLProvider, QueryBuilder, Type, Timestamp, util: { chunk } } = require('klasa');
+const { SQLProvider, QueryBuilder, Type, Timestamp } = require('klasa');
 const { resolve } = require('path');
 const db = require('sqlite');
 const fs = require('fs-nextra');
@@ -60,8 +59,8 @@ module.exports = class extends SQLProvider {
 	/* Document methods */
 
 	async getAll(table, entries = []) {
-		let output = [];
-		if (entries.length) for (const myChunk of chunk(entries, 999)) output.push(...await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${valueList(myChunk.length)} );`, myChunk));
+		let output;
+		if (entries.length) output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)} WHERE id IN ( ${valueList(entries.length)} );`, entries);
 		else output = await this.runAll(`SELECT * FROM ${sanitizeKeyName(table)};`);
 		return output.map(entry => this.parseEntry(table, entry));
 	}
@@ -90,10 +89,8 @@ module.exports = class extends SQLProvider {
 		const [keys, values] = this.parseUpdateInput(data, false);
 
 		// Push the id to the inserts.
-		if (!keys.includes('id')) {
-			keys.push('id');
-			values.push(id);
-		}
+		keys.push('id');
+		values.push(id);
 		return this.run(`INSERT INTO ${sanitizeKeyName(table)} ( ${keys.map(sanitizeKeyName).join(', ')} ) VALUES ( ${valueList(values.length)} );`, values.map(transformValue));
 	}
 

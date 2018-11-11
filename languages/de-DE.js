@@ -1,4 +1,3 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Language, util } = require('klasa');
 
 module.exports = class extends Language {
@@ -57,7 +56,7 @@ module.exports = class extends Language {
 			COMMAND_INVITE_SELFBOT: 'Wieso solltest du einen Einladungslink für einen Selfbot benötigen...',
 			COMMAND_INVITE: (client) => [
 				`Um ${client.user.username} zu Ihrem Disord Server hinzuzufügen, bitte folgenden Link klicken:`,
-				`<${client.invite}>`,
+				client.invite,
 				util.codeBlock('', [
 					'Der oben dargestellte Link wurde auf eine solche Art und Weise erzeugt, dass nur diejenigen Berechtigungen abgefragt',
 					'werden, welche für die Benutzung aller aktuellen Befehle notwendig sind. Bezüglich der Berechtigungen kann man es nicht',

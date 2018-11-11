@@ -1,12 +1,10 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
-const { Task } = require('klasa');
-
 /*
 
 	This is to be used with the mute command located in
 	/commands/Moderation/mute.js
 
 */
+const { Task } = require('klasa');
 
 module.exports = class extends Task {
 

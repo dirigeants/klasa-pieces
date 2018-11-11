@@ -1,4 +1,3 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
 const { Language, util } = require('klasa');
 
 module.exports = class extends Language {
@@ -57,7 +56,7 @@ module.exports = class extends Language {
 			COMMAND_INVITE_SELFBOT: 'De ce ți-ar trebui un link de invite pentru un selfbot...',
 			COMMAND_INVITE: (client) => [
 				`Pentru a adăuga ${client.user.username} în guildul tău de Discord:`,
-				`<${client.invite}>`,
+				client.invite,
 				util.codeBlock('', [
 					'Linkul deasupra este generat cu permisiunile minime necesare pentru a folosit toate comenzile existente.',
 					'Eu știu ca nu toate permisiunile sunt pentru orice server așa că nu vă fie frică să scoateți unele permisiuni.',
