@@ -36,11 +36,10 @@ module.exports = class extends Provider {
 		return this.tables.set(table, new Level(resolve(this.baseDir, table)));
 	}
 
-	deleteTable(table) {
+	async deleteTable(table) {
 		if (this.tables.has(table)) {
-			this.tables.get(table).close().then(() => {
-				fs.unlink(`${this.baseDir}/${table}`);
-			});
+			await this.tables.get(table).close();
+			await fs.unlink(`${this.baseDir}/${table}`);
 			return this.tables.delete(table);
 		}
 		return Promise.resolve();
