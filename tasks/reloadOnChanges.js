@@ -1,6 +1,8 @@
 const { Task, Stopwatch } = require('klasa');
 const { watch } = require('chokidar');
-const path = require('path');
+const { extname, basename, sep } = require('path');
+
+const nodeModules = `${sep}node_modules${sep}`;
 
 module.exports = class extends Task {
 
@@ -8,18 +10,18 @@ module.exports = class extends Task {
 		const timer = new Stopwatch();
 
 		for (const module in require.cache) {
-			if (module.split(path.sep).includes('node_modules')) continue;
-			if (path.extname(module) === '.node') continue;
-			delete require.cache[module];
+			if (!module.includes(nodeModules) && extname(module) !== '.node') {
+				delete require.cache[module];
+			}
 		}
 
 		let log;
 		const reload = this.client.commands.get('reload');
 		if (piece) {
-			await reload.run({ sendLocale: () => null }, [piece]);
+			await reload.run({ sendLocale: () => null, sendMessage: () => null }, [piece]);
 			log = `Reloaded it in ${timer}`;
 		} else {
-			await reload.everything({ sendLocale: () => null });
+			await reload.everything({ sendLocale: () => null, sendMessage: () => null });
 			log = `Reloaded everything in ${timer}.`;
 		}
 
@@ -41,21 +43,22 @@ module.exports = class extends Task {
 		});
 
 		const reloadStore = (_path) => {
-			const store = _path.split(path.sep)
+			const store = _path.split(sep)
 				.find(dir => this.client.pieceStores.has(dir));
 
-			const name = path.basename(_path);
+			const name = basename(_path);
 
 			if (!store) return this.run(name, _path);
 
 			const piece = this.client.pieceStores.get(store)
-				.get(name.replace(path.extname(name), ''));
+				.get(name.replace(extname(name), ''));
 
 			return this.run(name, _path, piece);
 		};
 
-		['add', 'change', 'unlink']
-			.map(event => this.client._fileChangeWatcher.on(event, reloadStore));
+		for (const event of ['add', 'change', 'unlink']) {
+			this.client._fileChangeWatcher.on(event, reloadStore);
+		}
 	}
 
 };
