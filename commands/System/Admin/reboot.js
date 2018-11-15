@@ -20,6 +20,8 @@ const PRECISE_TIME = {
 	SECOND: 1000 ** 3
 };
 
+const rebootKeys = ['message', 'timestamp'].map(key => `restart.${key}`);
+
 function bigAbs(bigint) {
 	return bigint < 0 ? -bigint : bigint;
 }
@@ -76,26 +78,24 @@ module.exports = class extends Command {
 
 	async init() {
 		// "message" needs to be awaited
-		const [message, timestamp] = await Promise.all(['message', 'timestamp']
-			.map(key => this.resolveSetting(this.client.settings, `restart.${key}`)));
-		await this.client.settings.reset(['message', 'timestamp']
-			.map(key => `restart.${key}`));
+		const [message, timestamp] = await Promise.all(rebootKeys.map(key => this.resolveSetting(key)));
+		await this.client.settings.reset(rebootKeys);
 
-		// if (message) message.sendLocale('COMMAND_REBOOT_SUCCESS', [timestamp && getFriendlyDuration(timestamp)]);
 		if (message) message.send(`✅ Successfully rebooted. (Took: ${timestamp && getFriendlyDuration(timestamp)})`);
 		else this.client.emit('info', 'No restart channel');
 	}
 
-	resolveSetting(settings, path) {
+	resolveSetting(path) {
+		const { settings, languages: { default: language } } = this.client;
+
 		const route = typeof path === 'string' ? path.split('.') : path;
 		const piece = settings.gateway.schema.get(route);
-		if (!piece) throw undefined;
 
 		let objOrData = settings;
 		for (const key of route) objOrData = objOrData[key];
 
 		try {
-			return piece.serializer.deserialize(objOrData, piece, this.client.languages.default);
+			return piece.serializer.deserialize(objOrData, piece, language);
 		} catch (err) {
 			return undefined;
 		}
