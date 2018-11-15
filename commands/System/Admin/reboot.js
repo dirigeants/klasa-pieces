@@ -69,7 +69,7 @@ module.exports = class extends Command {
 					message: await msg.sendLocale('COMMAND_REBOOT'),
 					timestamp: process.hrtime.bigint()
 				}
-			}).then(result => result.errors.forEach(err => this.client.emit('error', err)))
+			}).then(result => result.errors.length && this.client.emit('error', result.errors.join('\n')))
 		]);
 		process.exit();
 	}
