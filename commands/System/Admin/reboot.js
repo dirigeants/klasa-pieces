@@ -23,12 +23,13 @@ const rebootKeys = ['message', 'timestamp'].map(key => `restart.${key}`);
 
 const bigAbs = bigint => bigint < 0 ? -bigint : bigint;
 
-const roundTwoDigits = ([first, second]) => `${Number(first) + (second >= 5)}${second}`;
+const roundDigit = ([digit, otherDigit]) => Number(digit) + (otherDigit >= 5);
 
 function getFriendlyDuration(from, to = process.hrtime.bigint()) {
 	const time = bigAbs(to - from).toString();
-	const digits = time.length;
 	let shift, suffix;
+
+	const digits = time.length;
 	for (const [d, suf] of DIGITS_TO_UNITS) {
 		if (digits > d) {
 			shift = -d;
@@ -36,7 +37,10 @@ function getFriendlyDuration(from, to = process.hrtime.bigint()) {
 			break;
 		}
 	}
-	return `${time.slice(0, shift)}.${roundTwoDigits(time.slice(shift, shift + 2))}${suffix}`;
+
+	const whole = time.slice(0, shift);
+	const fractional = `${time.slice(shift, shift + 1)}${roundDigit(time.slice(shift + 1, shift + 2))}`;
+	return `${whole}.${fractional}${suffix}`;
 }
 
 module.exports = class extends Command {
