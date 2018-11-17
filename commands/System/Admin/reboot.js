@@ -39,7 +39,7 @@ function getFriendlyDuration(from, to = process.hrtime.bigint()) {
 	}
 
 	const whole = time.slice(0, shift);
-	const fractional = `${time.slice(shift, shift + 1)}${roundDigit(time.slice(shift + 1, shift + 2))}`;
+	const fractional = `${time.slice(shift, shift + 1)}${roundDigit(time.slice(shift + 1, shift + 3))}`;
 	return `${whole}.${fractional}${suffix}`;
 }
 
