@@ -35,8 +35,8 @@ module.exports = class extends Argument {
 			case 0: throw `${possible.name} Must be a valid name, id or role mention`;
 			case 1: return querySearch[0];
 			default: 
-            	if (querySearch[0].name.toLowerCase() === arg.toLowerCase()) return querySearch[0]
-            	throw `Found multiple matches: \`${querySearch.map(role => role.name).join('`, `')}\``;
+            			if (querySearch[0].name.toLowerCase() === arg.toLowerCase()) return querySearch[0];
+            			throw `Found multiple matches: \`${querySearch.map(role => role.name).join('`, `')}\``;
 		}
 	}
 
