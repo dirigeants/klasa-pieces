@@ -7,8 +7,8 @@ module.exports = class extends Command {
 		super(...args, {
 			description: 'Make the bot say something',
 			usage: '<message:string>',
-			aliases: ['echo'],
-			usageDelim: ' '
+			permissionLevel: 4,
+			aliases: ['echo']
 		});
 	}
 
