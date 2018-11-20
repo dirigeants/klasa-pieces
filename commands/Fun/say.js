@@ -16,7 +16,7 @@ module.exports = class extends Command {
 	async run(msg, [args]) {
 		// eslint-disable-next-line no-empty-function
 		msg.delete().catch(() => {});
-		return msg.channel.send(args, { disabledEveryone: true });
+		return msg.channel.send(args, { disableEveryone: true });
 	}
 
 };
