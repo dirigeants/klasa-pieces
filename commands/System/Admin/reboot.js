@@ -21,28 +21,6 @@ const DIGITS_TO_UNITS = new Map([
 
 const rebootKeys = ['message', 'timestamp'].map(key => `restart.${key}`);
 
-const bigAbs = bigint => bigint < 0 ? -bigint : bigint;
-
-const roundDigit = ([digit, otherDigit]) => Number(digit) + (otherDigit >= 5);
-
-function getFriendlyDuration(from, to = process.hrtime.bigint()) {
-	const time = bigAbs(to - from).toString();
-	let shift, suffix;
-
-	const digits = time.length;
-	for (const [d, suf] of DIGITS_TO_UNITS) {
-		if (digits > d) {
-			shift = -d;
-			suffix = suf;
-			break;
-		}
-	}
-
-	const whole = time.slice(0, shift);
-	const fractional = `${time.slice(shift, shift + 1)}${roundDigit(time.slice(shift + 1, shift + 3))}`;
-	return `${whole}.${fractional}${suffix}`;
-}
-
 module.exports = class extends Command {
 
 	constructor(...args) {
@@ -71,7 +49,7 @@ module.exports = class extends Command {
 		const [message, timestamp] = await Promise.all(rebootKeys.map(key => this._resolveSetting(key)));
 		await this.client.settings.reset(rebootKeys);
 
-		if (message) message.send(`✅ Successfully rebooted. (Took: ${timestamp && getFriendlyDuration(timestamp)})`);
+		if (message) message.send(`✅ Successfully rebooted. (Took: ${timestamp && this.constructor.getFriendlyDuration(timestamp)})`);
 		else this.client.emit('info', 'No restart channel');
 	}
 
@@ -89,6 +67,32 @@ module.exports = class extends Command {
 		} catch (err) {
 			return undefined;
 		}
+	}
+
+	static bigAbs(bigint) {
+		return bigint < 0 ? -bigint : bigint;
+	}
+
+	static getFriendlyDuration(from, to = process.hrtime.bigint()) {
+		const time = this.bigAbs(to - from).toString();
+		let shift, suffix;
+
+		const digits = time.length;
+		for (const [d, suf] of DIGITS_TO_UNITS) {
+			if (digits > d) {
+				shift = -d;
+				suffix = suf;
+				break;
+			}
+		}
+
+		const whole = time.slice(0, shift);
+		const fractional = `${time.slice(shift, shift + 1)}${this._roundDigit(time.slice(shift + 1, shift + 3))}`;
+		return `${whole}.${fractional}${suffix}`;
+	}
+
+	static _roundDigit([digit, otherDigit]) {
+		return Number(digit) + (otherDigit >= 5);
 	}
 
 };
