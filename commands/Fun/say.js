@@ -9,11 +9,12 @@ module.exports = class extends Command {
       usage: "<message:string>",
       disableEveryone: true,
       permissionLevel: 4,
-      aliases: ["echo"]
+      aliases: ["echo"],
+      usageDelim: ' '
     });
   }
 
-  async run(msg, [args]) {
+  async run(msg, [args] ) {
     msg.delete().catch(() => {});
     return msg.channel.send(args);
   }
