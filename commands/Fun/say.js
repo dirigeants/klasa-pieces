@@ -14,7 +14,7 @@ module.exports = class extends Command {
   }
 
   async run(msg, [args]) {
-    msg.delete().catch() => {} 
+    msg.delete().catch(() => {});
     return msg.channel.send(args);
   }
 };
