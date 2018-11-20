@@ -8,7 +8,7 @@ module.exports = class extends Command {
 		super(...args, {
 			aliases: ['randomdog', 'woof'],
 			description: 'Grabs a random dog image from random.dog.',
-			extendedHelp: 'This command grabs a random dog from "https://random.dog/woof.json".'
+			extendedHelp: 'This command grabs a random dog from "https://dog.ceo/api/breeds/image/random".'
 		});
 	}
 
