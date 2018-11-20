@@ -16,10 +16,11 @@ module.exports = class extends Extendable {
 	 */
 	async sendLoading(cb, { loadingText = 'Just a moment.' } = {}) {
 		const loadingMsg = await this.send(loadingText);
+		const oldContent = loadingMsg.content;
 		// eslint-disable-next-line callback-return
 		const response = await cb(loadingMsg);
 		// If the message was edited in cb, we don't wanna delete it
-		if (!(response && response.id === loadingMsg.id)) await loadingMsg.delete();
+		if (!(response && response.id === loadingMsg.id) && oldContent === loadingMsg.content) await loadingMsg.delete();
 		return response;
 	}
 
