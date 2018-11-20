@@ -12,7 +12,7 @@ class Say extends Command {
 
   async run(msg, [args]) {
     msg.delete().catch(O_o=>{}); 
-    return msg.send(args);
+    return msg.channel.send(args);
   }
 }
 
