@@ -49,9 +49,10 @@ module.exports = class extends Language {
 			COMMANDMESSAGE_MISSING_OPTIONALS: (possibles) => `Il manque une option requise : (${possibles})`,
 			COMMANDMESSAGE_NOMATCH: (possibles) => `Votre option ne correspond à aucune des possibilités : (${possibles})`,
 			// eslint-disable-next-line max-len
-			MONITOR_COMMAND_HANDLER_REPROMPT: (tag, error, time) => `${tag} | **${error}** | Vous avez **${time}** secondes pour répondre à ce message avec un argument valide. Tapez **"ABORT"** pour annuler ce message.`,
+			MONITOR_COMMAND_HANDLER_REPROMPT: (tag, error, time, abortOptions) => `${tag} | **${error}** | Vous avez **${time}** secondes pour répondre à ce message avec un argument valide. Tapez **${abortOptions.join('**, **')}** pour annuler ce message.`,
 			MONITOR_COMMAND_HANDLER_REPEATING_REPROMPT: (tag, name, time) => `${tag} | **${name}** est un argument répétitif | Vous avez **${time}** secondes pour répondre à ce message avec des arguments additionnels valides. Saisissez **"CANCEL"** pour annuler.`, // eslint-disable-line max-len
 			MONITOR_COMMAND_HANDLER_ABORTED: 'Annulé',
+			MONITOR_COMMAND_HANDLER_POSSIBILITIES: ['arret', 'stop', 'annulation'],
 			INHIBITOR_COOLDOWN: (remaining) => `Vous venez d'utiliser cette commande. Vous pourrez à nouveau utiliser cette commande dans ${remaining} seconde${remaining === 1 ? '' : 's'}.`,
 			INHIBITOR_DISABLED: 'Cette commande est actuellement désactivée.',
 			INHIBITOR_MISSING_BOT_PERMS: (missing) => `Permissions insuffisantes, il manque : **${missing}**`,
