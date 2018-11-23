@@ -6,6 +6,7 @@
  */
 
 const assert = require('assert');
+const git = require('simple-git/promise');
 const { Command, util: { codeBlock, regExpEsc }, KlasaMessage } = require('klasa');
 
 module.exports = class extends Command {
@@ -15,6 +16,8 @@ module.exports = class extends Command {
 			description: 'Pull in new changes from GitHub.',
 			permissionLevel: 10
 		});
+
+		this.git = git();
 
 		const trailingSlash = /[/\\]$/;
 		const [cwd, userBaseDirectory] = [process.cwd(), this.client.userBaseDirectory]
@@ -43,7 +46,7 @@ module.exports = class extends Command {
 	}
 
 	async updateBot(msg) {
-		const pullResult = await this.client.git.pull();
+		const pullResult = await this.git.pull();
 
 		const { pieces, nonPieces } = this._segregateChanges(pullResult);
 
