@@ -1,7 +1,7 @@
 /*
 To your main server file, add:
 Client.defaultUserSchema
-  .add("TODOs", "any", {array: true, default: [], configurable: true});
+  .add('TODOs', 'any', { array: true });
 */
 
 const { Command } = require('klasa');
