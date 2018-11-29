@@ -1,5 +1,5 @@
 /*
-To your main server file, add:
+This piece requires a `TODOs` key to work, add in your main file:
 Client.defaultUserSchema
   .add('TODOs', 'any', { array: true });
 */
