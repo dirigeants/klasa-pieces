@@ -1,7 +1,7 @@
 /*
-To your main server file, add:
+This piece requires a `TODOs` key to work, add in your main file:
 Client.defaultUserSchema
-  .add("TODOs", "any", {array: true, default: [], configurable: true});
+  .add('TODOs', 'any', { array: true });
 */
 
 const { Command } = require('klasa');
@@ -12,21 +12,10 @@ module.exports = class extends Command {
 		super(...args, {
 			enabled: true,
 			runIn: ['dm'],
-			requiredPermissions: [],
-			requiredSettings: [],
-			aliases: [],
-			autoAliases: true,
-			bucket: 1,
-			cooldown: 0,
-			promptLimit: 0,
-			promptTime: 30000,
-			guarded: false,
-			permissionLevel: 0,
 			description: 'add|remove|list user\'s TODOs through DM',
 			extendedHelp: 'No extended help available.',
 			usage: '<add|remove|list> (TODO:string) [content:...string]',
 			usageDelim: ' ',
-			quotedStringSupport: false,
 			subcommands: true
 		});
 		//
@@ -48,7 +37,7 @@ module.exports = class extends Command {
 	}
 
 	list(message) {
-		return message.send(`TODOs for this author are: ${message.author.settings.TODOs.map(key => `\n${key}`)}`);
+		return message.send(`List of TODOs for this user: \`${message.author.settings.TODOs.join('`, `')}\``);
 	}
 
 };
