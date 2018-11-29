@@ -14,7 +14,7 @@ module.exports = class extends Command {
 			runIn: ['dm'],
 			description: 'add|remove|list user\'s TODOs through DM',
 			extendedHelp: 'No extended help available.',
-			usage: '<add|remove|list> (TODO:string) [content:...string]',
+			usage: '<add|remove|list:default> (TODO:string) [content:...string]',
 			usageDelim: ' ',
 			subcommands: true
 		});
