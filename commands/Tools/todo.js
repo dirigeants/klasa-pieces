@@ -48,7 +48,7 @@ module.exports = class extends Command {
 	}
 
 	list(message) {
-		return message.send(`TODOs for this author are: ${message.author.settings.TODOs.map(key => `\n${key}`)}`);
+		return message.send(`List of TODOs for this user: \`${message.author.settings.TODOs.join('`, `')}\``);
 	}
 
 };
