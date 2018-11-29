@@ -1,4 +1,4 @@
-/* MIT License, Copyright?
+/*
 To your main server file, add:
 Client.defaultUserSchema
   .add("TODOs", "any", {array: true, default: [], configurable: true});
