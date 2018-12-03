@@ -47,9 +47,10 @@ module.exports = class extends Language {
 			COMMANDMESSAGE_MISSING_REQUIRED: (name) => `${name} 引数が必要です。`,
 			COMMANDMESSAGE_MISSING_OPTIONALS: (possibles) => `必要なオプションが不足しています: (${possibles})`,
 			COMMANDMESSAGE_NOMATCH: (possibles) => `あなたの選択肢は次のいずれとも一致しませんでした: (${possibles})`,
-			MONITOR_COMMAND_HANDLER_REPROMPT: (tag, error, time) => `${tag} | **${error}** | **${time}** 秒の間に有効な引数を入力してください。**"ABORT"** と打つとこのプロンプトは中止されます。`,
+			MONITOR_COMMAND_HANDLER_REPROMPT: (tag, error, time, abortOptions) => `${tag} | **${error}** | **${time}** 秒の間に有効な引数を入力してください。**${abortOptions.join('**, **')}** と打つとこのプロンプトは中止されます。`,
 			MONITOR_COMMAND_HANDLER_REPEATING_REPROMPT: (tag, name, time) => `${tag} | **${name}** は繰り返しの引数です | **${time}** 秒の間に追加の引数を入力してください。**"CANCEL"** と打つとこのプロンプトは中止されます。`,
 			MONITOR_COMMAND_HANDLER_ABORTED: '中断しました',
+			MONITOR_COMMAND_HANDLER_POSSIBILITIES: ['中断', '停止'],
 			INHIBITOR_COOLDOWN: (remaining) => `このコマンドを使用したばかりです。${remaining}秒でこのコマンドを再度使用できます。`,
 			INHIBITOR_DISABLED: 'このコマンドは現在無効にされています。',
 			INHIBITOR_MISSING_BOT_PERMS: (missing) => `不十分なアクセス許可。**${missing}** が不足しています。`,
@@ -102,7 +103,7 @@ module.exports = class extends Language {
 			COMMAND_PINGPONG: (diff, ping) => `Pong! (往復所要時間: ${diff}ms、Heartbeat: ${ping}ms)`,
 			COMMAND_INVITE: () => [
 				`サーバーに${this.client.user.username}を追加するには:`,
-				this.client.invite,
+				`<${this.client.invite}>`,
 				util.codeBlock('', [
 					'現在のすべてのコマンドを使用するために必要な最小限の権限を要求する上記のリンクが生成されます。',
 					'すべての権限がすべてのサーバーにとって正しいわけではないので、ボックスのチェックを外すことを恐れないでください。',
