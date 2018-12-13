@@ -11,7 +11,8 @@ module.exports = class extends Command {
 			cooldown: 5,
 			requiredPermissions: ['ATTACH_FILES'],
 			description: 'Applies a faceapp filter to an image.',
-			usage: '<smile|smile_2|hot|old|young|female|female_2|male|pan|hitman|makeup|wave|glasses|bangs|hipster|goatee|lion|impression|heisenberg|hollywood>'
+			usage: '<smile|smile_2|hot|old|young|female|female_2|male|pan|hitman|makeup|wave|glasses|bangs|hipster|goatee|lion|impression|heisenberg|hollywood>',
+			usageDelim: ' '
 		});
 	}
 
