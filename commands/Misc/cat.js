@@ -7,15 +7,12 @@ module.exports = class extends Command {
 	constructor(...args) {
 		super(...args, {
 			aliases: ['randomcat', 'meow'],
-			description: 'Grabs a random cat image from random.cat.'
+			description: 'Grabs a random cat. Use the "--gif" flag to get a GIF.'
 		});
 	}
 
 	async run(msg) {
-		const file = await fetch('http://aws.random.cat/meow')
-			.then(response => response.json())
-			.then(body => body.file);
-		return msg.channel.sendFile(file, `cat.${file.slice(file.lastIndexOf('.'), file.length)}`);
+		return msg.channel.sendFile(`https://cataas.com/cat${msg.flags.gif ? '/gif' : ''}`, `cat.${msg.flags.gif ? 'gif' : 'png'}`);
 	}
 
 };
