@@ -17,9 +17,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [name]) {
-		const url = `https://packagephobia.now.sh/api.json?p=${encodeURIComponent(name)}`;
-
-		const { publishSize, installSize } = await fetch(url)
+		const { publishSize, installSize } = await fetch(`https://packagephobia.now.sh/api.json?p=${encodeURIComponent(name)}`)
 			.then(response => response.json())
 			.catch(() => {
 				throw 'There was an unexpected error. Try again later.';
