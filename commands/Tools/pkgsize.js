@@ -1,7 +1,7 @@
 const { Command } = require('klasa');
 const fetch = require('node-fetch');
 
-const suffixes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+const suffixes = ['Bytes', 'KB', 'MB', 'GB'];
 const getBytes = (bytes) => {
 	const i = Math.floor(Math.log(bytes) / Math.log(1024));
 	return (!bytes && '0 Bytes') || `${(bytes / Math.pow(1024, i)).toFixed(2)} ${suffixes[i]}`;
@@ -17,12 +17,12 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [name]) {
-		const url = new URL(`https://packagephobia.now.sh/api.json?p=${encodeURIComponent(name)}`);
+		const url = `https://packagephobia.now.sh/api.json?p=${encodeURIComponent(name)}`;
 
 		const { publishSize, installSize } = await fetch(url)
 			.then(response => response.json())
 			.catch(() => {
-			  throw 'There was an unexpected error. Try again later.';
+				throw 'There was an unexpected error. Try again later.';
 			});
 
 		if (!publishSize && !installSize) throw 'That package doesn\'t exist.';
