@@ -39,7 +39,7 @@ module.exports = class extends Command {
 
 [Documentation](${crate.documentation}) - [Repository](${crate.repository})
 			`)
-      .addField('Total Downloads', crate.downloads.toLocaleString(), true)
+			.addField('Total Downloads', crate.downloads.toLocaleString(), true)
 			.addField('Categories', crate.categories.join(', '), true)
 			.addField('Keywords', crate.keywords.join(', '), true)
 			.addField('Latest Version', `
