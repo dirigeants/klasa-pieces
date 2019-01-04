@@ -2,7 +2,7 @@ const { Command } = require('klasa');
 const fetch = require('node-fetch');
 const { MessageEmbed } = require('discord.js');
 
-const suffixes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+const suffixes = ['Bytes', 'KB', 'MB'];
 const getBytes = (bytes) => {
 	const i = Math.floor(Math.log(bytes) / Math.log(1024));
 	return (!bytes && '0 Bytes') || `${(bytes / Math.pow(1024, i)).toFixed(2)} ${suffixes[i]}`;
@@ -12,23 +12,21 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			description: 'Shows the install/publish size of a npm package.',
+			description: 'Shows the install/publish size of a cargo crate.',
 			usage: '<name:str>'
 		});
 	}
 
 	async run(msg, [name]) {
-		const url = new URL(`https://crates.io/api/v1/crates/${encodeURIComponent(name)}`);
+		const url = `https://crates.io/api/v1/crates/${encodeURIComponent(name)}`;
 
-		const { crate, versions } = await fetch(url)
+		const { crate, versions: [latest] } = await fetch(url)
 			.then(response => response.json())
 			.catch(() => {
 				throw 'There was an unexpected error. Try again later.';
 			});
 
 		if (!crate) throw 'That crate doesn\'t exist.';
-
-		const latest = versions[0];
 
 		const embed = new MessageEmbed()
 			.setColor(15051318)
