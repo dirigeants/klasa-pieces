@@ -18,9 +18,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [name]) {
-		const url = `https://crates.io/api/v1/crates/${encodeURIComponent(name)}`;
-
-		const { crate, versions: [latest] } = await fetch(url)
+		const { crate, versions: [latest] } = await fetch(`https://crates.io/api/v1/crates/${encodeURIComponent(name)}`)
 			.then(response => response.json())
 			.catch(() => {
 				throw 'There was an unexpected error. Try again later.';
