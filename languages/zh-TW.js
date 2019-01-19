@@ -37,7 +37,7 @@ module.exports = class extends Language {
 			RESOLVER_INVALID_REGEX_MATCH: (name, pattern) => `${name} 的賦予值必須遵循正規表達式的模式──\`${pattern}\`。`,
 			RESOLVER_INVALID_ROLE: (name) => `${name} 必須賦予一成員組提及字串或成員組 ID。`,
 			RESOLVER_INVALID_STRING: (name) => `${name} 必須賦予一有效字串。`,
-            RESOLVER_INVALID_TIME: (name) => `${name} 必須賦予一有效的時長字串或日期字串。`,
+			RESOLVER_INVALID_TIME: (name) => `${name} 必須賦予一有效的時長字串或日期字串。`,
 			RESOLVER_INVALID_URL: (name) => `${name} 必須賦予一有效的 URL 網址。`,
 			RESOLVER_INVALID_USER: (name) => `${name} 必須賦予一提及字串或有效的使用者 ID。`,
 			RESOLVER_STRING_SUFFIX: ' 個字元',
@@ -66,7 +66,7 @@ module.exports = class extends Language {
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `此伺服器缺漏 **${settings.join(', ')}** ${settings.length !== 1 ? '等' : ''}的伺服器設定，因此無法執行該指令。`,
 			INHIBITOR_RUNIN: (types) => `此指令只能在 ${types} 的頻道中使用。`,
 			INHIBITOR_RUNIN_NONE: (name) => `指令 ${name} 並沒有被設定為在任何頻道中執行。`,
-            COMMAND_BLACKLIST_DESCRIPTION: '讓機器人對使用者或伺服器封鎖或取消封鎖。',
+			COMMAND_BLACKLIST_DESCRIPTION: '讓機器人對使用者或伺服器封鎖或取消封鎖。',
 			COMMAND_BLACKLIST_SUCCESS: (usersAdded, usersRemoved, guildsAdded, guildsRemoved) => [
 				usersAdded.length ? `**名單已追加使用者**\n${util.codeBlock('', usersAdded.join(', '))}` : '',
 				usersRemoved.length ? `**名單已移除只用者**\n${util.codeBlock('', usersRemoved.join(', '))}` : '',
@@ -136,7 +136,7 @@ module.exports = class extends Language {
 				'• ⏲ 【Tasks】可以排定工作，於未來的時間點運行。也可以不斷反覆。',
 				'',
 				'我們致力於提供一個 100% 可客製化的框架，希望能夠應對多種不同族群的使用者。我們勤於更新，一有空就會修正發現的程式臭蟲。',
-				"如果對我們感興趣，歡迎蒞臨 https://klasa.js.org。"
+				"如果對我們感興趣，歡迎蒞臨 https://klasa.js.org 。"
 			],
 			COMMAND_INFO_DESCRIPTION: '提供關於本機器人的一些資訊。',
 			COMMAND_HELP_DESCRIPTION: '針對一項指令顯示說明。',
@@ -166,17 +166,17 @@ module.exports = class extends Language {
 			COMMAND_STATS: (memUsage, uptime, users, guilds, channels, klasaVersion, discordVersion, processVersion, message) => [
 				'= 統計情報 =',
 				'',
-				`• 記憶體使用　　:: ${memUsage} MB`,
-				`• 啟動時間　　　:: ${uptime}`,
-				`• 使用者　　　　:: ${users}`,
-				`• 伺服器　　　　:: ${guilds}`,
-				`• 頻道　　　　　:: ${channels}`,
-				`• Ｋｌａｓａ　　:: v${klasaVersion}`,
-				`• Ｄｉｓｃｏｒｄ:: v${discordVersion}`,
-				`• Ｎｏｄｅ．ｊｓ:: ${processVersion}`,
-				`• Ｓｈａｒｄ　　:: ${(message.guild ? message.guild.shardID : 0) + 1} / ${this.client.options.totalShardCount}`
+				`• 記憶體使用 :: ${memUsage} MB`,
+				`• 啟動時間   :: ${uptime}`,
+				`• 使用者     :: ${users}`,
+				`• 伺服器     :: ${guilds}`,
+				`• 頻道       :: ${channels}`,
+				`• Klasa      :: v${klasaVersion}`,
+				`• Discord.js :: v${discordVersion}`,
+				`• Node.js    :: ${processVersion}`,
+				`• Shard      :: ${(message.guild ? message.guild.shardID : 0) + 1} / ${this.client.options.totalShardCount}`
 			],
-			COMMAND_STATS_DESCRIPTION: '提供一些關於機器人的細節和統計數據。Provides some details about the bot and stats.',
+			COMMAND_STATS_DESCRIPTION: '提供一些關於機器人的細節和統計數據。',
 			MESSAGE_PROMPT_TIMEOUT: '提示訊息已逾時。'
 		};
 	}
