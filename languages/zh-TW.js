@@ -78,7 +78,7 @@ module.exports = class extends Language {
 				'eval 指令直接運行程式碼，拋出的任何錯誤都會被處理。',
 				'此外還提供旗標以調整一些細項。輸入 --silent, --depth=number 或 --async 來調整輸出格式。',
 				'輸入 --silent 旗標，可以隱藏輸出結果。',
-				"輸入 --depth 旗標並賦予一個數字，可以調整 util.inspect 的 depth。",
+				'輸入 --depth 旗標並賦予一個數字，可以調整 util.inspect 的 depth。',
 				'輸入 --async 旗標，可以將程式碼包在一個 async function，然後就能隨心所欲使用 await；若你想要有回傳值，就要有關鍵詞 return 。',
 				'輸入 --showHidden 旗標，可以啟用 util.inspect 的 showHidden 項目。',
 				'若輸出結果太長，將會包成一個檔案；機器人沒有 ATTACH_FILES 權限的話，則會直接列在 console 中。'
@@ -120,7 +120,7 @@ module.exports = class extends Language {
 			],
 			COMMAND_INVITE_DESCRIPTION: '顯示機器人的伺服器邀請連結。',
 			COMMAND_INFO: [
-				"Klasa 是一個「隨插即玩」框架，並以 Discord.js 程式庫為基礎。",
+				'Klasa 是一個「隨插即玩」框架，並以 Discord.js 程式庫為基礎。',
 				'大部分的程式碼都是模組化的，也就是說開發者可以依據需求改造 Klasa。',
 				'',
 				'Klasa 的功能略述如下：',
@@ -136,7 +136,7 @@ module.exports = class extends Language {
 				'• ⏲ 【Tasks】可以排定工作，於未來的時間點運行。也可以不斷反覆。',
 				'',
 				'我們致力於提供一個 100% 可客製化的框架，希望能夠應對多種不同族群的使用者。我們勤於更新，一有空就會修正發現的程式臭蟲。',
-				"如果對我們感興趣，歡迎蒞臨 https://klasa.js.org 。"
+				'如果對我們感興趣，歡迎蒞臨 https://klasa.js.org 。'
 			],
 			COMMAND_INFO_DESCRIPTION: '提供關於本機器人的一些資訊。',
 			COMMAND_HELP_DESCRIPTION: '針對一項指令顯示說明。',
