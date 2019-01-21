@@ -17,7 +17,6 @@ module.exports = class extends Command {
 			usageDelim: ' ',
 			subcommands: true
 		});
-		//
 		this.createCustomResolver('string', (arg, possible, message, [action]) => {
 			if (action === 'list') return arg;
 			return this.client.arguments.get('string').run(arg, possible, message);
