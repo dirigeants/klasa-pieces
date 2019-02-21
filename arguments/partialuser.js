@@ -5,7 +5,6 @@ module.exports = class extends Argument {
 	async run(arg, possible, message) {
 		const user = await this.resolveUser(arg, this.client.users);
 		if (user) return user;
-		// throw message.language.get('RESOLVER_INVALID_USER', possible.name);
 		throw `Please specify a valid user.`;
 	}
 
