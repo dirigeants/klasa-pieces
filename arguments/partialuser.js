@@ -8,24 +8,20 @@ module.exports = class extends Argument {
 		throw `Please specify a valid user.`;
 	}
 
-	resolveUser(text, users, caseSensitive = false, wholeWord = false) {
-		return users.get(text) || users.find(user => this.checkUser(text, user, caseSensitive, wholeWord));
+	resolveUser(text, users) {
+		return users.get(text) || users.find(user => this.checkUser(text, user));
 	}
 
-	checkUser(text, user, caseSensitive = false, wholeWord = false) {
+	checkUser(text, user) {
 		if (user.id === text) return true;
 		const reg = /<@!?(\d{17,19})>/;
 		const match = text.match(reg);
 		if (match && user.id === match[1]) return true;
-		text = caseSensitive ? text : text.toLowerCase();
-		const username = caseSensitive ? user.username : user.username.toLowerCase();
+		text = text.toLowerCase();
+		const username = user.username.toLowerCase();
 		const discrim = user.discriminator;
-		if (!wholeWord) {
-			return username.includes(text) ||
-			(username.includes(text.split('#')[0]) && discrim.includes(text.split('#')[1]));
-		}
-		return username === text ||
-		(username === text.split('#')[0] && discrim === text.split('#')[1]);
+		return username.includes(text) ||
+		(username.includes(text.split('#')[0]) && discrim.includes(text.split('#')[1]));
 	}
 
 };
