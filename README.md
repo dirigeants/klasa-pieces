@@ -48,6 +48,7 @@ We will automatically deny PRs that:
 - Contain NSFW, NSFL contents or contents we deem to be unacceptable
 - Contain hacks/exploits/etc
 - Have code that might cause a bot to break the TOS or Ratelimits
+- Do not abide by our [Code of Conduct](https://github.com/dirigeants/CoC/blob/master/CODE_OF_CONDUCT.md)
 - Any reason **WE** feel is valid
 
 > WE RESERVE THE RIGHT TO REFUSE ANY CONTENTS FOR ANY REASON WHETHER YOU ACCEPT THEM OR NOT.
