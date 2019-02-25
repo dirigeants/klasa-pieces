@@ -12,7 +12,7 @@ module.exports = class extends Command {
 		const fact = await fetch(`http://dog-api.kinduff.com/api/facts?number=1`)
 			.then(response => response.json())
 			.then(body => body.facts[0]);
-		return msg.sendMessage(`📢 **Dogfact:** *${fact}*`);
+		return msg.send(`📢 **Dogfact:** *${fact}*`);
 	}
 
 };

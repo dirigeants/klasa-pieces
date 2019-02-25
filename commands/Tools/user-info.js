@@ -19,17 +19,19 @@ module.exports = class extends Command {
 	}
 
 	run(msg, [member = msg.member]) {
-		return msg.sendEmbed(new MessageEmbed()
-			.setColor(member.displayHexColor || 0xFFFFFF)
-			.setThumbnail(member.user.displayAvatarURL())
-			.addField('❯ Name', member.user.tag, true)
-			.addField('❯ ID', member.id, true)
-			.addField('❯ Discord Join Date', this.timestamp.display(member.user.createdAt), true)
-			.addField('❯ Server Join Date', this.timestamp.display(member.joinedTimestamp), true)
-			.addField('❯ Status', this.statuses[member.presence.status], true)
-			.addField('❯ Playing', member.presence.activity ? member.presence.activity.name : 'N/A', true)
-			.addField('❯ Highest Role', member.roles.size > 1 ? member.roles.highest.name : 'None', true)
-			.addField('❯ Hoist Role', member.roles.hoist ? member.roles.hoist.name : 'None', true));
+		return msg.send({
+			embed: new MessageEmbed()
+				.setColor(member.displayHexColor || 0xFFFFFF)
+				.setThumbnail(member.user.displayAvatarURL())
+				.addField('❯ Name', member.user.tag, true)
+				.addField('❯ ID', member.id, true)
+				.addField('❯ Discord Join Date', this.timestamp.display(member.user.createdAt), true)
+				.addField('❯ Server Join Date', this.timestamp.display(member.joinedTimestamp), true)
+				.addField('❯ Status', this.statuses[member.presence.status], true)
+				.addField('❯ Playing', member.presence.activity ? member.presence.activity.name : 'N/A', true)
+				.addField('❯ Highest Role', member.roles.size > 1 ? member.roles.highest.name : 'None', true)
+				.addField('❯ Hoist Role', member.roles.hoist ? member.roles.hoist.name : 'None', true)
+		});
 	}
 
 };

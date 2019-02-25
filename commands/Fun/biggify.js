@@ -18,7 +18,7 @@ module.exports = class extends Command {
 			await new Promise((resolve, reject) => {
 				tempImg.getBuffer('image/png', (err, buffer) => err ?
 					reject(err) :
-					resolve(msg.channel.sendFile(buffer, 'image.png')));
+					resolve(msg.channel.send({ file: [{ attachment: buffer, name: 'image.png' }] })));
 			});
 		}
 	}

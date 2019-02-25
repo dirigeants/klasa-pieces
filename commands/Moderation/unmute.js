@@ -20,7 +20,7 @@ module.exports = class extends Command {
 
 		await member.roles.remove(msg.guild.settings.roles.muted);
 
-		return msg.sendMessage(`${member.user.tag} was unmuted.${reason ? ` With reason of: ${reason}` : ''}`);
+		return msg.send(`${member.user.tag} was unmuted.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
 };

@@ -18,7 +18,7 @@ module.exports = class extends Command {
 		const bans = await msg.guild.fetchBans();
 		if (bans.has(user.id)) {
 			await msg.guild.members.unban(user, reason);
-			return msg.sendMessage(`${user.tag} was unbanned.${reason ? ` With reason of: ${reason}` : ''}`);
+			return msg.send(`${user.tag} was unbanned.${reason ? ` With reason of: ${reason}` : ''}`);
 		}
 
 		throw `${user.tag} was never banned. How could I unban them?`;

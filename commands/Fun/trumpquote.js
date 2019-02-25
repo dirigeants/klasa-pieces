@@ -13,7 +13,7 @@ module.exports = class extends Command {
 			.then(response => response.json())
 			.then(body => body.value)
 			.catch(() => { throw 'There was an error. Please try again.'; });
-		return msg.sendMessage(quote);
+		return msg.send(quote);
 	}
 
 };

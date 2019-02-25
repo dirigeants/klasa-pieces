@@ -15,7 +15,7 @@ module.exports = class extends Command {
 		const joke = await fetch('http://api.yomomma.info')
 			.then(response => response.json())
 			.then(body => body.joke);
-		return msg.sendMessage(`📢 **Yomomma joke:** *${joke}*`);
+		return msg.send(`📢 **Yomomma joke:** *${joke}*`);
 	}
 
 };

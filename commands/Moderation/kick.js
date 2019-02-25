@@ -22,7 +22,7 @@ module.exports = class extends Command {
 		if (!member.kickable) throw 'I cannot kick this user.';
 
 		await member.kick(reason);
-		return msg.sendMessage(`${member.user.tag} got kicked.${reason ? ` With reason of: ${reason}` : ''}`);
+		return msg.send(`${member.user.tag} got kicked.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
 };

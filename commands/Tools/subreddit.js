@@ -23,15 +23,17 @@ module.exports = class extends Command {
 			})
 			.catch(() => { throw this.errorMessage; });
 
-		return msg.sendEmbed(new MessageEmbed()
-			.setTitle(subreddit.title)
-			.setDescription(subreddit.public_description)
-			.setURL(`https://www.reddit.com/r/${subredditName}/`)
-			.setColor(6570404)
-			.setThumbnail(subreddit.icon_img)
-			.setImage(subreddit.banner_img)
-			.addField('Subscribers', subreddit.subscribers.toLocaleString(), true)
-			.addField('Users Active', subreddit.accounts_active.toLocaleString(), true));
+		return msg.send({
+			embed: new MessageEmbed()
+				.setTitle(subreddit.title)
+				.setDescription(subreddit.public_description)
+				.setURL(`https://www.reddit.com/r/${subredditName}/`)
+				.setColor(6570404)
+				.setThumbnail(subreddit.icon_img)
+				.setImage(subreddit.banner_img)
+				.addField('Subscribers', subreddit.subscribers.toLocaleString(), true)
+				.addField('Users Active', subreddit.accounts_active.toLocaleString(), true)
+		});
 	}
 
 };

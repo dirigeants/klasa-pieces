@@ -12,7 +12,7 @@ module.exports = class extends Command {
 	}
 
 	run(msg, [coins = 0]) {
-		if (coins <= 0) return msg.sendMessage(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
+		if (coins <= 0) return msg.send(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 
 		let heads = 0;
 		let tails = 0;
@@ -20,7 +20,7 @@ module.exports = class extends Command {
 			if (Math.random() > 0.5) heads++;
 			else tails++;
 		}
-		return msg.sendMessage(`You flipped ${coins} coins. ${heads} ${heads === 1 ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
+		return msg.send(`You flipped ${coins} coins. ${heads} ${heads === 1 ? 'was' : 'were'} heads, and ${tails} ${tails === '1' ? 'was' : 'were'} tails.`);
 	}
 
 };

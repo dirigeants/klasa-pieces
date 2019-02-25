@@ -22,14 +22,16 @@ module.exports = class extends Command {
 			return msg.sendMessage('Today, something went wrong, so you will have to try again in a few moments. FML again.');
 		}
 
-		return msg.sendEmbed(new MessageEmbed()
-			.setTitle(`Requested by ${msg.author.tag}`)
-			.setAuthor('FML Stories')
-			.setColor(msg.member.displayColor)
-			.setTimestamp()
-			.setDescription(`_${article.childNodes[0].text}\n\n_`)
-			.addField('I agree, your life sucks', updoot.childNodes[0].text, true)
-			.addField('You deserved it:', downdoot.childNodes[0].text, true));
+		return msg.send({
+			embed: new MessageEmbed()
+				.setTitle(`Requested by ${msg.author.tag}`)
+				.setAuthor('FML Stories')
+				.setColor(msg.member.displayColor)
+				.setTimestamp()
+				.setDescription(`_${article.childNodes[0].text}\n\n_`)
+				.addField('I agree, your life sucks', updoot.childNodes[0].text, true)
+				.addField('You deserved it:', downdoot.childNodes[0].text, true)
+		});
 	}
 
 };

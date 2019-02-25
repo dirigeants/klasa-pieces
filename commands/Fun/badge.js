@@ -12,11 +12,13 @@ module.exports = class extends Command {
 	}
 
 	async run(message, [user = message.author, set = 1]) {
-		return message.sendEmbed(new MessageEmbed()
-			.setImage(`https://robohash.org/${user.id}?set=set${set}`)
-			.setColor('RANDOM')
-			.setFooter(`Requested by ${message.author.tag}`, message.author.displayAvatarURL())
-			.setTimestamp());
+		return message.send({
+			embed: new MessageEmbed()
+				.setImage(`https://robohash.org/${user.id}?set=set${set}`)
+				.setColor('RANDOM')
+				.setFooter(`Requested by ${message.author.tag}`, message.author.displayAvatarURL())
+				.setTimestamp()
+		});
 	}
 
 };

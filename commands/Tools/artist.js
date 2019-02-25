@@ -32,7 +32,7 @@ module.exports = class extends Command {
 			.then(response => response.artists.items[0])
 			.catch(() => { throw 'There was an error. Please try again later.'; });
 
-		if (artist) return msg.sendMessage(artist.external_urls.spotify);
+		if (artist) return msg.send(artist.external_urls.spotify);
 		throw "Couldn't find any artists with that name.";
 	}
 

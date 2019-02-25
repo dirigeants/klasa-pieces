@@ -25,7 +25,7 @@ module.exports = class extends Command {
 			throw 'I cant post a NSFW image in this channel unless you mark it as NSFW!';
 		}
 
-		return msg.sendMessage(data.url);
+		return msg.send(data.url);
 	}
 
 };

@@ -41,10 +41,10 @@ module.exports = class extends Command {
 					user: member.id
 				}
 			});
-			return msg.sendMessage(`${member.user.tag} got temporarily muted for ${Duration.toNow(when)}.${reason ? ` With reason of: ${reason}` : ''}`);
+			return msg.send(`${member.user.tag} got temporarily muted for ${Duration.toNow(when)}.${reason ? ` With reason of: ${reason}` : ''}`);
 		}
 
-		return msg.sendMessage(`${member.user.tag} got muted.${reason ? ` With reason of: ${reason}` : ''}`);
+		return msg.send(`${member.user.tag} got muted.${reason ? ` With reason of: ${reason}` : ''}`);
 	}
 
 };

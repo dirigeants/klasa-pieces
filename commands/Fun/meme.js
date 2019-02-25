@@ -23,7 +23,7 @@ module.exports = class extends Command {
 			.then(response => response.json())
 			.then(body => body.data);
 		const selected = data[Math.floor(Math.random() * data.length)];
-		return msg.send(new MessageEmbed().setImage(`http://imgur.com/${selected.hash}${selected.ext.replace(/\?.*/, '')}`));
+		return msg.send({ embed: new MessageEmbed().setImage(`http://imgur.com/${selected.hash}${selected.ext.replace(/\?.*/, '')}`) });
 	}
 
 };

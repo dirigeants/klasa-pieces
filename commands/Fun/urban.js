@@ -35,19 +35,21 @@ module.exports = class extends Command {
 		}
 
 		const definition = this.content(result.definition, result.permalink);
-		return msg.sendEmbed(new MessageEmbed()
-			.setTitle(`Word: ${toTitleCase(query)}`)
-			.setURL(result.permalink)
-			.setColor(msg.color)
-			.setThumbnail('http://i.imgur.com/CcIZZsa.png')
-			.setDescription([
-				`→ \`Definition\` :: ${ind}/${list.length}\n${definition}`,
-				`→ \`Example\` :: ${this.cutText(result.example, 750)}`,
-				`→ \`Author\` :: ${result.author}`
-			])
-			.addField(ZWS, `\\👍 ${result.thumbs_up}`, true)
-			.addField(ZWS, `\\👎 ${result.thumbs_down}`, true)
-			.setFooter('© Urban Dictionary'));
+		return msg.send({
+			embed: new MessageEmbed()
+				.setTitle(`Word: ${toTitleCase(query)}`)
+				.setURL(result.permalink)
+				.setColor(msg.color)
+				.setThumbnail('http://i.imgur.com/CcIZZsa.png')
+				.setDescription([
+					`→ \`Definition\` :: ${ind}/${list.length}\n${definition}`,
+					`→ \`Example\` :: ${this.cutText(result.example, 750)}`,
+					`→ \`Author\` :: ${result.author}`
+				])
+				.addField(ZWS, `\\👍 ${result.thumbs_up}`, true)
+				.addField(ZWS, `\\👎 ${result.thumbs_down}`, true)
+				.setFooter('© Urban Dictionary')
+		});
 	}
 
 	content(definition, permalink) {

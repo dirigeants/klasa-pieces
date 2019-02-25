@@ -45,7 +45,7 @@ module.exports = class extends Command {
 **License:** ${latest.license}
 `, true);
 
-		return msg.sendEmbed(embed);
+		return msg.send({ embed: embed });
 	}
 
 };

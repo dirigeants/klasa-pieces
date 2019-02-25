@@ -15,7 +15,7 @@ module.exports = class extends Command {
 		const fact = await fetch('https://catfact.ninja/fact')
 			.then(response => response.json())
 			.then(body => body.fact);
-		return msg.sendMessage(`📢 **Catfact:** *${fact}*`);
+		return msg.send(`📢 **Catfact:** *${fact}*`);
 	}
 
 };

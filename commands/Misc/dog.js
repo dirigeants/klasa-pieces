@@ -16,7 +16,7 @@ module.exports = class extends Command {
 		const url = await fetch('https://dog.ceo/api/breeds/image/random')
 			.then(response => response.json())
 			.then(body => body.message);
-		return msg.channel.sendFile(url);
+		return msg.channel.send({ files: [url] });
 	}
 
 };

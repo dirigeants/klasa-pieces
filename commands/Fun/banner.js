@@ -12,7 +12,7 @@ module.exports = class extends Command {
 	}
 
 	async run(msg, [banner]) {
-		return msg.sendCode('', await figletAsync(banner));
+		return msg.send('', { code: await figletAsync(banner) });
 	}
 
 };

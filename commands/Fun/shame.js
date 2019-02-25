@@ -11,7 +11,7 @@ module.exports = class extends Command {
 	}
 
 	run(msg, [user]) {
-		return msg.sendMessage(`🔔 SHAME 🔔 ${user} 🔔 SHAME 🔔`);
+		return msg.send(`🔔 SHAME 🔔 ${user} 🔔 SHAME 🔔`);
 	}
 
 };

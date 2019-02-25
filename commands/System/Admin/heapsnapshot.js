@@ -24,13 +24,13 @@ module.exports = class extends Command {
 	}
 
 	async run(msg) {
-		await msg.sendMessage('Capturing HEAP Snapshot. This may take a while...');
+		await msg.send('Capturing HEAP Snapshot. This may take a while...');
 
 		// Capture the snapshot (this freezes the entire VM)
 		const path = join(process.cwd(), `${Date.now()}.heapsnapshot`);
 		await writeSnapshot(path);
 
-		return msg.sendMessage(`Captured in \`${path}\`, check! Remember, do NOT share this with anybody, it may contain a lot of sensitive data.`);
+		return msg.send(`Captured in \`${path}\`, check! Remember, do NOT share this with anybody, it may contain a lot of sensitive data.`);
 	}
 
 };

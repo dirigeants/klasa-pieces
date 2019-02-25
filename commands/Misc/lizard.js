@@ -15,7 +15,7 @@ module.exports = class extends Command {
 		const url = await fetch('https://nekos.life/api/v2/img/lizard')
 			.then(response => response.json())
 			.then(body => body.url);
-		return msg.channel.sendFile(url);
+		return msg.channel.send({ files: [url] });
 	}
 
 };

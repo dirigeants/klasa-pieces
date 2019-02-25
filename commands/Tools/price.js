@@ -20,7 +20,7 @@ module.exports = class extends Command {
 			.then(response => response.json())
 			.catch(() => { throw 'There was an error, please make sure you specified an appropriate coin and currency.'; });
 		if (!body[c2]) return msg.sendMessage('There was an error, please make sure you specified an appropriate coin and currency.');
-		return msg.sendMessage(`Current price of ${amount} ${c1} is ${(body[c2] * amount).toLocaleString()} ${c2}`);
+		return msg.send(`Current price of ${amount} ${c1} is ${(body[c2] * amount).toLocaleString()} ${c2}`);
 	}
 
 };

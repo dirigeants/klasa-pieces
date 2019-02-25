@@ -19,7 +19,7 @@ module.exports = class extends Command {
 			lines.push(`**${ranks[Math.floor(Math.random() * ranks.length)]}**${suits[Math.floor(Math.random() * suits.length)]}`);
 		}
 
-		return msg.sendMessage(lines.join(', '));
+		return msg.send(lines.join(', '));
 	}
 
 };

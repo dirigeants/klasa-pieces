@@ -33,7 +33,7 @@ module.exports = class extends Command {
 				throw "Error - Couldn't find a face in the image.";
 			});
 
-		return msg.sendMessage(new MessageAttachment(faceappImage, `${Math.round(Math.random() * 10000)}.jpg`));
+		return msg.send({ files: [new MessageAttachment(faceappImage, `${Math.round(Math.random() * 10000)}.jpg`)] });
 	}
 
 };

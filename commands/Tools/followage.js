@@ -26,9 +26,11 @@ module.exports = class extends Command {
 			.then(response => response.json())
 			.catch(() => { throw `${twitchName} isn't following ${channelName}, or it is banned, or doesn't exist at all.`; });
 		const days = this.differenceDays(new Date(body.created_at), new Date());
-		return msg.sendEmbed(new MessageEmbed()
-			.setColor(6570406)
-			.setAuthor(`${twitchName} has been following ${channelName} for ${days} days.`, body.channel.logo));
+		return msg.send({
+			embed: new MessageEmbed()
+				.setColor(6570406)
+				.setAuthor(`${twitchName} has been following ${channelName} for ${days} days.`, body.channel.logo)
+		});
 	}
 
 	differenceDays(first, second) {

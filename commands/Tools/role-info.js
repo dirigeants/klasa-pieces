@@ -45,15 +45,17 @@ module.exports = class extends Command {
 	run(msg, [role]) {
 		const allPermissions = Object.entries(role.permissions.serialize()).filter(perm => perm[1]).map(([perm]) => this.perms[perm]).join(', ');
 
-		return msg.sendEmbed(new MessageEmbed()
-			.setColor(role.hexColor || 0xFFFFFF)
-			.addField('❯ Name', role.name, true)
-			.addField('❯ ID', role.id, true)
-			.addField('❯ Color', role.hexColor || 'None', true)
-			.addField('❯ Creation Date', this.timestamp.display(role.createdAt), true)
-			.addField('❯ Hoisted', role.hoist ? 'Yes' : 'No', true)
-			.addField('❯ Mentionable', role.mentionable ? 'Yes' : 'No', true)
-			.addField('❯ Permissions', allPermissions));
+		return msg.send({
+			embed: new MessageEmbed()
+				.setColor(role.hexColor || 0xFFFFFF)
+				.addField('❯ Name', role.name, true)
+				.addField('❯ ID', role.id, true)
+				.addField('❯ Color', role.hexColor || 'None', true)
+				.addField('❯ Creation Date', this.timestamp.display(role.createdAt), true)
+				.addField('❯ Hoisted', role.hoist ? 'Yes' : 'No', true)
+				.addField('❯ Mentionable', role.mentionable ? 'Yes' : 'No', true)
+				.addField('❯ Permissions', allPermissions)
+		});
 	}
 
 };

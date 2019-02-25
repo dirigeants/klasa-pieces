@@ -15,7 +15,7 @@ module.exports = class extends Command {
 		const joke = await fetch('http://api.chucknorris.io/jokes/random')
 			.then(response => response.json())
 			.then(body => body.value);
-		return msg.sendMessage(`**😁 Chuck Norris Joke:** ${joke}`);
+		return msg.send(`**😁 Chuck Norris Joke:** ${joke}`);
 	}
 
 };

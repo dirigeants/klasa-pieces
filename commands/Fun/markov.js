@@ -20,7 +20,7 @@ module.exports = class extends Command {
 
 		const quotes = new MarkovChain(messageBank.map(message => message.content).join(' '));
 		const chain = quotes.start(this.useUpperCase).end(20).process();
-		return msg.sendMessage(chain.substring(0, 1999));
+		return msg.send(chain.substring(0, 1999));
 	}
 
 	useUpperCase(wordList) {

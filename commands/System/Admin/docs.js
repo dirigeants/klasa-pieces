@@ -28,7 +28,7 @@ module.exports = class extends Command {
 		const buffer = Buffer.from(data);
 		const hash = createHash('sha1').update(data).digest('base64').substr(0, 7);
 		const duration = `Generated in ${stopwatch.stop()}`;
-		return this.msg.channel.sendFile(buffer, `commands_${hash}.${format}`, duration);
+		return this.msg.channel.send({ files: [{ attachment: buffer, name: `commands_${hash}.${format}`, duration }] });
 	}
 
 	async buildCommands(type, msg, normalize = false) {
@@ -122,8 +122,8 @@ module.exports = class extends Command {
 				html += `<tbody>`;
 				html += `${commands[categories[cat]][subCategories[subCat]]
 					.map(cmd => `<tr><td>${esc(this.prefix + cmd.name)}</td>` +
-					`<td>${esc(cmd.aliases.join(', '))}</td>` +
-					`<td>${esc(cmd.description)}</td></tr>`)
+						`<td>${esc(cmd.aliases.join(', '))}</td>` +
+						`<td>${esc(cmd.description)}</td></tr>`)
 					.join('\n')}`
 				;
 				html += `</tbody></table></div>`;
