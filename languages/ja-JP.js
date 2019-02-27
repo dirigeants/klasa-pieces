@@ -50,11 +50,11 @@ module.exports = class extends Language {
 			MONITOR_COMMAND_HANDLER_REPROMPT: (tag, error, time, abortOptions) => `${tag} | **${error}** | **${time}** 秒の間に有効な引数を入力してください。**${abortOptions.join('**, **')}** と打つとこのプロンプトは中止されます。`,
 			MONITOR_COMMAND_HANDLER_REPEATING_REPROMPT: (tag, name, time) => `${tag} | **${name}** は繰り返しの引数です | **${time}** 秒の間に追加の引数を入力してください。**"CANCEL"** と打つとこのプロンプトは中止されます。`,
 			MONITOR_COMMAND_HANDLER_ABORTED: '中断しました',
-			MONITOR_COMMAND_HANDLER_POSSIBILITIES: ['中断', '停止'],
 			INHIBITOR_COOLDOWN: (remaining) => `このコマンドを使用したばかりです。${remaining}秒でこのコマンドを再度使用できます。`,
-			INHIBITOR_DISABLED: 'このコマンドは現在無効にされています。',
+			INHIBITOR_DISABLED_GUILD: 'このコマンドはこのギルドの管理者によって無効にされています。',
+			INHIBITOR_DISABLED_GLOBAL: 'このコマンドはボットの所有者によって無効化されています。',
 			INHIBITOR_MISSING_BOT_PERMS: (missing) => `不十分なアクセス許可。**${missing}** が不足しています。`,
-			INHIBITOR_NSFW: 'このチャンネルでNSFWコマンドを使用することはできません。',
+			INHIBITOR_NSFW: 'NSFWコマンドはNSFWチャンネルでのみ使用できます。',
 			INHIBITOR_PERMISSIONS: 'このコマンドを使用する権限がありません。',
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `サーバーは設定 **${settings.join(', ')}** が不足しているためコマンドを実行できません。`,
 			INHIBITOR_RUNIN: (types) => `このコマンドは ${types} チャンネルでのみ有効です。`,
@@ -170,7 +170,8 @@ module.exports = class extends Language {
 				`• Shard        :: ${(message.guild ? message.guild.shardID : 0) + 1} / ${this.client.options.totalShardCount}`
 			],
 			COMMAND_STATS_DESCRIPTION: 'ボットの詳細と、統計情報を表示します。',
-			MESSAGE_PROMPT_TIMEOUT: 'プロンプトがタイムアウトしました。'
+			MESSAGE_PROMPT_TIMEOUT: 'プロンプトがタイムアウトしました。',
+			TEXT_PROMPT_ABORT_OPTIONS: ['中断', '停止', '取り消し']
 		};
 	}
 
