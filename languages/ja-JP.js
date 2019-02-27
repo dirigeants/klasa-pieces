@@ -54,7 +54,7 @@ module.exports = class extends Language {
 			INHIBITOR_COOLDOWN: (remaining) => `このコマンドを使用したばかりです。${remaining}秒でこのコマンドを再度使用できます。`,
 			INHIBITOR_DISABLED: 'このコマンドは現在無効にされています。',
 			INHIBITOR_MISSING_BOT_PERMS: (missing) => `不十分なアクセス許可。**${missing}** が不足しています。`,
-			INHIBITOR_NSFW: 'このチャンネルでNSFWコマンドを使用することはできません。',
+			INHIBITOR_NSFW: 'NSFWコマンドはNSFWチャンネルでのみ使用できます。',
 			INHIBITOR_PERMISSIONS: 'このコマンドを使用する権限がありません。',
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `サーバーは設定 **${settings.join(', ')}** が不足しているためコマンドを実行できません。`,
 			INHIBITOR_RUNIN: (types) => `このコマンドは ${types} チャンネルでのみ有効です。`,
