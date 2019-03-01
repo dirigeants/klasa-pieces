@@ -16,9 +16,15 @@ module.exports = class extends Provider {
 			db: 'klasa',
 			options: {}
 		}, this.client.options.providers.mongodb);
+
+		// If full connection string is provided, use that, otherwise fall back to individual parameters
+		const connectionString = this.client.options.providers.mongodb.connectionString || `mongodb://${connection.user}:${connection.password}@${connection.host}:${connection.port}/${connection.db}`;
+
 		const mongoClient = await Mongo.connect(
-			`mongodb://${connection.user}:${connection.password}@${connection.host}:${connection.port}/${connection.db}`,
-			mergeObjects(connection.options, { useNewUrlParser: true }));
+			connectionString,
+			mergeObjects(connection.options, { useNewUrlParser: true })
+		);
+
 		this.db = mongoClient.db(connection.db);
 	}
 
