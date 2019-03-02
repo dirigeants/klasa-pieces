@@ -11,7 +11,7 @@ module.exports = class extends Route {
 		const { guildID, channelID } = request.params;
 		const guild = this.client.guilds.get(guildID);
 		if (!guild) return response.end('{}');
-		const channel = guild.members.get(channelID);
+		const channel = guild.channels.get(channelID);
 		if (!channel) return response.end('{}');
 		return response.end(JSON.stringify(channel));
 	}
