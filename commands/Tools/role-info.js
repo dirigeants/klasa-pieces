@@ -53,7 +53,7 @@ module.exports = class extends Command {
 			.addField('❯ Creation Date', this.timestamp.display(role.createdAt), true)
 			.addField('❯ Hoisted', role.hoist ? 'Yes' : 'No', true)
 			.addField('❯ Mentionable', role.mentionable ? 'Yes' : 'No', true)
-			.addField('❯ Permissions', allPermissions));
+			.addField('❯ Permissions', allPermissions || 'None'));
 	}
 
 };
