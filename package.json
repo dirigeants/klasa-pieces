@@ -2,7 +2,7 @@
 	"name": "klasa-pieces",
 	"description": "This repository contains the various *Pieces* submitted by users and collaborators.",
 	"scripts": {
-		"test": "eslint .",
+		"test:lint": "eslint .",
 		"lint": "npm test -- --fix"
 	},
 	"repository": {
