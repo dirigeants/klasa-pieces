@@ -26,7 +26,7 @@ module.exports = class extends Command {
 		this.timestamp = new Timestamp('d MMMM YYYY');
 	}
 
-	run(msg) {
+	async run(msg) {
 		return msg.sendEmbed(new MessageEmbed()
 			.setColor(0x00AE86)
 			.setThumbnail(msg.guild.iconURL())

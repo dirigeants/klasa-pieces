@@ -12,7 +12,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	run(msg, choices) {
+	async run(msg, choices) {
 		return msg.reply(choices.length === 1 ?
 			'You only gave me one choice, dummy.' :
 			`I think you should go with "${choices[Math.floor(Math.random() * choices.length)]}"`);

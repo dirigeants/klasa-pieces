@@ -11,7 +11,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	run(msg, [coins = 0]) {
+	async run(msg, [coins = 0]) {
 		if (coins <= 0) return msg.sendMessage(`You flipped ${Math.random() > 0.5 ? 'Heads' : 'Tails'}.`);
 
 		let heads = 0;

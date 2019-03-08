@@ -12,7 +12,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	run(msg, [numCards]) {
+	async run(msg, [numCards]) {
 		const lines = [];
 
 		for (let i = 0; i < numCards; ++i) {

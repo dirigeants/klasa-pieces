@@ -10,7 +10,7 @@ module.exports = class extends Command {
 		});
 	}
 
-	run(msg, [mentioned = msg.member]) {
+	async run(msg, [mentioned = msg.member]) {
 		return msg.sendMessage(`${mentioned.user.tag}: ${compliments[Math.floor(Math.random() * compliments.length)]}`);
 	}
 
