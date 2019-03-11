@@ -97,5 +97,4 @@ module.exports = class extends Provider {
 		return this.db.table(table).get(id).delete().run();
 	}
 
-}
-;
+};
