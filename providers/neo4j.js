@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 dirigeants. All rights reserved. MIT license.
+// Copyright (c) 2017-2019 dirigeants. All rights reserved. MIT license.
 const { Provider, util: { mergeDefault, isObject, mergeObjects } } = require('klasa');
 const { v1: neo4j } = require('neo4j-driver');
 
