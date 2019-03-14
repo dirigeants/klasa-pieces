@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2019 dirigeants. All rights reserved. MIT license.
 const { Task, Stopwatch } = require('klasa');
 const { watch } = require('chokidar');
 const { extname, basename, sep } = require('path');
