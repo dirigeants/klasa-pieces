@@ -7,7 +7,7 @@ const nodeModules = `${sep}node_modules${sep}`;
 
 /*
 * When any piece file is changed in your bot (e.g. when you `git pull`, or just edit a file),
-* this piece will automatically reload that piece so the change is instantly updated into 
+* this piece will automatically reload that piece so the change is instantly updated into
 * your bot. Test this piece on a test bot before using it in production.
 */
 
