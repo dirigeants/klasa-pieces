@@ -9,7 +9,7 @@ module.exports = class extends Task {
 	async run(name, _path, piece) {
 		const timer = new Stopwatch();
 
-		for (const module of Object.keys(require.cache))
+		for (const module of Object.keys(require.cache)) {
 			if (!module.includes(nodeModules) && extname(module) !== '.node') {
 				delete require.cache[module];
 			}
