@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2019 dirigeants. All rights reserved. MIT license.
 const { Task, Timestamp } = require('klasa');
 const { targz } = require('fs-nextra');
 const { resolve } = require('path');
