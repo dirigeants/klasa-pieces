@@ -17,7 +17,7 @@ module.exports = class extends Task {
 	async run(data = { folder: './' }) {
 		if (!data || !data.folder) data = { folder: './' };
 
-		await targz(resolve(data.folder, `json-backup-${this.timestamp.display}.tar.gz`), this.provider.baseDirectory);
+		await targz(resolve(data.folder, `json-backup-${this.timestamp}.tar.gz`), this.provider.baseDirectory);
 	}
 
 };
