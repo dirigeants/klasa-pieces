@@ -5,19 +5,19 @@ const { resolve } = require('path');
 
 module.exports = class extends Task {
 
-    constructor(...args) {
-        super(...args);
-        this.timestamp = new Timestamp('yyyy-mm-dd');
-    }
+	constructor(...args) {
+		super(...args);
+		this.timestamp = new Timestamp('yyyy-mm-dd');
+	}
 
-    get provider() {
-        return this.client.providers.get('json');
-    }
+	get provider() {
+		return this.client.providers.get('json');
+	}
 
-    async run(data = { folder: './' }) {
-        if (!data || !data.folder) data = { folder: './' };
+	async run(data = { folder: './' }) {
+		if (!data || !data.folder) data = { folder: './' };
 
-        await targz(resolve(data.folder, `json-backup-${this.timestamp.display}.tar.gz`), this.provider.baseDirectory);
-    }
+		await targz(resolve(data.folder, `json-backup-${this.timestamp.display}.tar.gz`), this.provider.baseDirectory);
+	}
 
 };
