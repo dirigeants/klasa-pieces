@@ -7,7 +7,7 @@ module.exports = class extends Task {
 
 	constructor(...args) {
 		super(...args);
-		this.timestamp = new Timestamp('yyyy-mm-dd');
+		this.timestamp = new Timestamp('yyyy-mm-ddThh-mm-ss');
 	}
 
 	get provider() {
