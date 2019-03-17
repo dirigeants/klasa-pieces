@@ -50,7 +50,7 @@ module.exports = class extends Provider {
 
 	/* Document methods */
 
-	async getAll(table, entries) {
+	async getAll(table, entries = []) {
 		if (entries.length) {
 			const chunks = chunk(entries, 50000);
 			const output = [];
@@ -60,7 +60,7 @@ module.exports = class extends Provider {
 		return this.db.table(table).run();
 	}
 
-	async getKeys(table, entries) {
+	async getKeys(table, entries = []) {
 		if (entries.length) {
 			const chunks = chunk(entries, 50000);
 			const output = [];
@@ -82,7 +82,7 @@ module.exports = class extends Provider {
 		return this.db.table(table).sample(1).run();
 	}
 
-	create(table, id, value) {
+	create(table, id, value = {}) {
 		return this.db.table(table).insert({ ...this.parseUpdateInput(value), id }).run();
 	}
 
