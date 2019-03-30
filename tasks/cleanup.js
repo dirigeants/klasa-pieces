@@ -1,14 +1,12 @@
 // Copyright (c) 2017-2019 dirigeants. All rights reserved. MIT license.
 const { Task, Colors } = require('klasa');
-const { util: { binaryToID } } = require('discord.js');
+const { SnowflakeUtil } = require('discord.js');
 
 // THRESHOLD equals to 30 minutes in milliseconds:
 //     - 1000 milliseconds = 1 second
 //     - 60 seconds        = 1 minute
 //     - 30 minutes
-const THRESHOLD = 1000 * 60 * 30,
-	EPOCH = 1420070400000,
-	EMPTY = '0000100000000000000000';
+const THRESHOLD = 1000 * 60 * 30;
 
 module.exports = class MemorySweeper extends Task {
 
@@ -27,7 +25,7 @@ module.exports = class MemorySweeper extends Task {
 	}
 
 	async run() {
-		const OLD_SNOWFLAKE = binaryToID(((Date.now() - THRESHOLD) - EPOCH).toString(2).padStart(42, '0') + EMPTY);
+		const OLD_SNOWFLAKE = SnowflakeUtil.generate(Date.now() - THRESHOLD);
 		let presences = 0, guildMembers = 0, voiceStates = 0, emojis = 0, lastMessages = 0, users = 0;
 
 		// Per-Guild sweeper
