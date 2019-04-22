@@ -19,15 +19,16 @@ module.exports = class extends SQLProvider {
 	constructor(...args) {
 		super(...args);
 		this.qb = new QueryBuilder({
-			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
-			float: 'REAL',
-			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
-			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
-			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
 			array: type => type,
-			arrayResolver: (values) => `'${sanitizeString(JSON.stringify(values))}'`,
+			arraySerializer: (values) => `'${sanitizeString(JSON.stringify(values))}'`,
 			formatDatatype: (name, datatype, def = null) => `\`${name}\` ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
-		});
+		})
+			.add('integer', { type: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER' })
+			.add('float', { type: 'REAL' })
+			.add('date', { type: 'DATETIME', serializer: (input) => TIMEPARSERS.DATETIME.display(input) })
+			.add('time', { extends: 'date' })
+			.add('timestamp', { type: 'TIMESTAMP', serializer: (input) => TIMEPARSERS.DATE.display(input) });
+
 		this.pool = null;
 	}
 
@@ -81,7 +82,7 @@ module.exports = class extends SQLProvider {
 		const schemaValues = [...gateway.schema.values(true)];
 		return this.run(`
 			CREATE TABLE @0 (
-				id VARCHAR(${gateway.idLength || 18}) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+				id VARCHAR(${gateway.idLength || 18}) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.generateDatatype.bind(this.qb)).join(', ')}` : ''}
 			)`, [table]
 		);
 	}
@@ -162,8 +163,8 @@ module.exports = class extends SQLProvider {
 
 	addColumn(table, piece) {
 		return this.run(piece.type !== 'Folder' ?
-			`ALTER TABLE ${sanitizeKeyName(table)} ADD ${this.qb.parse(piece)};` :
-			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD ${this.qb.parse(subpiece)}`).join(', ')}`);
+			`ALTER TABLE ${sanitizeKeyName(table)} ADD ${this.qb.generateDatatype(piece)};` :
+			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD ${this.qb.generateDatatype(subpiece)}`).join(', ')}`);
 	}
 
 	removeColumn(table, key) {
@@ -173,7 +174,7 @@ module.exports = class extends SQLProvider {
 	}
 
 	updateColumn(table, piece) {
-		const [column, ...datatype] = this.qb.parse(piece).split(' ');
+		const [column, ...datatype] = this.qb.generateDatatype(piece).split(' ');
 		return this.run(`
 			ALTER TABLE @0
 			ALTER COLUMN @1 @2;`, [table, column, datatype]);
