@@ -4,7 +4,7 @@ const { resolve } = require('path');
 const db = require('sqlite');
 const fs = require('fs-nextra');
 
-const valueList = amount => new Array(amount).fill('?').join(', ');
+const valueList = amount => Array.from({ length: amount }, () => '?').join(', ');
 
 const TIMEPARSERS = {
 	DATE: new Timestamp('YYYY-MM-DD'),
@@ -16,15 +16,14 @@ module.exports = class extends SQLProvider {
 	constructor(...args) {
 		super(...args);
 		this.baseDir = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'sqlite');
-		this.qb = new QueryBuilder({
-			null: 'NULL',
-			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
-			float: 'DOUBLE PRECISION',
-			boolean: { type: 'TINYINT', resolver: (input) => input ? '1' : '0' },
-			date: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
-			time: { type: 'DATETIME', resolver: (input) => TIMEPARSERS.DATETIME.display(input) },
-			timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) }
-		});
+		this.qb = new QueryBuilder()
+			.add('null', { type: 'NULL' })
+			.add('integer', { type: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER' })
+			.add('float', { type: 'DOUBLE PRECISION' })
+			.add('boolean', { type: 'TINYINT', serializer: (input) => input ? '1' : '0' })
+			.add('date', { type: 'DATETIME', serializer: (input) => TIMEPARSERS.DATETIME.display(input) })
+			.add('time', { extends: 'date' })
+			.add('timestamp', { type: 'TIMESTAMP', serializer: (input) => TIMEPARSERS.DATE.display(input) });
 	}
 
 	async init() {
@@ -48,7 +47,7 @@ module.exports = class extends SQLProvider {
 		const schemaValues = [...gateway.schema.values(true)];
 		return this.run(`
 			CREATE TABLE ${sanitizeKeyName(table)} (
-				id VARCHAR(${gateway.idLength || 18}) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''}
+				id VARCHAR(${gateway.idLength || 18}) PRIMARY KEY NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.generateDatatype.bind(this.qb)).join(', ')}` : ''}
 			);`
 		);
 	}

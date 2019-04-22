@@ -7,16 +7,17 @@ module.exports = class extends SQLProvider {
 	constructor(...args) {
 		super(...args);
 		this.qb = new QueryBuilder({
-			boolean: 'BOOL',
-			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
-			float: 'DOUBLE PRECISION',
-			uuid: 'UUID',
-			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
-			any: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
-			array: type => `${type}[]`,
-			arrayResolver: (values, piece, resolver) => values.length ? `array[${values.map(value => resolver(value, piece)).join(', ')}]` : "'{}'",
+			array: (type) => `${type}[]`,
+			arraySerializer: (values, piece, resolver) =>
+				values.length ? `array[${values.map((value) => resolver(value, piece)).join(', ')}]` : "'{}'",
 			formatDatatype: (name, datatype, def = null) => `"${name}" ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
-		});
+		})
+			.add('boolean', { type: 'BOOL' })
+			.add('integer', { type: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER' })
+			.add('float', { type: 'DOUBLE PRECISION' })
+			.add('uuid', { type: 'UUID' })
+			.add('any', { type: 'JSON', serializer: (input) => `'${JSON.stringify(input)}'::json` })
+			.add('json', { extends: 'any' });
 		this.db = null;
 	}
 
@@ -64,7 +65,7 @@ module.exports = class extends SQLProvider {
 		const schemaValues = [...gateway.schema.values(true)];
 		return this.run(`
 			CREATE TABLE ${sanitizeKeyName(table)} (
-				${[`id VARCHAR(${gateway.idLength || 18}) PRIMARY KEY NOT NULL UNIQUE`, ...schemaValues.map(this.qb.parse.bind(this.qb))].join(', ')}
+				${[`id VARCHAR(${gateway.idLength || 18}) PRIMARY KEY NOT NULL UNIQUE`, ...schemaValues.map(this.qb.generateDatatype.bind(this.qb))].join(', ')}
 			)`
 		);
 	}
@@ -156,8 +157,8 @@ module.exports = class extends SQLProvider {
 
 	addColumn(table, piece) {
 		return this.run(piece.type !== 'Folder' ?
-			`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${this.qb.parse(piece)};` :
-			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.parse(subpiece)}`).join(', ')};`);
+			`ALTER TABLE ${sanitizeKeyName(table)} ADD COLUMN ${this.qb.generateDatatype(piece)};` :
+			`ALTER TABLE ${sanitizeKeyName(table)} ${[...piece.values(true)].map(subpiece => `ADD COLUMN ${this.qb.generateDatatype(subpiece)}`).join(', ')};`);
 	}
 
 	removeColumn(table, columns) {
@@ -167,9 +168,9 @@ module.exports = class extends SQLProvider {
 	}
 
 	updateColumn(table, piece) {
-		const [column, datatype] = this.qb.parse(piece).split(' ');
+		const [column, datatype] = this.qb.generateDatatype(piece).split(' ');
 		return this.run(`ALTER TABLE ${sanitizeKeyName(table)} ALTER COLUMN ${column} TYPE ${datatype}${piece.default ?
-			`, ALTER COLUMN ${column} SET NOT NULL, ALTER COLUMN ${column} SET DEFAULT ${this.qb.parseValue(piece.default, piece)}` : ''
+			`, ALTER COLUMN ${column} SET NOT NULL, ALTER COLUMN ${column} SET DEFAULT ${this.qb.serialize(piece.default, piece)}` : ''
 		};`);
 	}
 
