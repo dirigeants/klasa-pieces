@@ -10,16 +10,12 @@ module.exports = class extends Command {
 		});
 	}
 
-	async run(msg, [user]) {
-		if (!user) user = msg.author;
+	async run(msg, [user = msg.author]) {
 		const avatar = user.displayAvatarURL({ size: 512 });
 
-		const embed = new MessageEmbed()
+		return msg.sendEmbed(new MessageEmbed()
 			.setAuthor(user.username, avatar)
-			.setImage(avatar);
-
-		return msg.sendEmbed(embed);
+			.setImage(avatar));
 	}
-
 
 };
