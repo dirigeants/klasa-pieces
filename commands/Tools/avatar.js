@@ -5,7 +5,7 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			description: 'Shows a users\' avatar',
+			description: 'Shows a user\'s avatar',
 			usage: '[user:user]'
 		});
 	}
