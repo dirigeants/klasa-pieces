@@ -11,7 +11,8 @@ module.exports = class extends Command {
 			description: 'Searches discordemoji.com for an emoji.',
 			usage: '<query:str{1,20}> [count:int{1,100}]',
 			usageDelim: ','
-		});
+		});		
+		this.emojis = null;
 	}
 
 	async run(msg, [query, count = 4]) {
