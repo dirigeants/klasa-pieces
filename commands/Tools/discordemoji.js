@@ -7,7 +7,7 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-      aliases: ['de'],
+			aliases: ['de'],
 			description: 'Searches discordemoji.com for an emoji.',
 			usage: '<query:str{1,20}> [count:int{1,100}]',
 			usageDelim: ','
