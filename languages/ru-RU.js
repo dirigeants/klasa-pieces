@@ -6,7 +6,7 @@ module.exports = class extends Language {
 		super(...args);
 		this.language = {
 			DEFAULT: (key) => `Ключ ${key} ещё не переведён на ru-RU.`,
-			DEFAULT_LANGUAGE: 'Язык по-умолчанию',
+			DEFAULT_LANGUAGE: 'Язык по умолчанию',
 			PREFIX_REMINDER: (prefix = `@${this.client.user.tag}`) => `Префикс${Array.isArray(prefix) ?
 				`ы для этого сервера: ${prefix.map(pre => `\`${pre}\``).join(', ')}` :
 				` для этого сервера: \`${prefix}\``
