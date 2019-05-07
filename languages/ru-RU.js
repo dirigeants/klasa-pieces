@@ -86,7 +86,7 @@ module.exports = class extends Language {
 			COMMAND_EVAL_SENDCONSOLE: (time, type) => `Результат оказался слишком длинным, он будет выведен в консоль.\n**Тип**:${type}\n${time}`,
 			COMMAND_UNLOAD: (type, name) => `✅ Выгружено ${type}: ${name}`,
 			COMMAND_UNLOAD_DESCRIPTION: 'Выгружает элемент klasa.',
-			COMMAND_UNLOAD_WARN: 'Скорее всего вам не стоит выгружать это, так как вы не сможете использовать какую-либо команду чтобы загрузить это снова.',
+			COMMAND_UNLOAD_WARN: 'Скорее всего вам не стоит выгружать это, так как вы не сможете использовать какую-либо команду, чтобы загрузить это снова.',
 			COMMAND_TRANSFER_ERROR: '❌ Этот файл уже был перемещён или никогда не существовал.',
 			COMMAND_TRANSFER_SUCCESS: (type, name) => `✅ Успешно перемещено ${type}: ${name}.`,
 			COMMAND_TRANSFER_FAILED: (type, name) => `Перемещение ${type}: ${name} в клиент не удалось, проверьте вашу консоль.`,
