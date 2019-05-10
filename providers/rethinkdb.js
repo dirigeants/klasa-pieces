@@ -47,7 +47,7 @@ module.exports = class extends Provider {
 	sync(table) {
 		return this.db.table(table).sync().run();
 	}
-	
+
 	count(table) {
 		return this.db.table(table).count().run();
 	}
