@@ -41,8 +41,8 @@ module.exports = class MemorySweeper extends Task {
 				if (member.voice.channelID) continue;
 				if (member.lastMessageID && member.lastMessageID > OLD_SNOWFLAKE) continue;
 				guildMembers++;
-                		voiceStates++;
-                		guild.voiceStates.delete(id);
+				voiceStates++;
+				guild.voiceStates.delete(id);
 				guild.members.delete(id);
 			}
 
