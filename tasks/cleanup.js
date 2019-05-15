@@ -34,10 +34,6 @@ module.exports = class MemorySweeper extends Task {
 			presences += guild.presences.size;
 			guild.presences.clear();
 
-			// Clear Voice States
-			voiceStates += guild.voiceStates.size;
-			guild.voiceStates.clear();
-
 			// Clear members that haven't send a message in the last 30 minutes
 			const { me } = guild;
 			for (const [id, member] of guild.members) {
@@ -45,6 +41,8 @@ module.exports = class MemorySweeper extends Task {
 				if (member.voice.channelID) continue;
 				if (member.lastMessageID && member.lastMessageID > OLD_SNOWFLAKE) continue;
 				guildMembers++;
+                		voiceStates++;
+                		guild.voiceStates.delete(id);
 				guild.members.delete(id);
 			}
 
