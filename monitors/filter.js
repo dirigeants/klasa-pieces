@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2019 dirigeants. All rights reserved. MIT license.
 const { Monitor } = require('klasa');
 const { remove } = require('confusables');
 
