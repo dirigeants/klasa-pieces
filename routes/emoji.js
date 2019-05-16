@@ -4,14 +4,20 @@ const { Route } = require('klasa-dashboard-hooks');
 module.exports = class extends Route {
 
 	constructor(...args) {
-		super(...args, { route: 'guilds/:guildID/emojis' });
+		super(...args, { route: 'guilds/:guildID/emojis/:emojiID' });
 	}
 
 	get(request, response) {
-		const { guildID } = request.params;
+		const { guildID, emojiID } = request.params;
 		const guild = this.client.guilds.get(guildID);
-		if (!guild) return response.end(404);
-		return response.end(guild.emojis.keyArray());
+		if (!guild) return this.notFound(response);
+		const emoji = guild.emojis.get(emojiID);
+		if (!emoji) return this.notFound(response);
+		return response.end(JSON.stringify(emoji));
 	}
 
+	notFound(response) {
+		response.writeHead(404);
+		return response.end('{}');
+	}
 };
