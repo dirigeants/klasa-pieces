@@ -10,7 +10,7 @@ module.exports = class extends Route {
 	get(request, response) {
 		const { guildID } = request.params;
 		const guild = this.client.guilds.get(guildID);
-		if (!guild) return response.end('[]');
+		if (!guild) return response.end(404);
 		return response.end(guild.emojis.keyArray());
 	}
 
