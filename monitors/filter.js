@@ -3,8 +3,8 @@ const { remove } = require('confusables');
 
 /*
 *
-* Requires "filtererdWords" guild setting.
-* Client.defaultGuildSchema.add('filtererdWords', 'string', { default: [], array: true })
+* Requires "filteredWords" guild setting.
+* Client.defaultGuildSchema.add('filteredWords', 'string', { default: [], array: true })
 *
 * This is a simple moderation filter setup. You may
 * also want to: mute the person, log it to a logs
@@ -36,11 +36,11 @@ module.exports = class extends Monitor {
 		if (!content || !content.length) return;
 		const cleanContent = this.sanitize(content);
 
-		const filtererdWords = msg.guild.settings.get('filtererdWords');
-		if (!filtererdWords || !filtererdWords.length) return;
+		const filteredWords = msg.guild.settings.get('filteredWords');
+		if (!filteredWords || !filteredWords.length) return;
 
 		// If they said a filtered word, this variable will be equal to that word.
-		const hitTheFilter = filtererdWords.find(word => cleanContent.includes(this.sanitize(word)));
+		const hitTheFilter = filteredWords.find(word => cleanContent.includes(this.sanitize(word)));
 		if (!hitTheFilter) return;
 
 		msg.delete();
