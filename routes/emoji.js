@@ -20,4 +20,5 @@ module.exports = class extends Route {
 		response.writeHead(404);
 		return response.end('{}');
 	}
+
 };
