@@ -11,7 +11,7 @@ module.exports = class extends Route {
 		const { guildID } = request.params;
 		const guild = this.client.guilds.get(guildID);
 		if (!guild) return this.notFound(response);
-		return response.end(guild.emojis.keyArray());
+		return response.end(JSON.stringify(guild.emojis.keyArray()));
 	}
 
 	notFound(response) {
