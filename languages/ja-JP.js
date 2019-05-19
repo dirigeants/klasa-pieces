@@ -111,7 +111,7 @@ module.exports = class extends Language {
 				].join(' ')),
 				'バグを見つけたら <https://github.com/dirigeants/klasa> に問題を提出してください。'
 			],
-			COMMAND_INVITE_DESCRIPTION: 'ボットの公式サーバーリンクを表示します。',
+			COMMAND_INVITE_DESCRIPTION: 'ボットの招待リンクを表示します。',
 			COMMAND_INFO: [
 				'KlasaはDiscord.jsライブラリ上に構築された「プラグ・アンド・プレイ」フレームワークです。',
 				'ほとんどのコードはモジュール化されており、開発者はKlasaをニーズに合わせて編集できます。',
