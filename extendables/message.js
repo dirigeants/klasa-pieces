@@ -22,6 +22,11 @@ module.exports = class extends Extendable {
 			.catch(() => false);
 	}
 
+	async unreact(emojiID) {
+		const reaction = this.reactions.get(emojiID);
+		return reaction ? reaction.users.remove(this.client.user) : null;
+	}
+
 };
 
 const awaitReaction = async (msg, message) => {
