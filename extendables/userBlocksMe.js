@@ -52,12 +52,12 @@ module.exports = class extends Extendable {
 
 		if (!maybeMsg) {
 			const channels = guild.channels.filter(contextChannel ?
-				c => c.type === 'text' && c.id !== contextChannel.id :
-				c => c.type === 'text');
+				chan => chan.type === 'text' && chan.id !== contextChannel.id :
+				chan => chan.type === 'text');
 
 			for (const channel of channels.values()) {
 				const msgs = await channel.messages.fetch({ limit: 100 }, false);
-				maybeMsg = msgs.find(m => m.author != null && m.author.id === this.id);
+				maybeMsg = msgs.find(msg => msg.author !== null && msg.author.id === this.id);
 				if (maybeMsg) {
 					if (maybeMsg.reactable) break;
 					maybeMsg = undefined;
