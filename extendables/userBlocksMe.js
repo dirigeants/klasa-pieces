@@ -46,7 +46,7 @@ module.exports = class extends Extendable {
 
 		if (contextChannel) {
 			const msgs = await contextChannel.messages.fetch({ limit: 100 }, false);
-			maybeMsg = msgs.find(m => m.author != null && m.author.id === this.id);
+			maybeMsg = msgs.find(msg => msg.author !== null && msg.author.id === this.id);
 			if (maybeMsg && !maybeMsg.reactable) maybeMsg = undefined;
 		}
 
