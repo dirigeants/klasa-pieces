@@ -1,5 +1,5 @@
-import { Extendable } from 'klasa';
-import { User, GuildMember } from 'discord.js';
+const { Extendable } = require('klasa');
+const { User, GuildMember } = require('discord.js');
 
 const EMOJI_ID = '🤖';
 
