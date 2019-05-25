@@ -42,6 +42,11 @@ module.exports = class extends Extendable {
 	}
 
 	async _blocksMeInGuild(guild, contextChannel) {
+		if (!await guild.members.fetch({ user: this, cache: false })
+			.then(() => true, () => false)) {
+			return undefined;
+		}
+
 		let maybeMsg;
 
 		if (contextChannel) {
