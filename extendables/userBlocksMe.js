@@ -1,5 +1,5 @@
-import { Extendable, KlasaClient, ExtendableStore, KlasaMessage } from 'klasa';
-import { User, GuildMember, Collection, TextChannel, Guild, Message, Channel } from 'discord.js';
+import { Extendable } from 'klasa';
+import { User, GuildMember } from 'discord.js';
 
 const EMOJI_ID = '🤖';
 
