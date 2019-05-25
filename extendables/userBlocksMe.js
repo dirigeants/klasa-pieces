@@ -23,8 +23,8 @@ module.exports = class extends Extendable {
 					maybeMsg.reactions.remove(EMOJI_ID);
 					return false;
 				} else {
-                    return true;
-                }
+					return true;
+				}
 			}
 		}
 
