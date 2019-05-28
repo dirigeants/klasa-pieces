@@ -54,7 +54,7 @@ module.exports = class extends Provider {
 			const output = [];
 			const stream = db.createReadStream()
 				.on('data', filter.length ? (data) => {
-					data = JSON.parse(data);
+					data = JSON.parse(data.value);
 					if (filter.includes(data.id)) output.push(data);
 				} : (data) => output.push(JSON.parse(data.value)))
 				.once('end', () => {
