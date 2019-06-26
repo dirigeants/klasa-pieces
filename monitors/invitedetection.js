@@ -10,7 +10,8 @@ module.exports = class extends Monitor {
 		super(...args, {
 			name: 'invitedetection',
 			enabled: true,
-			ignoreSelf: true
+			ignoreSelf: true,
+			ignoreOthers: false
 		});
 	}
 
