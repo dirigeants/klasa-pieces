@@ -33,7 +33,7 @@ module.exports = class extends Task {
 		}
 
 		timer.stop();
-		return this.client.emit('log', `${name} was updated. ${log}`);
+		this.client.emit('log', `${name} was updated. ${log}`);
 	}
 
 	async init() {
