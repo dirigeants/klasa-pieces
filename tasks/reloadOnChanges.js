@@ -49,13 +49,19 @@ module.exports = class extends Task {
 			cwd: process.cwd()
 		});
 
-		const reloadStore = (_path) => {
+		const reloadStore = async (_path) => {
 			const store = _path.split(sep)
 				.find(dir => this.client.pieceStores.has(dir));
 
 			const name = basename(_path);
 
-			if (!store) return this.run(name, _path);
+			if (!store) {
+				if (this._running) return;
+				this._running = true;
+				await this.run(name, _path);
+				this._running = false;
+				return;
+			}
 
 			const piece = this.client.pieceStores.get(store)
 				.get(name.replace(extname(name), ''));
