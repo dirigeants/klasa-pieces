@@ -66,7 +66,7 @@ module.exports = class extends Task {
 			const piece = this.client.pieceStores.get(store)
 				.get(name.replace(extname(name), ''));
 
-			return this.run(name, _path, piece);
+			this.run(name, _path, piece);
 		};
 
 		for (const event of ['add', 'change', 'unlink']) {
