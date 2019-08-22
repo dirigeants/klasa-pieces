@@ -3,7 +3,7 @@
 	"description": "This repository contains the various *Pieces* submitted by users and collaborators.",
 	"scripts": {
 		"test:lint": "eslint .",
-		"lint": "npm test -- --fix"
+		"lint": "npm run test:lint -- --fix"
 	},
 	"repository": {
 		"type": "git",
