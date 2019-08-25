@@ -5,7 +5,7 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			description: 'Sends a avatar generated from adorable.io',
+			description: 'Sends an avatar generated from adorable.io',
 			usage: '[name:str]'
 		});
 	}
