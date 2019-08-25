@@ -14,7 +14,7 @@ function resolveChannel(query, guild) {
 module.exports = class extends Argument {
 
 	async run(arg, possible, msg) {
-		if (!msg.guild) return this.channel(arg, possible, msg);
+		if (!msg.guild) return this.store.get('channel').run(arg, possible, msg);
 		const resChannel = resolveChannel(arg, msg.guild);
 		if (resChannel) return resChannel;
 
