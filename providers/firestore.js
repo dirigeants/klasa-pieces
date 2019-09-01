@@ -131,8 +131,8 @@ module.exports = class extends Provider {
 		return this.db.collection(table).doc(id).delete();
 	}
 
-	replace(...args) {
-		return this.create(...args);
+	replace(table, id, doc) {
+		return this.create(table, id, doc);
 	}
 
 	async getAll(table, filter = []) {
