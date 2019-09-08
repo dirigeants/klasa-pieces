@@ -17,6 +17,7 @@ module.exports = class extends Command {
 	async run(message, [member, reason]) {
 		if (member.id === message.author.id) throw 'Why would you voice kick yourself?';
 		if (member.id === this.client.user.id) throw 'Have I done something wrong?';
+		if (!member.voice.channelID) throw 'That member is not in a voice channel.';
 		if (member.roles.highest.position >= message.member.roles.highest.position) throw 'You cannot voice kick this user.';
 
 		await member.voice.setChannel(null, reason);
