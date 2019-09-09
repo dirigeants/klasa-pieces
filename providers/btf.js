@@ -9,8 +9,8 @@ module.exports = class extends Provider {
 	constructor(...args) {
 		super(...args);
 
-		const baseDirectory = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'etf');
-		const defaults = util.mergeDefault({ baseDirectory }, this.client.options.providers.etf);
+		const baseDirectory = resolve(this.client.userBaseDirectory, 'bwd', 'provider', 'btf');
+		const defaults = util.mergeDefault({ baseDirectory }, this.client.options.providers.btf);
 
 		this.baseDirectory = defaults.baseDirectory;
 	}
@@ -53,19 +53,19 @@ module.exports = class extends Provider {
 		const filenames = await fsn.readdir(dir);
 		const files = [];
 		for (const filename of filenames) {
-			if (filename.endsWith('.etf')) files.push(filename.slice(0, filename.length - 4));
+			if (filename.endsWith('.btf')) files.push(filename.slice(0, filename.length - 4));
 		}
 		return files;
 	}
 
 	get(table, id) {
-		return fsn.readFile(resolve(this.baseDirectory, table, `${id}.etf`))
+		return fsn.readFile(resolve(this.baseDirectory, table, `${id}.btf`))
 			.then(deserialize)
 			.catch(() => null);
 	}
 
 	has(table, id) {
-		return fsn.pathExists(resolve(this.baseDirectory, table, `${id}.etf`));
+		return fsn.pathExists(resolve(this.baseDirectory, table, `${id}.btf`));
 	}
 
 	getRandom(table) {
@@ -73,20 +73,20 @@ module.exports = class extends Provider {
 	}
 
 	create(table, id, data = {}) {
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), serialize({ id, ...this.parseUpdateInput(data) }));
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.btf`), serialize({ id, ...this.parseUpdateInput(data) }));
 	}
 
 	async update(table, id, data) {
 		const existent = await this.get(table, id);
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), serialize(util.mergeObjects(existent || { id }, this.parseUpdateInput(data))));
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.btf`), serialize(util.mergeObjects(existent || { id }, this.parseUpdateInput(data))));
 	}
 
 	replace(table, id, data) {
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), serialize({ id, ...this.parseUpdateInput(data) }));
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.btf`), serialize({ id, ...this.parseUpdateInput(data) }));
 	}
 
 	delete(table, id) {
-		return fsn.unlink(resolve(this.baseDirectory, table, `${id}.etf`));
+		return fsn.unlink(resolve(this.baseDirectory, table, `${id}.btf`));
 	}
 
 };
