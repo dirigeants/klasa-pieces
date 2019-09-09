@@ -1,7 +1,6 @@
 // Copyright (c) 2017-2019 dirigeants. All rights reserved. MIT license.
 const { Provider, util } = require('klasa');
-// Requires to be installed from https://github.com/devsnek/earl
-const { pack, unpack } = require('earl');
+const { serialize, deserialize } = require('binarytf');
 const { resolve } = require('path');
 const fsn = require('fs-nextra');
 
@@ -61,7 +60,7 @@ module.exports = class extends Provider {
 
 	get(table, id) {
 		return fsn.readFile(resolve(this.baseDirectory, table, `${id}.etf`))
-			.then(unpack)
+			.then(deserialize)
 			.catch(() => null);
 	}
 
@@ -74,16 +73,16 @@ module.exports = class extends Provider {
 	}
 
 	create(table, id, data = {}) {
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), pack({ id, ...this.parseUpdateInput(data) }));
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), serialize({ id, ...this.parseUpdateInput(data) }));
 	}
 
 	async update(table, id, data) {
 		const existent = await this.get(table, id);
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), pack(util.mergeObjects(existent || { id }, this.parseUpdateInput(data))));
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), serialize(util.mergeObjects(existent || { id }, this.parseUpdateInput(data))));
 	}
 
 	replace(table, id, data) {
-		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), pack({ id, ...this.parseUpdateInput(data) }));
+		return fsn.outputFileAtomic(resolve(this.baseDirectory, table, `${id}.etf`), serialize({ id, ...this.parseUpdateInput(data) }));
 	}
 
 	delete(table, id) {
