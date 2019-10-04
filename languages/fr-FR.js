@@ -53,13 +53,11 @@ module.exports = class extends Language {
 			// eslint-disable-next-line max-len
 			MONITOR_COMMAND_HANDLER_REPEATING_REPROMPT: (tag, name, time, cancelOptions) => `${tag} | **${name}** est un argument répétitif | Vous avez **${time}** secondes pour répondre à ce message avec des arguments additionnels valides. Saisissez **${cancelOptions.join('**, **')}** pour annuler.`,
 			MONITOR_COMMAND_HANDLER_ABORTED: 'Annulé',
-			MONITOR_COMMAND_HANDLER_POSSIBILITIES: ['arret', 'stop'],
-			MONITOR_COMMAND_HANDLER_REPEATING_POSSIBLITIES: ['annuler'],
 			INHIBITOR_COOLDOWN: (remaining) => `Vous venez d'utiliser cette commande. Vous pourrez à nouveau utiliser cette commande dans ${remaining} seconde${remaining === 1 ? '' : 's'}.`,
 			INHIBITOR_DISABLED_GUILD: "Cette commande a été désactivée par l'administrateur du serveur.",
 			INHIBITOR_DISABLED_GLOBAL: 'Cette commande a été globalement désactivée par le propritétaire du bot.',
 			INHIBITOR_MISSING_BOT_PERMS: (missing) => `Permissions insuffisantes, il manque : **${missing}**`,
-			INHIBITOR_NSFW: 'Vous ne pouvez pas utiliser de commande NSFW dans ce salon.',
+			INHIBITOR_NSFW: 'Vous ne pouvez utiliser de commande NSFW que dans les salons NSFW.',
 			INHIBITOR_PERMISSIONS: 'Vous n\'avez pas la permission d\'utiliser cette commande.',
 			// eslint-disable-next-line max-len
 			INHIBITOR_REQUIRED_SETTINGS: (settings) => `Votre serveur n'a pas le${settings.length > 1 ? 's' : ''} paramètre${settings.length > 1 ? 's' : ''} **${settings.join(', ')}** et ne peux pas s'exécuter.`,
@@ -117,7 +115,7 @@ module.exports = class extends Language {
 				].join(' ')),
 				'Veuillez soumettre un problème à <https://github.com/dirigeants/klasa> si vous trouvez un bug.'
 			],
-			COMMAND_INVITE_DESCRIPTION: "Affiche le lien d'invitation du bot.",
+			COMMAND_INVITE_DESCRIPTION: "Affiche le lien d'invitation du bot, afin de l'inviter dans votre serveur.",
 			COMMAND_INFO: [
 				"Klasa est un framework 'plug-and-play' qui étend la librairie Discord.js.",
 				'Une grande partie du code est modularisée, ce qui permet aux développeurs de modifier Klasa pour répondre à leurs besoins.',
@@ -179,7 +177,8 @@ module.exports = class extends Language {
 				`• Shard           :: ${(message.guild ? message.guild.shardID : 0) + 1} / ${this.client.options.totalShardCount}`
 			],
 			COMMAND_STATS_DESCRIPTION: 'Fournit des détails et statistiques à propos du bot.',
-			MESSAGE_PROMPT_TIMEOUT: 'Le temps est écoulé.'
+			MESSAGE_PROMPT_TIMEOUT: 'Le temps est écoulé.',
+			TEXT_PROMPT_ABORT_OPTIONS: ['arret', 'stop', 'annuler']
 		};
 	}
 
