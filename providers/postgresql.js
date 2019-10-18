@@ -8,7 +8,7 @@ module.exports = class extends SQLProvider {
 		super(...args);
 		this.qb = new QueryBuilder({
 			boolean: 'BOOL',
-			integer: ({ max }) => max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
+			integer: ({ max }) => max !== null && max >= 2 ** 32 ? 'BIGINT' : 'INTEGER',
 			float: 'DOUBLE PRECISION',
 			uuid: 'UUID',
 			json: { type: 'JSON', resolver: (input) => `'${JSON.stringify(input)}'::json` },
@@ -135,7 +135,7 @@ module.exports = class extends SQLProvider {
 		return this.run(`
 			UPDATE ${sanitizeKeyName(table)}
 			SET ${keys.map((key, i) => `${sanitizeKeyName(key)} = $${i + 1}`)}
-			WHERE id = '${id.replace(/'/, "''")}';`, values);
+			WHERE id = '${id.replace(/'/g, "''")}';`, values);
 	}
 
 	replace(...args) {
