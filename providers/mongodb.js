@@ -99,5 +99,5 @@ function flatten(obj, path = '') {
 }
 
 function parseEngineInput(updated) {
-	return Object.assign({}, ...updated.map(({ entry, next }) => ({ [entry.key]: next })));
+	return Object.assign({}, ...updated.map(({ entry, next }) => ({ [entry.path]: next })));
 }
