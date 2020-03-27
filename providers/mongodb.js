@@ -22,7 +22,7 @@ module.exports = class extends Provider {
 
 		const mongoClient = await Mongo.connect(
 			connectionString,
-			mergeObjects(connection.options, { useNewUrlParser: true })
+			mergeObjects(connection.options, { useNewUrlParser: true, useUnifiedTopology: true })
 		);
 
 		this.db = mongoClient.db(connection.db);
